@@ -10,7 +10,7 @@ vim.opt.smartindent = true
 
 vim.opt.wrap = false
 
-vim.opt.swapfile = false
+vim.opt.swapfile = false -- thank god
 vim.opt.backup = false
 vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
 vim.opt.undofile = true
@@ -29,4 +29,4 @@ vim.opt.updatetime = 50
 vim.opt.colorcolumn = "80"
 
 vim.opt.list = true
-vim.opt.lcs = 'space:·'
+vim.opt.listchars = 'space:·'

@@ -1,4 +1,3 @@
-
 local lsp = require("lsp-zero")
 require('lspconfig').intelephense.setup({})
 
@@ -12,7 +11,7 @@ end)
 
 require('mason').setup({})
 require('mason-lspconfig').setup({
-  -- Replace the language servers listed here 
+  -- Replace the language servers listed here
   -- with the ones you want to install
   ensure_installed = {
 	  'tsserver',

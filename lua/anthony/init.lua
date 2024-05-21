@@ -13,7 +13,7 @@ vim.filetype.add({
 })
 
 local augroup = vim.api.nvim_create_augroup
-local AnthonyGroup = augroup('ThePrimeagen', {})
+local AnthonyGroup = augroup('AnthonyGroup', {})
 
 local yank_group = augroup('HighlightYank', {})
 
@@ -56,3 +56,14 @@ autocmd('LspAttach', {
 vim.g.netrw_browse_split = 0
 vim.g.netrw_banner = 0
 vim.g.netrw_winsize = 25
+
+in_wsl = os.getenv('WSL_DISTRO_NAME') ~= nil
+
+if in_wsl then
+    vim.g.clipboard = {
+        name = 'wsl clipboard',
+        copy =  { ["+"] = { "clip.exe" },   ["*"] = { "clip.exe" } },
+        paste = { ["+"] = { "nvim_paste" }, ["*"] = { "nvim_paste" } },
+        cache_enabled = true
+    }
+end

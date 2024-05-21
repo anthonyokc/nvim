@@ -13,7 +13,7 @@ vim.filetype.add({
 })
 
 local augroup = vim.api.nvim_create_augroup
-local AnthonyGroup = augroup('ThePrimeagen', {})
+local AnthonyGroup = augroup('AnthonyGroup', {})
 
 local yank_group = augroup('HighlightYank', {})
 

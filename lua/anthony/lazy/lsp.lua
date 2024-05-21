@@ -3,19 +3,27 @@ return {
     dependencies = {
         "williamboman/mason.nvim",
         "williamboman/mason-lspconfig.nvim",
+        "hrsh7th/nvim-cmp",
+        "hrsh7th/cmp-cmdline",
         "hrsh7th/cmp-nvim-lsp",
+        'hrsh7th/cmp-nvim-lsp-signature-help',
         "hrsh7th/cmp-buffer",
         "hrsh7th/cmp-path",
-        "hrsh7th/cmp-cmdline",
-        "hrsh7th/nvim-cmp",
+        'hrsh7th/cmp-calc',
+        'hrsh7th/cmp-emoji',
+        'jmbuhr/otter.nvim',
+        'jmbuhr/cmp-pandoc-references',
+        'kdheepak/cmp-latex-symbols',
         "L3MON4D3/LuaSnip",
         "saadparwaiz1/cmp_luasnip",
+        'onsails/lspkind-nvim',
         "j-hui/fidget.nvim",
     },
 
     config = function()
         local cmp = require('cmp')
         local cmp_lsp = require("cmp_nvim_lsp")
+        local lspkind = require 'lspkind'
         local capabilities = vim.tbl_deep_extend(
             "force",
             {},
@@ -28,8 +36,6 @@ return {
             ensure_installed = {
                 "lua_ls",
                 "rust_analyzer",
-                'tsserver',
-                'eslint',
                 'r_language_server'
             },
             handlers = {
@@ -59,7 +65,7 @@ return {
 
         local cmp_select = { behavior = cmp.SelectBehavior.Select }
 
-        cmp.setup({
+        cmp.setup {
             snippet = {
                 expand = function(args)
                     require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
@@ -71,24 +77,43 @@ return {
                 ['<C-y>'] = cmp.mapping.confirm({ select = true }),
                 ["<C-Space>"] = cmp.mapping.complete(),
             }),
-            sources = cmp.config.sources({
-                { name = 'nvim_lsp' },
-                { name = 'luasnip' }, -- For luasnip users.
-            }, {
-                { name = 'buffer' },
-            })
-        })
 
-        vim.diagnostic.config({
-            -- update_in_insert = true,
-            float = {
-                focusable = false,
-                style = "minimal",
-                border = "rounded",
-                source = "always",
-                header = "",
-                prefix = "",
+            ---@diagnostic disable-next-line: missing-fields
+            formatting = {
+              format = lspkind.cmp_format {
+                mode = 'symbol',
+                menu = {
+                  otter = '[🦦]',
+                  nvim_lsp = '[LSP]',
+                  luasnip = '[snip]',
+                  buffer = '[buf]',
+                  path = '[path]',
+                  spell = '[spell]',
+                  pandoc_references = '[ref]',
+                  tags = '[tag]',
+                  treesitter = '[TS]',
+                  calc = '[calc]',
+                  latex_symbols = '[tex]',
+                  emoji = '[emoji]',
+                },
+              },
             },
-        })
-    end
+            sources = {
+              { name = 'otter' }, -- for code chunks in quarto
+              { name = 'path' },
+              { name = 'nvim_lsp' },
+              { name = 'nvim_lsp_signature_help' },
+              { name = 'pandoc_references' },
+              { name = 'buffer', keyword_length = 5, max_item_count = 3 },
+              { name = 'spell' },
+              { name = 'treesitter', keyword_length = 5, max_item_count = 3 },
+              { name = 'calc' },
+              { name = 'latex_symbols' },
+              { name = 'emoji' },
+            },
+            view = {
+              entries = 'native',
+            },
+        }
+        end,
 }

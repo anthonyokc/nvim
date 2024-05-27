@@ -10,3 +10,4 @@ vim.keymap.set("v", ",e", "<Plug>RESendSelection")
 vim.g.rout_follow_colorscheme = 1
 -- R commands in R output are highlighted
 vim.g.Rout_more_colors = 1
+

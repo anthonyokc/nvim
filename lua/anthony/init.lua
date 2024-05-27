@@ -57,7 +57,7 @@ vim.g.netrw_browse_split = 0
 vim.g.netrw_banner = 0
 vim.g.netrw_winsize = 25
 
-in_wsl = os.getenv('WSL_DISTRO_NAME') ~= nil
+local in_wsl = os.getenv('WSL_DISTRO_NAME') ~= nil
 
 if in_wsl then
     vim.g.clipboard = {
@@ -67,3 +67,5 @@ if in_wsl then
         cache_enabled = true
     }
 end
+
+

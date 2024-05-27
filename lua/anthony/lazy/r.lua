@@ -14,5 +14,19 @@ return {
         vim.g.rout_follow_colorscheme = 1
         -- R commands in R output are highlighted
         vim.g.Rout_more_colors = 1
+
+        vim.opt.tabstop = 2
+        vim.opt.softtabstop = 2
+        vim.opt.shiftwidth = 2
+
+        local function map(mode, lhs, rhs, opts)
+          local options = {noremap = true}
+          if opts then options = vim.tbl_extend('force', options, opts) end
+          vim.api.nvim_set_keymap(mode, lhs, rhs, options)
+        end
+
+        map('i', '<C-k>', ' |> ', { noremap = true, silent = true})
+        map('i', '<C-m>', ' <- ', { noremap = true, silent = true})
+
     end
 }

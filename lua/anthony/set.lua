@@ -30,3 +30,19 @@ vim.opt.colorcolumn = "80"
 
 vim.opt.list = true
 vim.opt.listchars = 'space:·'
+
+-- -- Set Tabs for specific files
+-- local set_tab_settings = function(extension, ts, sw, sts)
+--   vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
+--     pattern = "*" .. extension,
+--     callback = function()
+--       vim.bo.tabstop = ts
+--       vim.bo.shiftwidth = sw
+--       vim.bo.softtabstop = sts
+--     end,
+--   })
+-- end
+--
+-- -- Set tab settings for R files
+-- set_tab_settings(".R|.Rmd|.qmd", 2, 2, 2)
+

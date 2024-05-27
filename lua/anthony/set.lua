@@ -18,7 +18,11 @@ vim.opt.undofile = true
 vim.opt.hlsearch = false
 vim.opt.incsearch = true
 
-vim.opt.termguicolors = true
+vim.opt.termguicolors = true -- enables 24-bit color
+
+-- disbale netrw (default file tree) to use nvim-tree instead
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
 
 vim.opt.scrolloff = 8
 vim.opt.signcolumn = "yes"

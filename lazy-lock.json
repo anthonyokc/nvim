@@ -13,6 +13,7 @@
   "cmp-pandoc-references": { "branch": "master", "commit": "dd86d3a8acc52a6d0503c3a45ba1bb93f39a3d31" },
   "cmp-path": { "branch": "main", "commit": "91ff86cd9c29299a64f968ebb45846c485725f23" },
   "cmp_luasnip": { "branch": "master", "commit": "05a9ab28b53f71d1aece421ef32fee2cb857a843" },
+  "copilot.vim": { "branch": "release", "commit": "25feddf8e3aa79f0573c8f43ddb13c44c530cfa5" },
   "fidget.nvim": { "branch": "main", "commit": "ef99df04a1c53a453602421bc0f756997edc8289" },
   "harpoon": { "branch": "harpoon2", "commit": "0378a6c428a0bed6a2781d459d7943843f374bce" },
   "harpoon-lualine": { "branch": "master", "commit": "d1b873c19b701fd80d60a67d086dbb3bcc4eb00e" },
@@ -20,6 +21,7 @@
   "img-clip.nvim": { "branch": "main", "commit": "c55f988972be0027316889c57ffe49f2bf8f67fd" },
   "jupytext.nvim": { "branch": "main", "commit": "c8baf3ad344c59b3abd461ecc17fc16ec44d0f7b" },
   "lazy.nvim": { "branch": "main", "commit": "0de782a6b0ffba599dbd332a4019d852564bf28c" },
+  "lazygit": { "branch": "master", "commit": "ef1daf314af3df584249ac479a6efaa4669f4804" },
   "lspkind-nvim": { "branch": "master", "commit": "1735dd5a5054c1fb7feaf8e8658dbab925f4f0cf" },
   "lualine.nvim": { "branch": "master", "commit": "0a5a66803c7407767b799067986b4dc3036e1983" },
   "luarocks.nvim": { "branch": "main", "commit": "d3dda396d66e484590f253d1ac6d8980e3130807" },
@@ -45,6 +47,7 @@
   "tokyonight.nvim": { "branch": "main", "commit": "7fc18e82575f5b482b758b6dddfe97b606819a20" },
   "trouble.nvim": { "branch": "main", "commit": "a8264a65a0b894832ea642844f5b7c30112c458f" },
   "undotree": { "branch": "master", "commit": "56c684a805fe948936cda0d1b19505b84ad7e065" },
+  "vim-dbml": { "branch": "master", "commit": "c684576d80542c52f888309b715c49bc69a02ed3" },
   "vim-fugitive": { "branch": "master", "commit": "4f59455d2388e113bd510e85b310d15b9228ca0d" },
   "vim-slime": { "branch": "main", "commit": "1a29ed8e969f7d0cc54c5b9f41477b5811a2521f" },
   "vim-startuptime": { "branch": "master", "commit": "ac2cccb5be617672add1f4f3c0a55ce99ba34e01" }

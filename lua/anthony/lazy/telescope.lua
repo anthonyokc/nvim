@@ -8,7 +8,16 @@ return {
     },
 
     config = function()
+        local actions = require("telescope.actions")
         require('telescope').setup({
+            defaults = {
+                mappings = {
+                    i = {
+                        ["<C-j>"] = actions.move_selection_next,
+                        ["<C-k>"] = actions.move_selection_previous,
+                    },
+                },
+            },
             pickers = {
                 find_files = {
                     -- `hidden = true` will still show the inside of `.git/` as it's not `.gitignore`d.
@@ -19,13 +28,13 @@ return {
         -- TODO: Make the menu wider on the file side.
 
         local builtin = require('telescope.builtin')
-        vim.keymap.set('n', '<leader>pf', builtin.find_files, {})
-        vim.keymap.set('n', '<C-p>', builtin.git_files, {})
-        vim.keymap.set('n', '<leader>pws', function()
+        vim.keymap.set('n', '<leader>pf', builtin.find_files, {}) -- search project files
+        vim.keymap.set('n', '<C-p>', builtin.git_files, {}) -- search git files
+        vim.keymap.set('n', '<leader>pws', function() -- search highlighted word
             local word = vim.fn.expand("<cword>")
             builtin.grep_string({ search = word })
         end)
-        vim.keymap.set('n', '<leader>pWs', function()
+        vim.keymap.set('n', '<leader>pWs', function() -- search full highlighted word
             local word = vim.fn.expand("<cWORD>")
             builtin.grep_string({ search = word })
         end)

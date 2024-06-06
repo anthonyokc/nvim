@@ -8,20 +8,9 @@ return {
             options = {
                 icons_enabled = true,
                 component_separators = '',
-                -- section_separators = { left = '', right = '' }
-                section_separators = { left = '', right = '' }
+                section_separators = { left = '', right = '' }
             },
             sections = {
-                lualine_x = {
-                    {
-                        Harpoon_files
-                    },
---                    {
---                        'filename',
---                        path = 3,
---                        shorting_target = 40,
---                    }
-                },
                 lualine_a = {
                     {
                         'filetype',
@@ -41,6 +30,27 @@ return {
                 lualine_c = {
                     ''
                 },
+                lualine_x = {
+                    {
+                        require("noice").api.status.command.get_hl,
+                        cond = require("noice").api.status.command.has,
+                    },
+                    {
+                        Harpoon_files
+                    },
+                },
+                lualine_z = {
+                    {
+                        function()
+                            local line = vim.fn.line('.')
+                            local total_lines = vim.fn.line('$')
+                            return line .. '/' .. total_lines
+                        end,
+                        cond = nil,
+                        color = nil,
+                        padding = 1
+                    },
+                }
             },
             extensions = {'fugitive', 'nvim-tree'}
         }

@@ -19,30 +19,25 @@ vim.keymap.set("n", "<leader>svwm", function()
     require("vim-with-me").StopVimWithMe()
 end)
 
--- greatest remap ever
---vim.keymap.set("x", "<leader>p", [["_dP]])
-vim.keymap.set("x", "p", [["_dP]])
+vim.keymap.set("x", "p", [["_dP]])                 -- when you paste over some text, keep the text in the vim clipboard
 
--- next greatest remap ever : asbjornHaland
-vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
-vim.keymap.set("n", "<leader>Y", [["+Y]])
+vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]]) -- copy selection to system clipboard
+vim.keymap.set("n", "<leader>Y", [["+Y]])          -- copy whole line to system clipboard
 
 vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
 
--- This is going to get me cancelled
 vim.keymap.set("i", "<C-c>", "<Esc>")
 
 vim.keymap.set("n", "Q", "<nop>")
--- vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
 vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
 
-vim.keymap.set("n", "<C-n>", "<cmd>cnext<CR>zz")
-vim.keymap.set("n", "<C-b>", "<cmd>cprev<CR>zz")
-vim.keymap.set("n", "<leader>n", "<cmd>lnext<CR>zz")
+vim.keymap.set("n", "<c-n>", "<cmd>cnext<cr>zz")
+vim.keymap.set("n", "<c-b>", "<cmd>cprev<cr>zz")
+vim.keymap.set("n", "<leader>n", "<cmd>lnext<cr>zz")
 vim.keymap.set("n", "<leader>b", "<cmd>lprev<CR>zz")
 
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]])
-vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
+vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = false })
 
 vim.keymap.set(
     "n",
@@ -63,3 +58,73 @@ vim.api.nvim_create_user_command('CloseAll', function()
 end, { desc = 'Close all windows and NvimTree if open' })
 vim.keymap.set("n", "<C-c>", vim.cmd.CloseAll)
 vim.keymap.set("n", "<C-s>", "<cmd>w<CR>")
+
+-- select the last pasted text
+vim.api.nvim_set_keymap('n', 'gV', '`[v`]', { noremap = true })
+vim.api.nvim_set_keymap('n', 'g=', '`[v`]=', { noremap = true })
+
+-- open new file in current buffer
+vim.keymap.set("n", ",e", function()
+    local current_dir = vim.fn.getcwd()               -- Save the current working directory
+    local path = vim.fn.expand('%:p:h') .. '/'        -- Construct the path to the directory of the current file and append a slash
+    vim.cmd('edit ' .. path)                          -- Open the new file in the specified path
+    vim.cmd('cd ' .. vim.fn.fnameescape(current_dir)) -- Restore the original working directory
+end)
+
+
+
+local comment_styles = { "#", "//", "--" } -- -- Define the comment styles
+
+-- Function to convert top line comments to inline comments
+local function convert_top_to_inline_comments()
+  -- Determine the mode: normal or visual
+  local mode = vim.fn.mode()
+
+  -- Get the current line or the selected lines in visual mode
+  local start_line, end_line
+  if mode == 'v' or mode == 'V' then
+    start_line = vim.fn.line("'<")
+    end_line = vim.fn.line("'>")
+  else
+    start_line = vim.fn.line('.')
+    end_line = start_line
+  end
+
+  for line_number = start_line, end_line do
+    local current_line = vim.fn.getline(line_number)
+
+    -- Iterate over the comment styles and perform the conversion if a match is found
+    for _, comment in ipairs(comment_styles) do
+      -- Check if the line starts with a comment
+      if current_line:match("^%s*" .. comment) then
+        -- Extract the comment part
+        local comment_part = current_line:match("^%s*" .. comment .. "%s*(.*)")
+
+        -- Get the line below the current line
+        local next_line_number = line_number + 1
+        local next_line = vim.fn.getline(next_line_number)
+
+        -- Create the new line with the inline comment
+        local new_line = next_line .. " " .. " " .. comment_part
+
+        -- Replace the next line with the new line
+        vim.fn.setline(next_line_number, new_line)
+
+        -- Delete the current line (original comment line)
+        vim.fn.setline(line_number, '')
+        break
+      end
+    end
+  end
+end
+
+-- Create a custom command to run the conversion function
+vim.api.nvim_create_user_command('ConvertComments', convert_top_to_inline_comments, {})
+
+-- Bind the function to the shortcut key (leader #) in normal and visual mode
+vim.keymap.set("n", "<leader>#", convert_top_to_inline_comments)
+vim.keymap.set("v", "<leader>#", function()
+  vim.cmd('ConvertComments')
+end)
+
+

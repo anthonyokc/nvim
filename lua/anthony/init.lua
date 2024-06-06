@@ -53,6 +53,10 @@ autocmd('LspAttach', {
     end
 })
 
+-- Open nvim-tree when entering a directory
+
+
+
 vim.g.netrw_browse_split = 0
 vim.g.netrw_banner = 0
 vim.g.netrw_winsize = 25
@@ -68,4 +72,8 @@ if in_wsl then
     }
 end
 
+
+vim.cmd[[
+    hi NvimTreeNormal guibg=NONE ctermbg=NONE
+]]
 

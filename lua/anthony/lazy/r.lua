@@ -10,6 +10,9 @@ return {
         vim.keymap.set("v", ",", "<Plug>RDSendSelection")
         vim.keymap.set("v", ",e", "<Plug>RESendSelection")
 
+        vim.g.R_auto_start = 2
+        vim.g.R_objbr_auto_start = 1
+
         -- R output is highlighted with current colorscheme
         vim.g.rout_follow_colorscheme = 1
         -- R commands in R output are highlighted
@@ -26,7 +29,8 @@ return {
         end
 
         map('i', '<C-k>', ' |> ', { noremap = true, silent = true})
-        map('i', '<C-m>', ' <- ', { noremap = true, silent = true})
+        map('i', '<C-i>', ' <- ', { noremap = true, silent = true})
+        vim.keymap.set("i", "<C-m>", " <- ")
 
     end
 }

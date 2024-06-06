@@ -4,6 +4,7 @@ return {
         branch = "harpoon2",
         dependencies = { "nvim-lua/plenary.nvim" },
         name = "harpoon",
+        priority = 100,
         config = function()
             -- REQUIRED
             local harpoon = require("harpoon")

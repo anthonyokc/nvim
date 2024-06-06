@@ -40,7 +40,6 @@ return {
             },
             handlers = {
                 function(server_name) -- default handler (optional)
-
                     require("lspconfig")[server_name].setup {
                         capabilities = capabilities
                     }
@@ -52,7 +51,7 @@ return {
                         capabilities = capabilities,
                         settings = {
                             Lua = {
-                                    runtime = { version = "Lua 5.1" },
+                                runtime = { version = "Lua 5.1" },
                                 diagnostics = {
                                     globals = { "vim", "it", "describe", "before_each", "after_each" },
                                 }
@@ -81,40 +80,44 @@ return {
 
             ---@diagnostic disable-next-line: missing-fields
             formatting = {
-              format = lspkind.cmp_format {
-                mode = 'symbol',
-                menu = {
-                  otter = '[🦦]',
-                  nvim_lsp = '[LSP]',
-                  luasnip = '[snip]',
-                  buffer = '[buf]',
-                  path = '[path]',
-                  spell = '[spell]',
-                  pandoc_references = '[ref]',
-                  tags = '[tag]',
-                  treesitter = '[TS]',
-                  calc = '[calc]',
-                  latex_symbols = '[tex]',
-                  emoji = '[emoji]',
+                format = lspkind.cmp_format {
+                    mode = 'symbol',
+                    menu = {
+                        otter = '[🦦]',
+                        nvim_lsp = '',
+                        vsnip = '',
+                        cmp_zotcite = 'z',
+                        cmp_r = 'R',
+                        luasnip = '[snip]',
+                        buffer = '[buf]',
+                        path = '[path]',
+                        spell = '[spell]',
+                        pandoc_references = '[ref]',
+                        tags = '[tag]',
+                        treesitter = '[TS]',
+                        calc = '[calc]',
+                        latex_symbols = '[tex]',
+                        emoji = '[emoji]',
+                    },
                 },
-              },
             },
             sources = {
-              { name = 'otter' }, -- for code chunks in quarto
-              { name = 'path' },
-              { name = 'nvim_lsp' },
-              { name = 'nvim_lsp_signature_help' },
-              { name = 'pandoc_references' },
-              { name = 'buffer', keyword_length = 5, max_item_count = 3 },
-              { name = 'spell' },
-              { name = 'treesitter', keyword_length = 5, max_item_count = 3 },
-              { name = 'calc' },
-              { name = 'latex_symbols' },
-              { name = 'emoji' },
+                { name = 'cmp_r' }, -- R completion
+                { name = 'otter' }, -- for code chunks in quarto
+                { name = 'path' },
+                { name = 'nvim_lsp' },
+                { name = 'nvim_lsp_signature_help' },
+                { name = 'pandoc_references' },
+                { name = 'buffer',                 keyword_length = 5, max_item_count = 3 },
+                { name = 'spell' },
+                { name = 'treesitter',             keyword_length = 5, max_item_count = 3 },
+                { name = 'calc' },
+                { name = 'latex_symbols' },
+                { name = 'emoji' },
             },
             view = {
-              entries = 'native',
+                entries = 'native',
             },
         }
-        end,
+    end,
 }

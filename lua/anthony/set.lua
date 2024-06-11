@@ -12,7 +12,11 @@ vim.opt.wrap = false
 
 vim.opt.swapfile = false -- thank god
 vim.opt.backup = false
-vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
+
+-- Where to put the undo directory
+local path_separator = package.config:sub(1,1)
+local home_directory = os.getenv("HOME") or os.getenv("USERPROFILE") -- USERPROFILE is used in Windows
+vim.opt.undodir = home_directory .. path_separator .. ".vim" .. path_separator .. "undodir"
 vim.opt.undofile = true
 
 vim.opt.hlsearch = false

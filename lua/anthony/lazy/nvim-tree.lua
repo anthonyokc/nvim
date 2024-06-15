@@ -11,7 +11,7 @@ return {
         })
 
         local api = require "nvim-tree.api"
-        api.tree.open() -- open the tree automatically, do not focus on it though
+        -- api.tree.open() -- open the tree automatically, do not focus on it though
 
 
         -- key bindings

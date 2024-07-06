@@ -36,16 +36,20 @@ return {
 
                         vim.api.nvim_buf_set_keymap(0, "n", ",", "<Plug>RDSendLine", {})
                         vim.api.nvim_buf_set_keymap(0, "v", ",", "<Plug>RDSendSelection", {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<LocalLeader>f", "<Plug>RFormat", {})
+                        vim.api.nvim_buf_set_keymap(0, "v", "<LocalLeader>f", "<Plug>RFormat", {})
                         -- vim.api.nvim_buf_set_keymap(0, "v", ",e", "<Plug>RESendSelection", {})
                         vim.api.nvim_buf_set_keymap(0, "n", "<Enter>", "<Plug>RDSendLine", {})
                         vim.api.nvim_buf_set_keymap(0, "v", "<Enter>", "<Plug>RDSendSelection", {})
 
                         -- Custom Actions
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader><Enter>",
+                            "<Cmd>lua require('r.run').action('')<CR>", {})
                         vim.api.nvim_buf_set_keymap(0, "n", "<LocalLeader>V",
                             "<Cmd>lua require('r.send').cmd('hgd()')<CR>", {})
                     end
                 },
-                min_editor_width = 85,
+                min_editor_width = 80,
                 disable_cmds = {
                     "RClearConsole",
                     "RCustomStart",
@@ -54,7 +58,7 @@ return {
                 },
 
                 -- R Console
-                rconsole_width = 78,
+                rconsole_width = 100,
                 OutDec = ".",
 
                 -- Auto Start
@@ -62,15 +66,15 @@ return {
                 objbr_auto_start = true,
 
                 -- R Object Browser
-                objbr_place = "console,below", -- place above the R console
+                objbr_place = "console,below", -- place below the R console
                 objbr_opendf = false,
 
                 -- R Help & Documentation
                 nvimpager = "tab", -- use vertical split for help pages
 
                 -- Built-in Key Maps,
-                assignment_keymap = "<C-i>",
-                pipe_keymap = "<C-k>",
+                assignment_keymap = "<C-k>",
+                pipe_keymap = "<C-l>",
 
                 -- View a data.frame or matrix, uses <LocalLeader>rv,
                 csv_app = "tmux new-window vd",

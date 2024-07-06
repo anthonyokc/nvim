@@ -23,13 +23,16 @@ vim.keymap.set("x", "p", [["_dP]])                 -- when you paste over some t
 
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]]) -- copy selection to system clipboard
 vim.keymap.set("n", "<leader>Y", [["+Y]])          -- copy whole line to system clipboard
+vim.keymap.set("n", "yay", "<cmd>%y+<CR>")          -- copy whole line to system clipboard
 
 vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
 
 vim.keymap.set("i", "<C-c>", "<Esc>")
 
 vim.keymap.set("n", "Q", "<nop>")
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
+vim.keymap.set("n", "<leader>F", function()
+    vim.lsp.buf.format({ timeout_ms = 5000 })
+end)
 
 vim.keymap.set("n", "<c-n>", "<cmd>cnext<cr>zz")
 vim.keymap.set("n", "<c-b>", "<cmd>cprev<cr>zz")
@@ -105,8 +108,8 @@ local function convert_top_to_inline_comments()
         local next_line = vim.fn.getline(next_line_number)
 
         -- Create the new line with the inline comment
-        local new_line = next_line .. " " .. " " .. comment_part
 
+  local new_line = next_line .. " " .. " " .. comment_part
         -- Replace the next line with the new line
         vim.fn.setline(next_line_number, new_line)
 

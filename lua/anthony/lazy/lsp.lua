@@ -35,8 +35,8 @@ return {
         require("mason-lspconfig").setup({
             ensure_installed = {
                 "lua_ls",
-                "rust_analyzer",
-                'r_language_server'
+                "rust_analyzer"
+                --'r_language_server'
             },
             handlers = {
                 function(server_name) -- default handler (optional)
@@ -71,9 +71,10 @@ return {
                 end,
             },
             mapping = cmp.mapping.preset.insert({
-                ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
+                ['<C-b>'] = cmp.mapping.select_prev_item(cmp_select),
                 ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
-                ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+                ['<Tab>'] = cmp.mapping.confirm({ select = true }),
+                ['<C-y>'] = cmp.mapping.complete({ select = true }),
                 ['<C-u>'] = cmp.mapping.scroll_docs(-4),
                 ['<C-d>'] = cmp.mapping.scroll_docs(4),
             }),
@@ -115,8 +116,9 @@ return {
                 { name = 'latex_symbols' },
                 { name = 'emoji' },
             },
-            view = {
-                entries = 'native',
+            window = {
+                completion = cmp.config.window.bordered(),
+                documentation = cmp.config.window.bordered(),
             },
         }
     end,

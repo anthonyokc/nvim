@@ -6,7 +6,13 @@ return {
                 enable = true
             },
             view = {
-                side = "right"
+                float = {
+                    enable = true,
+                    open_win_config = {
+                        height = 70,
+                        width = 50
+                    }
+                }
             }
         })
 

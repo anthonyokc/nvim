@@ -18,6 +18,7 @@ return {
         "saadparwaiz1/cmp_luasnip",
         'onsails/lspkind-nvim',
         "j-hui/fidget.nvim",
+
     },
 
     config = function()

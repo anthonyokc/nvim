@@ -61,7 +61,8 @@ return {
         vim.keymap.set('n', '<leader>ff', builtin.find_files, {}) -- search project files
         vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Find Buffers" })
         vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Find Help Tags" })
-        vim.keymap.set("n", "<leader>fd", builtin.lsp_document_symbols, { desc = "Find Symbols" })
+        vim.keymap.set("n", "<leader>fd", "<cmd>Telescope diagnostics<CR>", { desc = "Find Diagnostic" })
+        vim.keymap.set("n", "<leader>fs", builtin.lsp_document_symbols, { desc = "Find Symbols" })
         vim.keymap.set("n", "<leader>fi", "<cmd>AdvancedGitSearch<CR>", { desc = "AdvancedGitSearch" })
         vim.keymap.set('n', '<leader>fn', "<cmd>Telescope notify<CR>", {})  -- search notifications
         vim.keymap.set('n', '<leader>fN', "<cmd>Telescope noice<CR>", {})   -- search notifications
@@ -81,7 +82,7 @@ return {
             local word = vim.fn.expand("<cWORD>")
             builtin.grep_string({ search = word })
         end)
-        vim.keymap.set('n', '<leader>fs', function()
+        vim.keymap.set('n', '<leader>fg', function()
             builtin.grep_string({ search = vim.fn.input("Grep > ") })
         end)
         vim.keymap.set('n', '<leader>vh', builtin.help_tags, {})

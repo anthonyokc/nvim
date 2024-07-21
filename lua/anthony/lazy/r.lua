@@ -11,9 +11,6 @@ return {
                         -- This function will be called at the FileType event
                         -- of files supported by R.nvim. This is an
                         -- opportunity to create mappings local to buffers.
-                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>r", ":call StartR('R')<CR>", {})
-                        vim.api.nvim_buf_set_keymap(0, "i", "<leader>r", "<Esc>:call StartR('R')<CR>", {})
-                        vim.api.nvim_buf_set_keymap(0, "v", "<leader>r", "<Esc>:call StartR('R')<CR>", {})
 
                         -- Clear existing mappings for the comma key in normal and visual modes
                         -- Function to delete key mappings for a specific mode and prefix
@@ -60,6 +57,14 @@ return {
                 -- R Console
                 rconsole_width = 100,
                 OutDec = ".",
+                R_app = "radian",
+                R_cmd = "R",
+                hl_term = true,
+                bracketed_paste = true,
+
+                -- PDF Viewer
+                open_pdf = "open",
+                open_html = "open",
 
                 -- Auto Start
                 auto_start = "always",

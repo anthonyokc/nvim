@@ -29,7 +29,7 @@ return {
       },
       { -- show images in nvim!
         '3rd/image.nvim',
-        enabled = true,
+        enabled = false,
         dev = false,
         ft = { 'markdown', 'quarto', 'vimwiki' },
         dependencies = {

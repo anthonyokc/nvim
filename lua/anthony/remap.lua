@@ -40,6 +40,7 @@ vim.keymap.set("n", "<leader>n", "<cmd>lnext<cr>zz")
 vim.keymap.set("n", "<leader>b", "<cmd>lprev<CR>zz")
 
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]])
+vim.keymap.set("n", "<leader>rh", [[:%s/read.csv("\(.*\)")/read_csv(here("data\/\1"))/gI<Left><Left><Left>]])
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = false })
 
 vim.keymap.set(
@@ -130,4 +131,30 @@ vim.keymap.set("v", "<leader>#", function()
   vim.cmd('ConvertComments')
 end)
 
+-- Switch between terminal buffer and the leftmost pane
+local function switch_to_terminal()
+  -- Save the current window ID
+  local current_win = vim.api.nvim_get_current_win()
+
+  -- Check if the current window is the terminal buffer
+  if vim.bo.buftype == 'terminal' then
+    -- Move to the leftmost window
+    vim.cmd('wincmd t')
+  else
+    -- Find the terminal buffer window and switch to it
+    local term_win = -1
+    for win = 1, vim.fn.winnr('$') do
+      if vim.fn.getbufvar(vim.fn.winbufnr(win), '&buftype') == 'terminal' then
+        term_win = win
+        break
+      end
+    end
+    if term_win > 0 then
+      vim.cmd(term_win .. 'wincmd w')
+    end
+  end
+end
+
+-- Map <leader>' to the switch_to_terminal function
+vim.api.nvim_set_keymap('n', '<leader>\'', 'switch_to_terminal()<CR>', { noremap = true, silent = true })
 

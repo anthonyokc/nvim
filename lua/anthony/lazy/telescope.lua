@@ -35,9 +35,9 @@ return {
                             copy_to_clipboard()
                             actions.close(prompt_bufnr)
                         end,
-                        i = { ["<c-t>"] = open_with_trouble },
-                        n = { ["<c-t>"] = open_with_trouble },
+                        ["<C-t>"] = open_with_trouble,
                     },
+                    n = { ["<C-t>"] = open_with_trouble },
                 },
                 layout_config = {
                     preview_width = 0.55,
@@ -68,8 +68,11 @@ return {
         vim.keymap.set('n', '<leader>fN', "<cmd>Telescope noice<CR>", {})   -- search notifications
         vim.keymap.set('n', '<leader>fy', "<cmd>Telescope neoclip<CR>", {}) -- search notifications
         vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "Find Keymaps" })
-        vim.keymap.set("n", "<leader>fr", "<CMD>lua require('telescope').extensions.git_worktree.git_worktree()<CR>", { noremap = true, silent = true })
-        vim.keymap.set("n", "<leader>fR", "<CMD>lua require('telescope').extensions.git_worktree.create_git_worktree()<CR>", { noremap = true, silent = true })
+        vim.keymap.set("n", "<leader>fr", "<CMD>lua require('telescope').extensions.git_worktree.git_worktree()<CR>",
+            { noremap = true, silent = true })
+        vim.keymap.set("n", "<leader>fR",
+            "<CMD>lua require('telescope').extensions.git_worktree.create_git_worktree()<CR>",
+            { noremap = true, silent = true })
         vim.keymap.set('n', '<leader>fm', "<cmd>Telescope harpoon marks<cr>", {})
         vim.keymap.set("n", "<leader>gc", builtin.git_commits, { desc = "Search Git Commits" })
         vim.keymap.set("n", "<leader>gb", builtin.git_bcommits, { desc = "Search Git Commits for Buffer" })

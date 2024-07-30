@@ -1,7 +1,7 @@
 return {
     {
         "R-nvim/R.nvim",
-        ft = { 'r', 'rmd', 'qmd', 'rnoweb', 'rhelp' },
+        ft = { 'r', 'rmd', 'qmd', 'quarto', 'rnoweb', 'rhelp' },
         config = function()
             -- Create a table with the options to be passed to setup()
             local setup_options = {
@@ -42,6 +42,14 @@ return {
                         -- Custom Actions
                         vim.api.nvim_buf_set_keymap(0, "n", "<leader><Enter>",
                             "<Cmd>lua require('r.run').action('')<CR>", {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>ri",
+                            "<Cmd>lua require('r.run').action('(function(package) { rlang::as_label(rlang::enexpr(package)) |> renv::install(prompt = FALSE) })')<CR>", {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>rI",
+                            "<Cmd>lua require('r.run').action('ri')<CR>", {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>rs",
+                            "<Cmd>lua require('r.send').cmd('renv::status()')<CR>", {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>rS",
+                            "<Cmd>lua require('r.send').cmd('renv::snapshot()')<CR>", {})
                         vim.api.nvim_buf_set_keymap(0, "n", "<LocalLeader>V",
                             "<Cmd>lua require('r.send').cmd('hgd()')<CR>", {})
                     end
@@ -59,8 +67,9 @@ return {
                 OutDec = ".",
                 R_app = "radian",
                 R_cmd = "R",
+                -- RStudio_cmd = "/usr/bin/rstudio",
                 hl_term = true,
-                bracketed_paste = true,
+                bracketed_paste = false,
 
                 -- PDF Viewer
                 open_pdf = "open",

@@ -46,13 +46,33 @@ return {
                             "<Cmd>lua require('r.run').action('(function(package) { rlang::as_label(rlang::enexpr(package)) |> renv::install(prompt = FALSE) })')<CR>",
                             {})
                         vim.api.nvim_buf_set_keymap(0, "n", "<leader>rI",
-                            "<Cmd>lua require('r.run').action('ri')<CR>", {})
+                            "<Cmd>lua require('r.send').cmd('renv::init()')<CR>", {})
                         vim.api.nvim_buf_set_keymap(0, "n", "<leader>rs",
                             "<Cmd>lua require('r.send').cmd('renv::status()')<CR>", {})
                         vim.api.nvim_buf_set_keymap(0, "n", "<leader>rS",
                             "<Cmd>lua require('r.send').cmd('renv::snapshot()')<CR>", {})
                         vim.api.nvim_buf_set_keymap(0, "n", "<leader>rd",
                             "<Cmd>lua require('r.send').cmd('devtools::document()')<CR>", {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>rc",
+                            "<Cmd>lua require('r.send').cmd('devtools::check()')<CR>", {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>rl",
+                            "<Cmd>lua require('r.send').cmd('devtools::load_all()')<CR>", {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>rt",
+                            "<Cmd>lua require('r.send').cmd('devtools::test_active_file()')<CR>", {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>rT",
+                            "<Cmd>lua require('r.send').cmd('devtools::test()')<CR>", {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>rv",
+                            "<Cmd>lua require('r.send').cmd('devtools::test_coverage_active_file()')<CR>", {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>rV",
+                            "<Cmd>lua require('r.send').cmd('devtools::test_coverage()')<CR>", {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>rut",
+                            "<Cmd>lua require('r.send').cmd('usethis::use_test()')<CR>", {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>rup",
+                            "<Cmd>lua require('r.run').action('(function(package) { rlang::as_label(rlang::enexpr(package)) |> usethis::use_package() })')<CR>",
+                            {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>rus",
+                            "<Cmd>lua require('r.run').action('(function(package) { rlang::as_label(rlang::enexpr(package)) |> usethis::use_package(type = \"Suggests\") })')<CR>",
+                            {})
                         vim.api.nvim_buf_set_keymap(0, "n", "<LocalLeader>V",
                             "<Cmd>lua require('r.send').cmd('hgd()')<CR>", {})
                     end

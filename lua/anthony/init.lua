@@ -190,4 +190,4 @@ function UnformatRFunction()
 end
 
 vim.api.nvim_set_keymap('n', '<leader>rf', ':lua FormatRFunction()<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>ru', ':lua UnformatRFunction()<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>rr', ':lua UnformatRFunction()<CR>', { noremap = true, silent = true })

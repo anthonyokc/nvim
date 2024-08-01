@@ -157,5 +157,5 @@ local function switch_to_terminal()
 end
 
 -- Map <leader>' to the switch_to_terminal function
-vim.api.nvim_set_keymap('n', '<leader>\'', 'switch_to_terminal()<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>\'', switch_to_terminal, { noremap = true, silent = true })
 

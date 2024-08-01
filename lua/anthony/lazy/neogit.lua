@@ -10,7 +10,7 @@ return {
     config = function()
         local neogit = require("neogit")
 
-        vim.keymap.set("n", "<leader>gs", vim.cmd.Neogit)
+        vim.keymap.set("n", "<leader>gt", vim.cmd.Neogit)
 
         neogit.setup {
             -- Hides the hints at the top of the status buffer

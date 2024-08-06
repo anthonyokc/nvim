@@ -3,7 +3,12 @@ return {
     "jackMort/ChatGPT.nvim",
     event = "VeryLazy",
     config = function()
-      require("chatgpt").setup()
+      require("chatgpt").setup({
+                popup_input = {
+                    submit = "<C-k>",
+                    submit_n = "<C-k>"
+                }
+            })
     end,
     dependencies = {
       "MunifTanjim/nui.nvim",

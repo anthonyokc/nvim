@@ -142,6 +142,11 @@ return {
         -- end
 
         vim.api.nvim_set_keymap('n', '<leader>rf', '<cmd>lua FormatRFunction()<CR>',
+<<<<<<< HEAD
+=======
+            { noremap = true, silent = true })
+        vim.api.nvim_set_keymap('n', '<leader>rr', '<cmd>lua UnformatRFunction()<CR>',
+>>>>>>> 17f0bad (R function formatter function added (like reshape add-in))
             { noremap = true, silent = true })
     end
 }

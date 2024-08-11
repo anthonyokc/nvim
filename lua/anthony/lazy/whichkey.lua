@@ -4,7 +4,7 @@ return {
     config = function()
         local wk = require("which-key")
         wk.add({
-            { "<leader>gt",  desc = "Neogit" },
+            { "<leader>gt",  desc = " grep" },
             { "<leader>f",   group = "file" }, -- group
             { "<leader>ff",  "<cmd>Telescope find_files<cr>",          desc = "Find File", mode = "n" },
             { "<leader>fg",  desc = "Telescope grep" },

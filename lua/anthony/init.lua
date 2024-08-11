@@ -177,7 +177,65 @@ function FormatRFunction()
     ReformatRFunction("format")
 end
 
--- Function to unformat R function
 function UnformatRFunction()
+<<<<<<< HEAD
     ReformatRFunction("unformat")
+=======
+    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+    row = row - 1 -- API uses 0-based indexing for rows
+
+    local function find_matching_paren(lines, start_row, start_col)
+        local paren_count = 1
+        for r = start_row, #lines do
+            local line = lines[r]
+            local c = (r == start_row) and start_col or 1
+            while c <= #line do
+                if line:sub(c, c) == "(" then
+                    paren_count = paren_count + 1
+                elseif line:sub(c, c) == ")" then
+                    paren_count = paren_count - 1
+                    if paren_count == 0 then
+                        return r, c
+                    end
+                end
+                c = c + 1
+            end
+        end
+        return nil, nil
+    end
+
+    local lines = vim.api.nvim_buf_get_lines(0, row, -1, false)
+    local line = lines[1]
+
+    -- Split the line into prefix and function call
+    local prefix, func_call = line:match("^(.-)([%w_]+%s*%(.*)")
+    if not func_call then
+        print("No function call found on this line.")
+        return
+    end
+
+    local func_name = func_call:match("^([%w_]+)")
+    local open_paren = func_call:find("%(")
+    if not open_paren then
+        print("No opening parenthesis found.")
+        return
+    end
+
+    -- Find the matching closing parenthesis
+    local end_row, end_col = find_matching_paren(lines, 1, #prefix + open_paren)
+    if not end_row then
+        print("No matching closing parenthesis found.")
+        return
+    end
+
+    local full_func_call = table.concat(lines, "\n"):sub(#prefix + 1, end_col + (end_row - 1) * #line)
+    local args = full_func_call:match("%b()")
+
+    if func_name and args then
+        local unformatted = prefix .. full_func_call:gsub("\n%s*", " ")
+        vim.api.nvim_buf_set_lines(0, row, row + end_row, false, { unformatted .. lines[end_row]:sub(end_col + 1) })
+    else
+        print("No function found under cursor.")
+    end
+>>>>>>> 17f0bad (R function formatter function added (like reshape add-in))
 end

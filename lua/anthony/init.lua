@@ -78,10 +78,10 @@ vim.cmd [[
 
 local function ReformatRFunction(mode)
     local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-    row = row - 1  -- API uses 0-based indexing for rows
+    row = row - 1     -- API uses 0-based indexing for rows
 
     local function find_matching_paren(lines, start_row, start_col)
-        local paren_count = 0
+        local paren_count = 1
         for r = start_row, #lines do
             local line = lines[r]
             local c = (r == start_row) and start_col or 1
@@ -103,76 +103,69 @@ local function ReformatRFunction(mode)
     local lines = vim.api.nvim_buf_get_lines(0, row, -1, false)
     local line = lines[1]
 
-    -- Find the closest opening parenthesis before the cursor
-    local start_pos = col
-    while start_pos > 0 and line:sub(start_pos, start_pos) ~= "(" do
-        start_pos = start_pos - 1
+    -- Split the line into prefix and function call
+    local prefix, func_call = line:match("^(.-)([%w_]+%s*%(.*)")
+    if not func_call then
+        print("No function call found on this line.")
+        return
     end
 
-    if start_pos == 0 then
+    local func_name = func_call:match("^([%w_]+)")
+    local open_paren = func_call:find("%(")
+    if not open_paren then
         print("No opening parenthesis found.")
         return
     end
 
     -- Find the matching closing parenthesis
-    local end_row, end_col = find_matching_paren(lines, 1, start_pos)
+    local end_row, end_col = find_matching_paren(lines, 1, #prefix + open_paren)
     if not end_row then
         print("No matching closing parenthesis found.")
         return
     end
 
-    -- Find the start of the function name
-    local func_start = start_pos - 1
-    while func_start > 0 and line:sub(func_start, func_start):match("[%w_]") do
-        func_start = func_start - 1
-    end
-    func_start = func_start + 1
+    local full_func_call = table.concat(lines, "\n"):sub(#prefix + 1, end_col + (end_row - 1) * #line)
+    local args = full_func_call:match("%b()")
 
-    local full_func_call = table.concat(lines, "\n"):sub(func_start, end_col + (end_row - 1) * #line)
-    local outer_func, inner_func_call = full_func_call:match("([%w_]+)(%b())")
+    if func_name and args then
+        if mode == "format" then
+            args = args:sub(2, -2)     -- Remove outer parentheses
+            local split_args = {}
+            local nested_count = 0
+            local current_arg = ""
 
-    if outer_func and inner_func_call then
-        local inner_func, args = inner_func_call:match("([%w_]+)(%b())")
-        if inner_func and args then
-            if mode == "format" then
-                args = args:sub(2, -2)  -- Remove outer parentheses
-                local split_args = {}
-                local nested_count = 0
-                local current_arg = ""
-
-                for c in args:gmatch(".") do
-                    if c == "(" then
-                        nested_count = nested_count + 1
-                    elseif c == ")" then
-                        nested_count = nested_count - 1
-                    end
-
-                    if c == "," and nested_count == 0 then
-                        table.insert(split_args, current_arg:match("^%s*(.-)%s*$"))
-                        current_arg = ""
-                    else
-                        current_arg = current_arg .. c
-                    end
+            for c in args:gmatch(".") do
+                if c == "(" then
+                    nested_count = nested_count + 1
+                elseif c == ")" then
+                    nested_count = nested_count - 1
                 end
-                if current_arg ~= "" then
+
+                if c == "," and nested_count == 0 then
                     table.insert(split_args, current_arg:match("^%s*(.-)%s*$"))
+                    current_arg = ""
+                else
+                    current_arg = current_arg .. c
                 end
-
-                local indent = line:match("^%s*")
-                local new_lines = {}
-                table.insert(new_lines, indent .. outer_func .. "(" .. inner_func .. "(")
-                for i, arg in ipairs(split_args) do
-                    table.insert(new_lines, indent .. "  " .. arg .. (i < #split_args and "," or ""))
-                end
-                table.insert(new_lines, indent .. "))" .. lines[end_row]:sub(end_col + 1))
-
-                vim.api.nvim_buf_set_lines(0, row, row + end_row, false, new_lines)
-            elseif mode == "unformat" then
-                local unformatted = full_func_call:gsub("\n%s*", " ")
-                vim.api.nvim_buf_set_lines(0, row, row + end_row, false, {unformatted .. lines[end_row]:sub(end_col + 1)})
             end
-        else
-            print("No inner function found.")
+            if current_arg ~= "" then
+                table.insert(split_args, current_arg:match("^%s*(.-)%s*$"))
+            end
+
+            local indent = prefix:match("^%s*")
+            local arg_indent = indent .. "  "
+
+            local new_lines = {}
+            table.insert(new_lines, prefix .. func_name .. "(")
+            for i, arg in ipairs(split_args) do
+                table.insert(new_lines, arg_indent .. arg .. (i < #split_args and "," or ""))
+            end
+            table.insert(new_lines, indent .. ")" .. lines[end_row]:sub(end_col + 1))
+
+            vim.api.nvim_buf_set_lines(0, row, row + end_row, false, new_lines)
+        elseif mode == "unformat" then
+            local unformatted = prefix .. full_func_call:gsub("\n%s*", " ")
+            vim.api.nvim_buf_set_lines(0, row, row + end_row, false, { unformatted .. lines[end_row]:sub(end_col + 1) })
         end
     else
         print("No function found under cursor.")
@@ -188,6 +181,3 @@ end
 function UnformatRFunction()
     ReformatRFunction("unformat")
 end
-
-vim.api.nvim_set_keymap('n', '<leader>rf', ':lua FormatRFunction()<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>rr', ':lua UnformatRFunction()<CR>', { noremap = true, silent = true })

@@ -111,37 +111,37 @@ return {
 
         local ts_utils = require 'nvim-treesitter.ts_utils'
 
-        local function reformat_hovered_function()
-            local bufnr = vim.api.nvim_get_current_buf()
-            local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-            local root = ts_utils.get_root_for_position(row - 1, col - 1, bufnr)
-            if not root then return end
+        -- local function reformat_hovered_function()
+        --     local bufnr = vim.api.nvim_get_current_buf()
+        --     local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+        --     local root = ts_utils.get_root_for_position(row - 1, col - 1, bufnr)
+        --     if not root then return end
 
-            local node = ts_utils.get_node_at_cursor()
-            if not node then return end
+        --     local node = ts_utils.get_node_at_cursor()
+        --     if not node then return end
 
-            while node do
-                if node:type() == 'function_call' then
-                    local start_row, start_col, end_row, end_col = node:range()
-                    local lines = vim.api.nvim_buf_get_lines(bufnr, start_row, end_row + 1, false)
-                    local text = table.concat(lines, "\n")
-                    local func_name = text:match("^%s*(%w+)%s*%(")
+        --     while node do
+        --         if node:type() == 'function_call' then
+        --             local start_row, start_col, end_row, end_col = node:range()
+        --             local lines = vim.api.nvim_buf_get_lines(bufnr, start_row, end_row + 1, false)
+        --             local text = table.concat(lines, "\n")
+        --             local func_name = text:match("^%s*(%w+)%s*%(")
 
-                    if func_name then
-                        local args = text:match("%((.*)%)")
-                        if args then
-                            local formatted_args = "(\n    " .. args:gsub(",%s*", ",\n    ") .. "\n  )"
-                            local new_text = func_name .. formatted_args
-                            vim.api.nvim_buf_set_lines(bufnr, start_row, end_row + 1, false, { new_text })
-                        end
-                    end
-                    break
-                end
-                node = node:parent()
-            end
-        end
+        --             if func_name then
+        --                 local args = text:match("%((.*)%)")
+        --                 if args then
+        --                     local formatted_args = "(\n    " .. args:gsub(",%s*", ",\n    ") .. "\n  )"
+        --                     local new_text = func_name .. formatted_args
+        --                     vim.api.nvim_buf_set_lines(bufnr, start_row, end_row + 1, false, { new_text })
+        --                 end
+        --             end
+        --             break
+        --         end
+        --         node = node:parent()
+        --     end
+        -- end
 
-        vim.api.nvim_set_keymap('n', '<leader>rf', '<cmd>lua reformat_hovered_function()<CR>',
+        vim.api.nvim_set_keymap('n', '<leader>rf', '<cmd>lua FormatRFunction()<CR>',
             { noremap = true, silent = true })
     end
 }

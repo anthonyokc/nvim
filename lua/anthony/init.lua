@@ -178,9 +178,6 @@ function FormatRFunction()
 end
 
 function UnformatRFunction()
-<<<<<<< HEAD
-    ReformatRFunction("unformat")
-=======
     local row, col = unpack(vim.api.nvim_win_get_cursor(0))
     row = row - 1 -- API uses 0-based indexing for rows
 
@@ -237,5 +234,4 @@ function UnformatRFunction()
     else
         print("No function found under cursor.")
     end
->>>>>>> 17f0bad (R function formatter function added (like reshape add-in))
 end

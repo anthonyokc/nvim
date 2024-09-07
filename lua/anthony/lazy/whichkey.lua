@@ -17,6 +17,7 @@ return {
             { "<leader>r",   group = "R Commands" },            -- group
             { "<leader>rf",  group = "R Format Function" },    -- group
             { "<leader>rr",  group = "R Unformat Function" },    -- group
+            { "<leader>rR",  group = "renv Restore" },    -- group
             { "<leader>rh",  desc = "Convert read.csv to read_csv and use here()" },
             { "<leader>ri",  desc = "Install R package with renv" },
             { "<leader>rI",  desc = "Initialize renv" },
@@ -56,7 +57,7 @@ return {
                 { "<leader>cp",     ":<C-u>'<,'>GpChatPaste<cr>",                    desc = "Visual Chat Paste" },
                 { "<leader>cr",     ":<C-u>'<,'>GpRewrite<cr>",                      desc = "Visual Rewrite" },
                 { "<leader>cs",     "<cmd>GpStop<cr>",                               desc = "GpStop" },
-                { "<leader>ct",     ":<C-u>'<,'>GpChatToggle<cr>",                   desc = "Visual Toggle Chat" },
+                { "<leader>cp",     ":<C-u>'<,'>GpChatToggle<cr>",                   desc = "Visual Toggle Chat" },
                 { "<leader>cw",     group = "Whisper" },
                 { "<leader>cwa",    ":<C-u>'<,'>GpWhisperAppend<cr>",                desc = "Whisper Append" },
                 { "<leader>cwb",    ":<C-u>'<,'>GpWhisperPrepend<cr>",               desc = "Whisper Prepend" },
@@ -104,7 +105,7 @@ return {
                 { "<leader>cn",     "<cmd>GpNextAgent<cr>",                          desc = "Next Agent" },
                 { "<leader>cr",     "<cmd>GpRewrite<cr>",                            desc = "Inline Rewrite" },
                 { "<leader>cs",     "<cmd>GpStop<cr>",                               desc = "GpStop" },
-                { "<leader>ct",     "<cmd>GpChatToggle<cr>",                         desc = "Toggle Chat" },
+                { "<leader>cp",     "<cmd>GpChatToggle<cr>",                         desc = "Toggle Chat" },
                 { "<leader>cw",     group = "Whisper" },
                 { "<leader>cwa",    "<cmd>GpWhisperAppend<cr>",                      desc = "Whisper Append (after)" },
                 { "<leader>cwb",    "<cmd>GpWhisperPrepend<cr>",                     desc = "Whisper Prepend (before)" },

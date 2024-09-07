@@ -46,8 +46,6 @@ autocmd('LspAttach', {
         vim.keymap.set("n", "<leader>vd", function() vim.diagnostic.open_float() end, opts)
         vim.keymap.set("n", "<leader>vca", function() vim.lsp.buf.code_action() end, opts)
         vim.keymap.set("n", "<leader>vrr", function() vim.lsp.buf.references() end, opts)
-        vim.keymap.set("n", "<leader>vrn", function() vim.lsp.buf.rename() end, opts)
-        vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
         vim.keymap.set("n", "]d", function() vim.diagnostic.goto_next() end, opts)
         vim.keymap.set("n", "[d", function() vim.diagnostic.goto_prev() end, opts)
     end
@@ -78,7 +76,7 @@ vim.cmd [[
 
 local function ReformatRFunction(mode)
     local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-    row = row - 1     -- API uses 0-based indexing for rows
+    row = row - 1 -- API uses 0-based indexing for rows
 
     local function find_matching_paren(lines, start_row, start_col)
         local paren_count = 1
@@ -129,7 +127,7 @@ local function ReformatRFunction(mode)
 
     if func_name and args then
         if mode == "format" then
-            args = args:sub(2, -2)     -- Remove outer parentheses
+            args = args:sub(2, -2) -- Remove outer parentheses
             local split_args = {}
             local nested_count = 0
             local current_arg = ""
@@ -235,3 +233,49 @@ function UnformatRFunction()
         print("No function found under cursor.")
     end
 end
+
+-- Function to toggle comment on selected lines
+function toggle_comment_selected_lines()
+    -- Get the start and end positions of the selection
+    local start_line = vim.fn.line("'<")
+    local end_line = vim.fn.line("'>")
+
+    -- Loop through the selected lines
+    for line_num = start_line, end_line do
+        -- Get the content of the current line
+        local line_content = vim.fn.getline(line_num)
+        -- Check if the line starts with "# "
+        if string.sub(line_content, 1, 2) == "# " then
+            -- Remove "# " from the beginning of the line
+            local new_line_content = string.sub(line_content, 3)
+            vim.fn.setline(line_num, new_line_content)
+        else
+            -- Prepend "# " to the line content
+            local new_line_content = "# " .. line_content
+            vim.fn.setline(line_num, new_line_content)
+        end
+    end
+end
+
+-- Function to toggle comment on the current line
+function toggle_comment_current_line()
+    -- Get the current line number
+    local line_num = vim.fn.line(".")
+    -- Get the content of the current line
+    local line_content = vim.fn.getline(line_num)
+    -- Check if the line starts with "# "
+    if string.sub(line_content, 1, 2) == "# " then
+        -- Remove "# " from the beginning of the line
+        local new_line_content = string.sub(line_content, 3)
+        vim.fn.setline(line_num, new_line_content)
+    else
+        -- Prepend "# " to the line content
+        local new_line_content = "# " .. line_content
+        vim.fn.setline(line_num, new_line_content)
+    end
+end
+
+vim.api.nvim_set_keymap('n', '<leader>C', ':lua toggle_comment_current_line()<CR>',
+    { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<leader>C', ':lua toggle_comment_selected_lines()<CR>',
+    { noremap = true, silent = true })

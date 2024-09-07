@@ -5,7 +5,13 @@ return {
 
     dependencies = {
         { "nvim-lua/plenary.nvim" },
-        { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' }
+        { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
+        {
+            "nvim-telescope/telescope-live-grep-args.nvim",
+            -- This will not install any breaking changes.
+            -- For major updates, this must be adjusted manually.
+            version = "^1.0.0",
+        },
     },
 
     config = function()
@@ -58,6 +64,7 @@ return {
         require('telescope').load_extension('noice')
         require('telescope').load_extension('fzf')
         require('telescope').load_extension('git_worktree')
+        require('telescope').load_extension("live_grep_args")
         vim.keymap.set('n', '<leader>ff', builtin.find_files, {}) -- search project files
         vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Find Buffers" })
         vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Find Help Tags" })
@@ -85,7 +92,8 @@ return {
             local word = vim.fn.expand("<cWORD>")
             builtin.grep_string({ search = word })
         end)
-        vim.keymap.set('n', '<leader>fg', function()
+        vim.keymap.set("n", "<leader>fg", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
+        vim.keymap.set('n', '<leader>fG', function()
             builtin.grep_string({ search = vim.fn.input("Grep > ") })
         end)
         vim.keymap.set('n', '<leader>vh', builtin.help_tags, {})

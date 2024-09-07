@@ -31,6 +31,7 @@ return {
                         -- Clear command-line mode mappings that start with a comma
                         clear_mappings('c', ',')
 
+
                         vim.api.nvim_buf_set_keymap(0, "n", ",", "<Plug>RDSendLine", {})
                         vim.api.nvim_buf_set_keymap(0, "v", ",", "<Plug>RDSendSelection", {})
                         vim.api.nvim_buf_set_keymap(0, "n", "<LocalLeader>f", "<Plug>RFormat", {})
@@ -49,6 +50,8 @@ return {
                             "<Cmd>lua require('r.send').cmd('renv::init()')<CR>", {})
                         vim.api.nvim_buf_set_keymap(0, "n", "<leader>rs",
                             "<Cmd>lua require('r.send').cmd('renv::status()')<CR>", {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>rR",
+                            "<Cmd>lua require('r.send').cmd('renv::restore()')<CR>", {})
                         vim.api.nvim_buf_set_keymap(0, "n", "<leader>rS",
                             "<Cmd>lua require('r.send').cmd('renv::snapshot()')<CR>", {})
                         vim.api.nvim_buf_set_keymap(0, "n", "<leader>rd",

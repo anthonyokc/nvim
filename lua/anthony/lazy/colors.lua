@@ -46,4 +46,16 @@ return {
             ColorMyPencils()
         end
     },
+
+    {
+        "chrisbra/Colorizer",
+        config = function()
+            vim.cmd.ColorToggle()
+        end
+    },
+
+    {
+        "HiPhish/rainbow-delimiters.nvim"
+    }
 }
+

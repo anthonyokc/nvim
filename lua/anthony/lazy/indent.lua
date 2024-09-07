@@ -4,6 +4,7 @@ return {
         config = function()
             require("ibl").setup({
                 scope = { enabled = false },
+                exclude = { filetypes = {"dashboard"} }
             })
         end
     },
@@ -27,6 +28,7 @@ return {
                     -- symbol = '╎',
                 },
                 symbol = '│',
+                exclude = { filetypes = {"dashboard"} }
 
             })
         end,

@@ -60,10 +60,10 @@ end)
 vim.api.nvim_create_user_command('CloseAll', function()
     vim.cmd('qa')
 end, { desc = 'Close all windows and NvimTree if open' })
-vim.keymap.set("n", "<C-x>", vim.cmd.CloseAll)
+vim.keymap.set("n", "<C-z>", vim.cmd.CloseAll)
 vim.keymap.set("n", "<C-s>", "<cmd>w<CR>")
 vim.keymap.set("n", "<C-S>", "<cmd>wa<CR>")
-vim.keymap.set("n", "<C-z>", "<cmd>q<CR>") -- close current window
+vim.keymap.set("n", "<C-x>", "<cmd>q<CR>") -- close current window
 
 -- select the last pasted text
 vim.api.nvim_set_keymap('n', 'gV', '`[v`]', { noremap = true })

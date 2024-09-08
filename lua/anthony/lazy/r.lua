@@ -103,7 +103,7 @@ return {
 
                 -- Auto Start
                 auto_start = "always",
-                objbr_auto_start = true,
+                objbr_auto_start = false,
 
                 -- R Object Browser
                 objbr_place = "console,below", -- place below the R console

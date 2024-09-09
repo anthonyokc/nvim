@@ -76,7 +76,13 @@ return {
                         vim.api.nvim_buf_set_keymap(0, "n", "<leader>rus",
                             "<Cmd>lua require('r.run').action('(function(package) { rlang::as_label(rlang::enexpr(package)) |> usethis::use_package(type = \"Suggests\") })')<CR>",
                             {})
-                        vim.api.nvim_buf_set_keymap(0, "n", "<LocalLeader>V",
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>V",
+                            "<Cmd>lua require('r.run').action('(function(data) { data |> View() })')<CR>",
+                            {})
+                        vim.api.nvim_buf_set_keymap(0, "v", "<leader>V",
+                            "<Cmd>lua require('r.run').action('(function(data) { data |> View() })')<CR>",
+                            {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<LocalLeader>hgd",
                             "<Cmd>lua require('r.send').cmd('hgd()')<CR>", {})
                     end
                 },

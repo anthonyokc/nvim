@@ -25,7 +25,7 @@ vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]]) -- copy selection to system c
 vim.keymap.set("n", "<leader>Y", [["+Y]])          -- copy whole line to system clipboard
 vim.keymap.set("n", "yay", "<cmd>%y+<CR>")          -- copy whole line to system clipboard
 
-vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
+vim.keymap.set({ "n", "v" }, "D", [["_d]])
 
 vim.keymap.set("i", "<C-c>", "<Esc>")
 
@@ -39,7 +39,7 @@ vim.keymap.set("n", "<c-b>", "<cmd>cprev<cr>zz")
 vim.keymap.set("n", "<leader>n", "<cmd>lnext<cr>zz")
 vim.keymap.set("n", "<leader>b", "<cmd>lprev<CR>zz")
 
-vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]])
+vim.keymap.set("n", "<leader>ss", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]])
 vim.keymap.set("n", "<leader>rh", [[:%s/read.csv("\(.*\)")/read_csv(here("data\/\1"))/gI<Left><Left><Left>]])
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = false })
 
@@ -64,6 +64,11 @@ vim.keymap.set("n", "<C-z>", vim.cmd.CloseAll)
 vim.keymap.set("n", "<C-s>", "<cmd>w<CR>")
 vim.keymap.set("n", "<C-S>", "<cmd>wa<CR>")
 vim.keymap.set("n", "<C-x>", "<cmd>q<CR>") -- close current window
+
+-- Remap Ctrl + Z to undo in Insert mode
+vim.api.nvim_set_keymap('i', '<C-z>', '<C-o>u', { noremap = true, silent = true })
+-- Remap Ctrl + Y to redo in Insert mode
+vim.api.nvim_set_keymap('i', '<C-y>', '<C-o><C-r>', { noremap = true, silent = true })
 
 -- select the last pasted text
 vim.api.nvim_set_keymap('n', 'gV', '`[v`]', { noremap = true })

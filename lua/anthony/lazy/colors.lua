@@ -51,6 +51,7 @@ return {
         "chrisbra/Colorizer",
         config = function()
             vim.cmd.ColorToggle()
+            require('avante_lib').load()
         end
     },
 

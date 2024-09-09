@@ -84,8 +84,11 @@ return {
             formatting = {
                 format = lspkind.cmp_format {
                     mode = 'symbol',
+                    symbol_map = { Copilot = "" },
+                    max_width = 50,
                     menu = {
                         otter = '[🦦]',
+                        Copilot = "",
                         nvim_lsp = '',
                         vsnip = '',
                         cmp_zotcite = 'z',
@@ -116,6 +119,8 @@ return {
                 { name = 'calc' },
                 { name = 'latex_symbols' },
                 { name = 'emoji' },
+                { name = 'copilot',                group_index = 2 },
+                { name = "luasnip" },
             },
             window = {
                 completion = cmp.config.window.bordered(),

@@ -21,7 +21,7 @@ return {
 
 
         -- key bindings
-        vim.keymap.set("n", "<C-h>", api.tree.change_root_to_node)
+        vim.keymap.set("n", "<C-o>", api.tree.change_root_to_node)
         vim.keymap.set("n", "<C-g>", api.tree.toggle)
     end
 }

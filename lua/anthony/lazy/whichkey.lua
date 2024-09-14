@@ -4,7 +4,7 @@ return {
     config = function()
         local wk = require("which-key")
         wk.add({
-            { "<leader>gt",  desc = " Neogit" },
+            { "<leader>gt",  desc = "Neogit" },
             { "<leader>f",   group = "file" }, -- group
             { "<leader>ff",  "<cmd>Telescope find_files<cr>",          desc = "Find File", mode = "n" },
             { "<leader>fg",  desc = "Telescope grep" },
@@ -34,6 +34,17 @@ return {
             { "<leader>rut", desc = "usethis Test" },
             { "<leader>rup", desc = "usethis Package (Imports)" },
             { "<leader>rus", desc = "usethis Package (Suggests)" },
+            { "<leader>df",  desc = "Diffview Open" },
+            { "<leader>df",  desc = "Diffview Close" },
+            { "<leader>hS", desc = "Stage Buffer" },
+            { "<leader>ha", desc = "Stage Hunk" },
+            { "<leader>hu", desc = "Undo Stage Hunk" },
+            { "<leader>hR", desc = "Reset Buffer" },
+            { "<leader>hp", desc = "Preview Hunk" },
+            { "<leader>hb", desc = "Blame Line" },
+            { "<leader>tB", desc = "Toggle Current Line Blame" },
+            { "<leader>hd", desc = "Diff This on Index" },
+            { "<leader>hD", desc = "Diff This on Last Commit" },
         })
         wk.add({
             {

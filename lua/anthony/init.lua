@@ -290,6 +290,17 @@ vim.api.nvim_set_keymap('n', '<leader>C', ':lua toggle_comment_current_line()<CR
 vim.api.nvim_set_keymap('v', '<leader>C', ':lua toggle_comment_selected_lines()<CR>',
     { noremap = true, silent = true })
 
+
+vim.g.git_worktree = {
+    change_directory_command = "cd",
+    update_on_change = true,
+    update_on_change_command = "e .",
+    clearjumps_on_change = true,
+    confirm_telescope_deletions = true,
+    autopush = false,
+}
+
+
 vim.api.nvim_create_autocmd("User", {
     pattern = "ToggleMyPrompt",
     callback = function() require("avante.config").override({ system_prompt =

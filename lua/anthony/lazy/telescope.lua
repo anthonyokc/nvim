@@ -78,7 +78,7 @@ return {
         vim.keymap.set("n", "<leader>fr", "<CMD>lua require('telescope').extensions.git_worktree.git_worktree()<CR>",
             { noremap = true, silent = true })
         vim.keymap.set("n", "<leader>fR",
-            "<CMD>lua require('telescope').extensions.git_worktree.create_git_worktree()<CR>",
+            "<CMD>lua require('telescope').extensions.git_worktree.create_git_worktree({prefix = '../'})<CR>",
             { noremap = true, silent = true })
         vim.keymap.set('n', '<leader>fm', "<cmd>Telescope harpoon marks<cr>", {})
         vim.keymap.set("n", "<leader>gc", builtin.git_commits, { desc = "Search Git Commits" })

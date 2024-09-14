@@ -289,3 +289,13 @@ vim.api.nvim_set_keymap('n', '<leader>C', ':lua toggle_comment_current_line()<CR
     { noremap = true, silent = true })
 vim.api.nvim_set_keymap('v', '<leader>C', ':lua toggle_comment_selected_lines()<CR>',
     { noremap = true, silent = true })
+
+vim.api.nvim_create_autocmd("User", {
+    pattern = "ToggleMyPrompt",
+    callback = function() require("avante.config").override({ system_prompt =
+        "You are an expert-level R programmer with knowledge about every niche package there is. You are assisting me on a coding task. I will sometimes provide you existing code, to help understand what I want to do. Whenever you reply, always aim to be concise and abide by tidy data principles and the tidyverse style guide." }) end,
+})
+
+vim.keymap.set("n", "<leader>am",
+    function() vim.api.nvim_exec_autocmds("User", { pattern = "ToggleMyPrompt" }) end,
+    { desc = "avante: toggle my prompt" })

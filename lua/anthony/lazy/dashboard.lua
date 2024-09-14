@@ -19,6 +19,7 @@ return {
                         key = 'f',
                     },
                 },
+                project = { enable = false },
                 footer = {
                     '',
                     '“The least advantaged are not, if all goes well, the unfortunate and unlucky,',

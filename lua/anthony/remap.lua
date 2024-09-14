@@ -82,6 +82,10 @@ vim.keymap.set("n", ",e", function()
     vim.cmd('cd ' .. vim.fn.fnameescape(current_dir)) -- Restore the original working directory
 end)
 
+-- See list of buffers
+vim.keymap.set("n", "<leader>ls", "<cmd>ls<CR>")
+-- See list of modified buffers
+vim.keymap.set("n", "<leader>lm", "<cmd>ls!<CR>")
 
 
 local comment_styles = { "#", "//", "--" } -- -- Define the comment styles
@@ -164,4 +168,121 @@ end
 
 -- Map <leader>' to the switch_to_terminal function
 vim.keymap.set('n', '<leader>\'', switch_to_terminal, { noremap = true, silent = true })
+
+-- Toggle terminal window visibility
+local function toggle_terminal_visibility()
+  local term_win = -1
+  local term_buf = -1
+
+  -- Find the terminal buffer and window
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    local buf = vim.api.nvim_win_get_buf(win)
+    if vim.api.nvim_buf_get_option(buf, 'buftype') == 'terminal' then
+      term_win = win
+      term_buf = buf
+      break
+    end
+  end
+
+  if term_win ~= -1 then
+    -- Terminal window exists, toggle its visibility
+    if vim.api.nvim_win_is_valid(term_win) then
+      -- Hide the terminal window
+      vim.api.nvim_win_hide(term_win)
+    else
+      -- Show the terminal window
+      vim.api.nvim_open_win(term_buf, true, {
+        relative = 'editor',
+        row = vim.o.lines - 15,
+        col = 0,
+        width = vim.o.columns,
+        height = 15,
+        style = 'minimal'
+      })
+    end
+  else
+    -- No terminal window found, create a new one
+    vim.cmd('botright 15split | terminal')
+  end
+end
+
+vim.keymap.set('n', '<leader>ht', toggle_terminal_visibility, { noremap = true, silent = true })
+
+vim.api.nvim_create_user_command("TermToggle", function()
+    local is_open = vim.g.term_win_id ~= nil and vim.api.nvim_win_is_valid(vim.g.term_win_id)
+
+    if is_open then
+        vim.api.nvim_win_hide(vim.g.term_win_id)
+        vim.g.term_win_id = nil
+        return
+    end
+
+    -- Open new window 25 lines tall at the bottom of the screen
+    vim.cmd("botright 25 new")
+    vim.g.term_win_id = vim.api.nvim_get_current_win()
+
+    local has_term_buf = vim.g.term_buf_id ~= nil and vim.api.nvim_buf_is_valid(vim.g.term_buf_id)
+
+    if has_term_buf then
+        vim.api.nvim_win_set_buf(vim.g.term_win_id, vim.g.term_buf_id)
+    else
+        vim.cmd.term()
+        vim.g.term_buf_id = vim.api.nvim_get_current_buf()
+    end
+
+    vim.cmd.startinsert()
+end, {})
+
+-- For session manager usage
+vim.api.nvim_create_user_command("TermKill", function()
+    if vim.g.term_win_id ~= nil then
+        vim.api.nvim_win_close(vim.g.term_win_id, true)
+        vim.g.term_win_id = nil
+    end
+    if vim.g.term_buf_id ~= nil then
+        vim.api.nvim_buf_delete(vim.g.term_buf_id, { force = true })
+        vim.g.term_buf_id = nil
+    end
+end, {})
+
+vim.keymap.set("n", "<leader>tt", vim.cmd.TermToggle, { desc = "Toggle [T]erminal", silent = true })
+vim.keymap.set("t", "<C-t>", vim.cmd.TermToggle, { desc = "Toggle [^][T]erminal", silent = true })
+
+
+-- Function to list all windows across all tabpages
+function ListAllWindows()
+    print("Listing all windows across all tabpages:")
+    for _, tab in ipairs(vim.api.nvim_list_tabpages()) do
+        local tab_number = vim.api.nvim_tabpage_get_number(tab)
+        print(string.format("Tabpage #%d:", tab_number))
+
+        local windows = vim.api.nvim_tabpage_list_wins(tab)
+        for _, win in ipairs(windows) do
+            local buf = vim.api.nvim_win_get_buf(win)
+            local buf_name = vim.api.nvim_buf_get_name(buf)
+            local is_current = (win == vim.api.nvim_get_current_win()) and " (Current)" or ""
+            print(string.format("  Window ID: %d, Buffer: %s%s", win, buf_name, is_current))
+        end
+    end
+end
+
+-- Create a user command to invoke the function
+vim.api.nvim_create_user_command('ListAllWindows', ListAllWindows, {})
+
+
+-- Function to create a listed terminal buffer
+function CreateListedTerminal()
+    -- Open a new split with a terminal
+    vim.cmd('split')
+    vim.cmd('terminal')
+
+    -- Get the current buffer
+    local bufnr = vim.api.nvim_get_current_buf()
+
+    -- Set 'buflisted' to true
+    vim.api.nvim_buf_set_option(bufnr, 'buflisted', true)
+end
+
+-- Keybinding to create a listed terminal
+vim.api.nvim_set_keymap('n', '<leader>tt', ':lua CreateListedTerminal()<CR>', { noremap = true, silent = true })
 

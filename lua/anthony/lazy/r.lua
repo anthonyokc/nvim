@@ -43,6 +43,8 @@ return {
                         -- Custom Actions
                         vim.api.nvim_buf_set_keymap(0, "n", "<leader><Enter>",
                             "<Cmd>lua require('r.run').action('')<CR>", {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>rg",
+                            "<Cmd>lua require('r.run').action('glimpse')<CR>", {})
                         vim.api.nvim_buf_set_keymap(0, "n", "<leader>ri",
                             "<Cmd>lua require('r.run').action('(function(package) { rlang::as_label(rlang::enexpr(package)) |> renv::install(prompt = FALSE) })')<CR>",
                             {})

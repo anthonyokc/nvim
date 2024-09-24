@@ -9,7 +9,7 @@ return {
             auto_suggestions_provider = "claude",
             hints = { enabled = false },
             behaviour = {
-                auto_suggestions = true,
+                auto_suggestions = false,
             },
             mappings = {
                 --- @class AvanteConflictMappings
@@ -22,12 +22,12 @@ return {
                     next = "]x",
                     prev = "[x",
                 },
-                suggestion = {
-                    accept = "<C-j>",
-                    next = "<M-]>",
-                    prev = "<M-[>",
-                    dismiss = "<C-]>",
-                },
+                -- suggestion = {
+                --     accept = "<C-j>",
+                --     next = "<M-]>",
+                --     prev = "<M-[>",
+                --     dismiss = "<C-]>",
+                -- },
                 jump = {
                     next = "]]",
                     prev = "[[",
@@ -74,29 +74,29 @@ return {
         "MunifTanjim/nui.nvim",
         --- The below dependencies are optional,
         "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
-        "zbirenbaum/copilot.lua", -- for providers='copilot'
-        {
-            -- support for image pasting
-            "HakonHarnes/img-clip.nvim",
-            event = "VeryLazy",
-            opts = {
-                -- recommended settings
-                default = {
-                    embed_image_as_base64 = false,
-                    prompt_for_file_name = false,
-                    drag_and_drop = {
-                        insert_mode = true,
-                    },
-                },
-            },
-        },
-        {
-            -- Make sure to setup it properly if you have lazy=true
-            'MeanderingProgrammer/render-markdown.nvim',
-            opts = {
-                file_types = { "markdown", "Avante" },
-            },
-            ft = { "markdown", "Avante" },
-        },
+        -- "zbirenbaum/copilot.lua", -- for providers='copilot'
+        -- {
+        --     -- support for image pasting
+        --     "HakonHarnes/img-clip.nvim",
+        --     event = "VeryLazy",
+        --     opts = {
+        --         -- recommended settings
+        --         default = {
+        --             embed_image_as_base64 = false,
+        --             prompt_for_file_name = false,
+        --             drag_and_drop = {
+        --                 insert_mode = true,
+        --             },
+        --         },
+        --     },
+        -- },
+        -- {
+        --     -- Make sure to setup it properly if you have lazy=true
+        --     'MeanderingProgrammer/render-markdown.nvim',
+        --     opts = {
+        --         file_types = { "markdown", "Avante" },
+        --     },
+        --     ft = { "markdown", "Avante" },
+        -- },
     },
 }

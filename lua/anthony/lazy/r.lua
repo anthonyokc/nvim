@@ -22,6 +22,23 @@ return {
                                 end
                             end
                         end
+                        local function read_csv_to_object()
+                            local start_line, end_line = vim.fn.getpos("'<")[2], vim.fn.getpos("'>")[2]
+                            local lines = vim.api.nvim_buf_get_lines(0, start_line - 1, end_line, false)
+
+                            for _, line in ipairs(lines) do
+                                local object_name, file_path = line:match("write_csv%(([%w_]+),%s*here%(\"(.+)\"%)%)")
+                                if object_name and file_path then
+                                    local new_line = string.format("%s <- read_csv(here(\"%s\"))", object_name, file_path)
+                                    vim.api.nvim_buf_set_lines(0, start_line - 1, start_line, false, { new_line })
+                                end
+                                start_line = start_line + 1
+                            end
+                        end
+
+                        vim.api.nvim_create_user_command('ReadCsvToObject', read_csv_to_object, {})
+
+
                         -- Clear normal mode mappings that start with a comma
                         clear_mappings('n', ',')
                         -- Clear insert mode mappings that start with a comma
@@ -39,6 +56,7 @@ return {
                         -- vim.api.nvim_buf_set_keymap(0, "v", ",e", "<Plug>RESendSelection", {})
                         vim.api.nvim_buf_set_keymap(0, "n", "<Enter>", "<Plug>RDSendLine", {})
                         vim.api.nvim_buf_set_keymap(0, "v", "<Enter>", "<Plug>RDSendSelection", {})
+                        vim.api.nvim_buf_set_keymap(0, "v", "<leader>rH", "<CMD>ReadCsvToObject<CR>", {})
 
                         -- Custom Actions
                         vim.api.nvim_buf_set_keymap(0, "n", "<leader><Enter>",

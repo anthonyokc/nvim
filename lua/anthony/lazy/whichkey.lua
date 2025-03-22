@@ -4,6 +4,14 @@ return {
     config = function()
         local wk = require("which-key")
         wk.add({
+            -- Case conversion commands
+            { "su", desc = "Convert to lowercase" },
+            { "sU", desc = "Convert to uppercase" },
+            { "s~", desc = "Toggle case" },
+            { "gu", desc = "Convert to lowercase (with motion)" },
+            { "gU", desc = "Convert to uppercase (with motion)" },
+            { "g~", desc = "Toggle case (with motion)" },
+            { "<leader>a",  desc = "Avante" },
             { "<leader>gt",  desc = "Neogit" },
             { "<leader>f",   group = "file" }, -- group
             { "<leader>ff",  "<cmd>Telescope find_files<cr>",          desc = "Find File", mode = "n" },

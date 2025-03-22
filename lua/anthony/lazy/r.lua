@@ -49,6 +49,9 @@ return {
                         clear_mappings('c', ',')
 
 
+                        -- Built-in Key Maps,
+                        vim.api.nvim_buf_set_keymap(0, "i", "<C-k>", "<Plug>RInsertAssign", {})
+                        vim.api.nvim_buf_set_keymap(0, "i", "<C-l>", "<Plug>RInsertPipe", {})
                         vim.api.nvim_buf_set_keymap(0, "n", ",", "<Plug>RDSendLine", {})
                         vim.api.nvim_buf_set_keymap(0, "v", ",", "<Plug>RDSendSelection", {})
                         vim.api.nvim_buf_set_keymap(0, "n", "<LocalLeader>f", "<Plug>RFormat", {})
@@ -138,12 +141,11 @@ return {
                 -- R Help & Documentation
                 nvimpager = "tab", -- use vertical split for help pages
 
-                -- Built-in Key Maps,
-                assignment_keymap = "<C-k>",
-                pipe_keymap = "<C-l>",
-
                 -- View a data.frame or matrix, uses <LocalLeader>rv,
-                csv_app = "tmux new-window vd",
+                view_df = {
+                    open_app = "tmux new-window vd", -- How to open the CSV
+                },
+
 
                 -- Syntax Highlighting,
                 Rout_more_colors = true, -- R commands in R output, .Rout files, are highlighted

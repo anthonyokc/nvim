@@ -310,3 +310,29 @@ vim.api.nvim_create_autocmd("User", {
 vim.keymap.set("n", "<leader>am",
     function() vim.api.nvim_exec_autocmds("User", { pattern = "ToggleMyPrompt" }) end,
     { desc = "avante: toggle my prompt" })
+
+-- Function to save all buffers and create directories if needed
+local function save_all_with_dirs()
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    -- Skip if buffer isn't loaded
+    if not vim.api.nvim_buf_is_loaded(buf) then
+      goto continue
+    end
+
+    local buftype = vim.api.nvim_buf_get_option(buf, "buftype")
+    local name = vim.api.nvim_buf_get_name(buf)
+
+    -- Skip if it's a special buffer (e.g. terminal) or unnamed
+    if buftype == "" and name ~= "" then
+      local directory = vim.fn.fnamemodify(name, ":h")
+      vim.fn.mkdir(directory, "p")               -- create directory if needed
+      vim.api.nvim_buf_call(buf, function()
+        vim.cmd("write")                        -- only valid on normal buffers
+      end)
+    end
+
+    ::continue::
+  end
+end
+
+vim.api.nvim_create_user_command("WA", save_all_with_dirs, {})

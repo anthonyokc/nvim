@@ -336,3 +336,29 @@ local function save_all_with_dirs()
 end
 
 vim.api.nvim_create_user_command("WA", save_all_with_dirs, {})
+
+-- Function to toggle window size between 50% and original size
+local window_sizes = {}
+function toggle_window_size()
+    local win_id = vim.api.nvim_get_current_win()
+    local win_width = vim.api.nvim_win_get_width(win_id)
+    local total_width = vim.o.columns
+
+    if not window_sizes[win_id] then
+        -- Store current size if we haven't stored it yet
+        window_sizes[win_id] = win_width
+
+        -- Resize to 50% of screen width
+        vim.api.nvim_win_set_width(win_id, math.floor(total_width * 0.5))
+    else
+        -- Restore original size
+        vim.api.nvim_win_set_width(win_id, window_sizes[win_id])
+        -- Clear stored size
+        window_sizes[win_id] = nil
+    end
+end
+
+-- Set up the keybinding for <leader>j
+vim.keymap.set("n", "<leader>j", toggle_window_size, { noremap = true, silent = true, desc = "Toggle window size to 50%" })
+
+

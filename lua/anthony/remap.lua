@@ -43,6 +43,7 @@ vim.keymap.set("n", "<leader>ss", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]])
 vim.keymap.set("n", "<leader>rh", [[:%s/read.csv("\(.*\)")/read_csv(here("data\/\1"))/gI<Left><Left><Left>]])
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = false })
 
+
 vim.keymap.set(
     "n",
     "<leader>ee",
@@ -69,6 +70,25 @@ vim.keymap.set("n", "<C-x>", "<cmd>q<CR>") -- close current window
 vim.api.nvim_set_keymap('i', '<C-z>', '<C-o>u', { noremap = true, silent = true })
 -- Remap Ctrl + Y to redo in Insert mode
 vim.api.nvim_set_keymap('i', '<C-y>', '<C-o><C-r>', { noremap = true, silent = true })
+
+-- Remap case conversion commands for normal, visual, and visual block modes
+vim.keymap.set("n", "su", "vu", { noremap = true, desc = "Convert to lowercase (normal)" })
+vim.keymap.set("n", "sU", "vU", { noremap = true, desc = "Convert to uppercase (normal)" })
+vim.keymap.set("n", "s~", "v~", { noremap = true, desc = "Toggle case (normal)" })
+
+-- Visual mode case conversion
+vim.keymap.set("x", "su", "u", { noremap = true, desc = "Convert to lowercase (visual)" })
+vim.keymap.set("x", "sU", "U", { noremap = true, desc = "Convert to uppercase (visual)" })
+vim.keymap.set("x", "s~", "~", { noremap = true, desc = "Toggle case (visual)" })
+
+-- Disable the default case conversion bindings in normal mode
+vim.keymap.set("n", "u", "u", { noremap = true, desc = "Undo" }) -- Keep u as undo only
+vim.keymap.set("n", "U", "<nop>", { noremap = true, desc = "Disabled" }) -- Disable U completely
+
+-- Disable the default case conversion bindings in visual mode
+vim.keymap.set("x", "u", "<nop>", { noremap = true, desc = "Disabled" })
+vim.keymap.set("x", "U", "<nop>", { noremap = true, desc = "Disabled" })
+
 
 -- select the last pasted text
 vim.api.nvim_set_keymap('n', 'gV', '`[v`]', { noremap = true })

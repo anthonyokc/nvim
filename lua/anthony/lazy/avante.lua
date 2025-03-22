@@ -7,9 +7,19 @@ return {
         require("avante").setup({
             provider = "claude",
             auto_suggestions_provider = "claude",
+            cursor_applying_provider = nil, -- The provider used in the applying phase of Cursor Planning Mode, defaults to nil, when nil uses Config.provider as the provider for the applying phase
+            dual_boost = {
+                enabled = false,
+                first_provider = "openai",
+                second_provider = "claude",
+                prompt =
+                "Based on the two reference outputs below, generate a response that incorporates elements from both but reflects your own judgment and unique perspective. Do not provide any explanation, just give the response directly. Reference Output 1: [{{provider1_output}}], Reference Output 2: [{{provider2_output}}]",
+                timeout = 60000, -- Timeout in milliseconds
+            },
             hints = { enabled = false },
             behaviour = {
                 auto_suggestions = false,
+                enable_cursor_planning_mode = false,     -- Whether to enable Cursor Planning Mode. Default to false.
             },
             mappings = {
                 --- @class AvanteConflictMappings

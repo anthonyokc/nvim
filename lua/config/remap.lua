@@ -1,5 +1,5 @@
 vim.g.mapleader = " "
-vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
+vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "Open file explorer" })
 
 vim.keymap.set("n", "T", "<cmd>retab<CR>")
 vim.keymap.set("v", "T", "<cmd>retab<CR>")
@@ -12,18 +12,11 @@ vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
 
-vim.keymap.set("n", "<leader>vwm", function()
-    require("vim-with-me").StartVimWithMe()
-end)
-vim.keymap.set("n", "<leader>svwm", function()
-    require("vim-with-me").StopVimWithMe()
-end)
-
 vim.keymap.set("x", "p", [["_dP]])                 -- when you paste over some text, keep the text in the vim clipboard
 
-vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]]) -- copy selection to system clipboard
-vim.keymap.set("n", "<leader>Y", [["+Y]])          -- copy whole line to system clipboard
-vim.keymap.set("n", "yay", "<cmd>%y+<CR>")          -- copy whole line to system clipboard
+vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Copy to system clipboard" }) -- copy selection to system clipboard
+vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "Copy line to system clipboard" })          -- copy whole line to system clipboard
+vim.keymap.set("n", "yay", "<cmd>%y+<CR>", { desc = "Copy whole file to system clipboard" })          -- copy whole line to system clipboard
 
 vim.keymap.set({ "n", "v" }, "D", [["_d]])
 
@@ -32,15 +25,15 @@ vim.keymap.set("i", "<C-c>", "<Esc>")
 vim.keymap.set("n", "Q", "<nop>")
 vim.keymap.set("n", "<leader>F", function()
     vim.lsp.buf.format({ timeout_ms = 5000 })
-end)
+end, { desc = "Format buffer" })
 
 vim.keymap.set("n", "<c-n>", "<cmd>cnext<cr>zz")
 vim.keymap.set("n", "<c-b>", "<cmd>cprev<cr>zz")
-vim.keymap.set("n", "<leader>n", "<cmd>lnext<cr>zz")
-vim.keymap.set("n", "<leader>b", "<cmd>lprev<CR>zz")
+vim.keymap.set("n", "<leader>n", "<cmd>lnext<cr>zz", { desc = "Next location list item" })
+vim.keymap.set("n", "<leader>b", "<cmd>lprev<CR>zz", { desc = "Previous location list item" })
 
-vim.keymap.set("n", "<leader>ss", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]])
-vim.keymap.set("n", "<leader>rh", [[:%s/read.csv("\(.*\)")/read_csv(here("data\/\1"))/gI<Left><Left><Left>]])
+vim.keymap.set("n", "<leader>ss", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]], { desc = "Search and replace current word" })
+vim.keymap.set("n", "<leader>rh", [[:%s/read.csv("\(.*\)")/read_csv(here("data\/\1"))/gI<Left><Left><Left>]], { desc = "Convert read.csv to read_csv with here()" })
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = false })
 
 
@@ -50,7 +43,7 @@ vim.keymap.set(
     "oif err != nil {<CR>}<Esc>Oreturn err<Esc>"
 )
 
-vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/anthony/packer.lua<CR>");
+vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/anthony/packer.lua<CR>", { desc = "Edit packer.lua" });
 vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>");
 
 vim.keymap.set("n", "<leader><leader>", function()
@@ -103,9 +96,9 @@ vim.keymap.set("n", ",e", function()
 end)
 
 -- See list of buffers
-vim.keymap.set("n", "<leader>ls", "<cmd>ls<CR>")
+vim.keymap.set("n", "<leader>ls", "<cmd>ls<CR>", { desc = "List buffers" })
 -- See list of modified buffers
-vim.keymap.set("n", "<leader>lm", "<cmd>ls!<CR>")
+vim.keymap.set("n", "<leader>lm", "<cmd>ls!<CR>", { desc = "List modified buffers" })
 
 
 local comment_styles = { "#", "//", "--" } -- -- Define the comment styles
@@ -157,10 +150,10 @@ end
 vim.api.nvim_create_user_command('ConvertComments', convert_top_to_inline_comments, {})
 
 -- Bind the function to the shortcut key (leader #) in normal and visual mode
-vim.keymap.set("n", "<leader>#", convert_top_to_inline_comments)
+vim.keymap.set("n", "<leader>#", convert_top_to_inline_comments, { desc = "Convert top line comments to inline" })
 vim.keymap.set("v", "<leader>#", function()
   vim.cmd('ConvertComments')
-end)
+end, { desc = "Convert top line comments to inline" })
 
 -- Switch between terminal buffer and the leftmost pane
 local function switch_to_terminal()
@@ -187,7 +180,7 @@ local function switch_to_terminal()
 end
 
 -- Map <leader>' to the switch_to_terminal function
-vim.keymap.set('n', '<leader>\'', switch_to_terminal, { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>\'', switch_to_terminal, { noremap = true, silent = true, desc = "Switch to terminal" })
 
 -- Toggle terminal window visibility
 local function toggle_terminal_visibility()
@@ -226,7 +219,7 @@ local function toggle_terminal_visibility()
   end
 end
 
-vim.keymap.set('n', '<leader>ht', toggle_terminal_visibility, { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>ht', toggle_terminal_visibility, { noremap = true, silent = true, desc = "Toggle terminal visibility" })
 
 vim.api.nvim_create_user_command("TermToggle", function()
     local is_open = vim.g.term_win_id ~= nil and vim.api.nvim_win_is_valid(vim.g.term_win_id)
@@ -265,7 +258,7 @@ vim.api.nvim_create_user_command("TermKill", function()
     end
 end, {})
 
-vim.keymap.set("n", "<leader>tt", vim.cmd.TermToggle, { desc = "Toggle [T]erminal", silent = true })
+vim.keymap.set("n", "<leader>tt", vim.cmd.TermToggle, { desc = "Toggle terminal", silent = true })
 vim.keymap.set("t", "<C-t>", vim.cmd.TermToggle, { desc = "Toggle [^][T]erminal", silent = true })
 
 
@@ -304,5 +297,5 @@ function CreateListedTerminal()
 end
 
 -- Keybinding to create a listed terminal
-vim.api.nvim_set_keymap('n', '<leader>tt', ':lua CreateListedTerminal()<CR>', { noremap = true, silent = true })
-
+vim.keymap.set("n", "<leader>tt", vim.cmd.TermToggle, { desc = "Toggle terminal", silent = true })
+vim.keymap.set("t", "<C-t>", vim.cmd.TermToggle, { desc = "Toggle [^][T]erminal", silent = true })

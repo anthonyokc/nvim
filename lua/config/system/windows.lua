@@ -1,0 +1,55 @@
+return {}
+-- Windows-specific configuration
+-- local M = {}
+-- 
+-- M.setup = function()
+--     -- Fix shell issues on Windows
+--     if vim.fn.has('win32') == 1 then
+--         -- Use PowerShell Core if available, otherwise fallback to cmd.exe
+--         if vim.fn.executable('pwsh') == 1 then
+--             vim.o.shell = 'pwsh'
+--             vim.o.shellcmdflag = '-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command [Console]::InputEncoding=[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;'
+--             vim.o.shellredir = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
+--             vim.o.shellpipe = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
+--             vim.o.shellquote = ''
+--             vim.o.shellxquote = ''
+--         else
+--             -- Fallback to cmd.exe with UTF-8 codepage
+--             vim.o.shell = 'cmd.exe'
+--             vim.o.shellcmdflag = '/s /c chcp 65001 >nul && '
+--         end
+--     end
+-- 
+--     -- Set proper Python executable path on Windows
+--     if vim.fn.executable('python') == 1 then
+--         vim.g.python3_host_prog = vim.fn.exepath('python')
+--     end
+-- 
+--     -- Fix clipboard on Windows
+--     vim.g.clipboard = {
+--         name = 'win32yank',
+--         copy = {
+--             ['+'] = 'clip.exe',
+--             ['*'] = 'clip.exe',
+--         },
+--         paste = {
+--             ['+'] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+--             ['*'] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+--         },
+--         cache_enabled = 0,
+--     }
+-- 
+--     -- Fix path separators for Windows
+--     vim.opt.shellslash = true
+-- end
+-- 
+-- return M ocal M = {}
+-- 
+-- M.setup = function()
+--     -- Fix shell issues on Windows
+--     if vim.fn.has('win32') == 1 then
+--         -- Use PowerShell Core if available, otherwise fallback to cmd.exe
+--         if vim.fn.executable('pwsh') == 1 then
+--             vim.o.shell = 'pwsh'
+--             vim.o.shellcmdflag = '-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command [Console]::InputEncoding=[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;'
+--             vim.o.shellredir = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'

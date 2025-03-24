@@ -12,6 +12,52 @@ return {
             { "gU",          desc = "Convert to uppercase (with motion)" },
             { "g~",          desc = "Toggle case (with motion)" },
 
+            -- File explorer and navigation
+            { "<leader>p",   group = "File Explorer" },
+            { "<leader>pv",  desc = "Open file explorer" },
+            { "<leader>vpp", desc = "Edit packer.lua" },
+            { "<leader>ls",  desc = "List buffers" },
+            { "<leader>lm",  desc = "List modified buffers" },
+
+            -- Copy and paste operations
+            { "<leader>y",   desc = "Copy to system clipboard" },
+            { "<leader>Y",   desc = "Copy line to system clipboard" },
+            { "<leader>yay", desc = "Copy whole file to system clipboard" },
+
+            -- Search and replace
+            { "<leader>s",   group = "Search and Replace" },
+            { "<leader>ss",  desc = "Search and replace current word" },
+            { "<leader>rh",  desc = "Convert read.csv to read_csv with here()" },
+            { "<leader>#",   desc = "Convert top line comments to inline" },
+
+            -- LSP and diagnostics
+            { "<leader>v",   group = "LSP" },
+            { "<leader>vws", desc = "Workspace symbols" },
+            { "<leader>vd",  desc = "Open diagnostic float" },
+            { "<leader>vca", desc = "Code actions" },
+            { "<leader>vrr", desc = "References" },
+            { "<leader>F",   desc = "Format buffer" },
+
+            -- Quickfix and location list
+            { "<leader>n",   desc = "Next location list item" },
+            { "<leader>b",   desc = "Previous location list item" },
+
+            -- Terminal operations
+            { "<leader>t",   group = "Terminal" },
+            { "<leader>tt",  desc = "Toggle terminal" },
+            { "<leader>ht",  desc = "Toggle terminal visibility" },
+            { "<leader>'",   desc = "Switch to terminal" },
+
+            -- Window management
+            { "<leader>j",   desc = "Toggle window size to 50%" },
+
+            -- Comments
+            { "<leader>C",   desc = "Toggle comment" },
+
+            -- Avante
+            { "<leader>a",   group = "Avante" },
+            { "<leader>am",  desc = "Toggle my prompt" },
+
             -- Find commands group
             { "<leader>f",   group = "Find" },
             -- File and buffer operations
@@ -44,7 +90,6 @@ return {
             { "<leader>ft",  desc = "Find TODOs" },
 
             -- Other groups
-            { "<leader>a",   desc = "Avante" },
             { "<leader>gt",  desc = "Neogit" },
             { "<leader>m",   group = "Markdown" },
             { "<leader>mp",  desc = "Toggle Markdown Preview" },

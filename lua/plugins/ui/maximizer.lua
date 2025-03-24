@@ -1,12 +1,5 @@
 return {
     {
-        "nvim-lua/plenary.nvim",
-        name = "plenary"
-    },
-
-    "eandrju/cellular-automaton.nvim",
-
-    {
         "szw/vim-maximizer",
         keys = {
             { "<leader>k", "<cmd>MaximizerToggle<CR>", desc = "Maximize/restore current window" },

@@ -107,6 +107,10 @@ return {
                             {})
                         vim.api.nvim_buf_set_keymap(0, "n", "<LocalLeader>hgd",
                             "<Cmd>lua require('r.send').cmd('hgd()')<CR>", {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>tm",
+                            "<Cmd>lua require('r.send').cmd('targets::tar_make()')<CR>", {})
+                        vim.api.nvim_buf_set_keymap(0, "n", "<leader>tv",
+                            "<Cmd>lua require('r.send').cmd('targets::tar_visnetwork()')<CR>", {})
                     end
                 },
                 disable_cmds = {

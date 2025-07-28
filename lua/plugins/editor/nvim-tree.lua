@@ -12,7 +12,11 @@ return {
                         height = 70,
                         width = 50
                     }
-                }
+                },
+            },
+            filters = {
+                dotfiles = false,   -- Don't filter dotfiles by default
+                git_ignored = false -- Don't filter git-ignored files by default
             }
         })
 

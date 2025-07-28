@@ -19,7 +19,8 @@ return {
             hints = { enabled = false },
             behaviour = {
                 auto_suggestions = false,
-                enable_cursor_planning_mode = false,     -- Whether to enable Cursor Planning Mode. Default to false.
+                enable_cursor_planning_mode = false, -- Whether to enable Cursor Planning Mode. Default to false.
+                enable_claude_text_editor_tool_mode = true,
             },
             mappings = {
                 --- @class AvanteConflictMappings

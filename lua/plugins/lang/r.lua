@@ -7,12 +7,10 @@ return {
             local setup_options = {
                 R_args = { "--quiet", "--no-save" },
                 hook = {
+                    -- This function will be called at the FileType event
+                    -- of files supported by R.nvim. This is an
+                    -- opportunity to create mappings local to buffers.
                     on_filetype = function()
-                        -- This function will be called at the FileType event
-                        -- of files supported by R.nvim. This is an
-                        -- opportunity to create mappings local to buffers.
-
-                        -- Clear existing mappings for the comma key in normal and visual modes
                         -- Function to delete key mappings for a specific mode and prefix
                         local function clear_mappings(mode, prefix)
                             local mappings = vim.api.nvim_get_keymap(mode)
@@ -38,6 +36,7 @@ return {
 
                         vim.api.nvim_create_user_command('ReadCsvToObject', read_csv_to_object, {})
 
+                        -- KEYMAPS & COMMANDS #################################
 
                         -- Clear normal mode mappings that start with a comma
                         clear_mappings('n', ',')
@@ -113,6 +112,8 @@ return {
                             "<Cmd>lua require('r.send').cmd('targets::tar_visnetwork()')<CR>", {})
                     end
                 },
+
+                -- Disable some default commands
                 disable_cmds = {
                     "RClearConsole",
                     "RCustomStart",
@@ -120,7 +121,10 @@ return {
                     "RSaveClose",
                 },
 
+                -- CONFIGURATION OPTIONS
+
                 min_editor_width = 18,
+
                 -- R Console
                 rconsole_width = 100,
                 OutDec = ".",
@@ -150,10 +154,10 @@ return {
                     open_app = "tmux new-window vd", -- How to open the CSV
                 },
 
-
                 -- Syntax Highlighting,
                 Rout_more_colors = true, -- R commands in R output, .Rout files, are highlighted
             }
+
             -- Call the setup function with the options
             require("r").setup(setup_options)
 

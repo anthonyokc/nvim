@@ -1,21 +1,35 @@
+-- LSP Configuration for Neovim
+-- 1. Mason: Package manager for LSP servers, DAP servers, linters, and formatters
+-- 2. Mason LSP Config: Bridge between Mason and nvim-lspconfig
+-- 3. nvim-lspconfig: Provides sensible default configurations for LSP servers
+-- 4. cmp-nvim-lsp: LSP completion source for the nvim-cmp completion engine
+-- 5. fidget.nvim: UI notifications for LSP progress messages
+-- 6. LazyDev: A lazy loaded plugin for Lua development
 return {
     -- 1. Mason: Package‑manager for LSP servers, DAP servers, linters, and formatters.
     -- Does not handle configurations.
     {
         "mason-org/mason.nvim",
         opts = {
+            -- Ensure that Mason is installed with these LSPs, DAPs, linters, and formatters
             ensure_installed = {
                 -- LSP servers
                 "bacon_ls",                        -- Bacon Language Server for Rust
                 "bash-language-server",            -- Bash Language Server
                 "basedpyright",                    -- BasedPyright for Python
+                "checkmake",                       -- CheckMake for Makefile linting
+                "clangd",                          -- Clangd for C and C++
+                "clang-format",                    -- Clang Format for C and C++
+                "cmake-language-server",           -- CMake Language Server
+                "cmakelang",                       -- CMakeLang for CMake formatting
                 "docker_compose_language_service", -- Docker Compose Language Service
                 "dockerfile-language-server",      -- Dockerfile Language Server
                 "eslint-lsp",                      -- ESLint Language Server for JavaScript and TypeScript
                 "gopls",                           -- Go Language Server
                 "jsonlsp",                         -- JSON Language Server
                 "lua-langeuage-server",            -- Lua Language Server
-                "ltex-ls",                         -- LTeX for text, markdown, latex, restructuredtext
+                -- "ltex-ls",                      -- LTeX for text, markdown, latex, restructuredtext
+                "nil",                             -- Nix Language Server
                 "r_language_server",               -- R Language Server
                 "ruff",                            -- Ruff for Python
                 "rust-analyzer",                   -- Rust Analyzer for Rust
@@ -26,6 +40,12 @@ return {
                 "vale-ls",                         -- Vale Language Server for text and markdown
 
                 -- DAP servers
+                "bash-debug-adapter", -- Bash Debug Adapter
+                "codelldb",           -- CodeLLDB for debugging C, C++, Rust, Zig
+                "debugpy",            -- DebugPy for Python debugging
+                "go-debug-adapter",   -- Go Debug Adapter
+                "js-debug-adapter",   -- JS Debug Adapter for JavaScript and TypeScript
+                "netcoredbg",         -- NetCoreDbg for .NET debugging
                 "bash-debug-adapter", -- Bash Debug Adapter
                 "codelldb",           -- CodeLLDB for debugging C, C++, Rust, Zig
                 "debugpy",            -- DebugPy for Python debugging
@@ -44,6 +64,7 @@ return {
                 "vulture",     -- Vulture for Python dead code detection
 
                 -- Formatters
+                "Nixfmt",  -- NixFmt for Nix formatting
                 "fixjson", -- FixJSON for JSON formatting
                 "gci",     -- GCI, a tool that control golang package import order and make it always deterministic.
                 "jq",      -- JQ for JSON processing
@@ -69,11 +90,12 @@ return {
     -- Optionally, you can add server-specific configurations
     {
         "neomvim/nvim-lspconfig",
+        url = "git@github.com:neovim/nvim-lspconfig.git",
         dependencies = { "hrsh7th/cmp-nvim-lsp" },
         init = function()
             -- advertise completion capabilities to *every* server
             vim.lsp.config("*", {
-                capabilities = require("cmp_nvim_lsp").default_capabilities() -- :contentReference[oaicite:1]{index=1}
+                capabilities = require("cmp_nvim_lsp").default_capabilities()
             })
 
             -- Configure LSP servers with specific settings
@@ -91,6 +113,7 @@ return {
                 settings = {
                     ["harper-ls"] = {
                         linters = {
+                            -- Disablejavascript linter
                             SentenceCapitalization = false,
                             SpellCheck             = false,
                         },
@@ -100,7 +123,7 @@ return {
 
             -- Configure diagnostics
             vim.diagnostic.config({
-                virtual_lines = true,
+                -- virtual_lines = true,
                 -- virtual_text = true,
                 -- float = {
                 --     source = true
@@ -109,7 +132,14 @@ return {
         end,
     },
 
-    -- 4. Fidget: UI notifications for LSP progress messages
+    -- 4. cmp-nvim-lsp: LSP completion source for the nvim-cmp completion engine
+    -- Provides LSP completion capabilities to nvim-cmp
+    {
+        "hrsh7th/cmp-nvim-lsp",
+        dependencies = { "hrsh7th/nvim-cmp" },
+    },
+
+    -- 5. Fidget: UI notifications for LSP progress messages
     -- Provides a nice UI for LSP progress messages
     {
         "j-hui/fidget.nvim",
@@ -117,13 +147,6 @@ return {
         config = function()
             require("fidget").setup({})
         end,
-    },
-
-    -- 5. cmp-nvim-lsp: LSP completion source for the nvim-cmp completion engine
-    -- Provides LSP completion capabilities to nvim-cmp
-    {
-        "hrsh7th/cmp-nvim-lsp",
-        dependencies = { "hrsh7th/nvim-cmp" },
     },
 
     -- 6. LazyDev: A lazy loaded plugin for Lua development

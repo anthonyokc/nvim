@@ -169,16 +169,5 @@ return {
             vim.opt.softtabstop = 2
             vim.opt.shiftwidth = 2
         end
-    },
-    {
-        "R-nvim/cmp-r",
-        opts = {
-            filetypes = { 'r', 'rmd', 'qmd', 'rnoweb', 'rhelp' },    -- default: {"r", "rmd", "qmd", "rnoweb", "rhelp"}
-            doc_width = 58,                                          -- max. width of documentation window, default: 58
-            trigger_characters = { " ", ":", "(", '"', "@", "$" },   -- list of characters that trigger completion, default: {" ", ":", "(", '"', "@", "$"}
-            fun_data_1 = { 'select', 'rename', 'mutate', 'filter' }, -- list of functions where data.frame columns are use to autocomplete, default: {'select', 'rename', 'mutate', 'filter'}
-            fun_data_2 = { ggplot = { 'aes' }, with = { '*' } }      -- Dictionary with parent function as keys and list of nested functions as values, default: {ggplot = {'aes'}, with = {'*'}}
-            -- quarto_intel = "PATH" -- Path to yaml-intelligence-resources.json which is part of quarto application and has all necessary information for completion of valid YAML options in an Quarto document. Default: nil (cmp-r will try to find the file).
-        }
     }
 }

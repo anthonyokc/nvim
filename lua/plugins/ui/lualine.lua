@@ -56,7 +56,10 @@ return {
                     'branch', 'diff', 'diagnostics'
                 },
                 lualine_c = {
-                    ''
+                    {
+                    '',
+                    color = { fg = 'none', bg = 'none' },
+                    }
                 },
                 lualine_x = {
                     {

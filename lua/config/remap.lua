@@ -35,6 +35,7 @@ vim.keymap.set("n", "<leader>b", "<cmd>lprev<CR>zz", { desc = "Previous location
 vim.keymap.set("n", "<leader>ss", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]], { desc = "Search and replace current word" })
 vim.keymap.set("n", "<leader>rh", [[:%s/read.csv("\(.*\)")/read_csv(here("data\/\1"))/gI<Left><Left><Left>]], { desc = "Convert read.csv to read_csv with here()" })
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = false })
+vim.keymap.set("n", "<leader>hx", "<cmd>%!xxd<CR>", { silent = false })
 
 
 vim.keymap.set(

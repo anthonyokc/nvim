@@ -91,11 +91,11 @@ return {
     {
         "neomvim/nvim-lspconfig",
         url = "git@github.com:neovim/nvim-lspconfig.git",
-        dependencies = { "hrsh7th/cmp-nvim-lsp" },
+        dependencies = { "hrsh7th/cmp-nvim-lsp", "saghen/blink.cmp" },
         init = function()
-            -- advertise completion capabilities to *every* server
+            -- advertise completion capabilities ONCE to *every* server
             vim.lsp.config("*", {
-                capabilities = require("cmp_nvim_lsp").default_capabilities()
+                capabilities = require("blink.cmp").get_lsp_capabilities()
             })
 
             -- Configure LSP servers with specific settings
@@ -120,6 +120,7 @@ return {
                     },
                 },
             })
+
 
             -- Configure diagnostics
             vim.diagnostic.config({

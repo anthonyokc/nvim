@@ -1,20 +1,22 @@
 return {
     -- Specialized completions
     {
-        'R-nvim/cmp-r', -- R completions
+        "R-nvim/cmp-r",
+        lazy = false,
         config = function()
             require('cmp_r').setup({
-                filetypes = { 'r', 'rmd', 'quarto', 'qmd', 'rnoweb', 'rhelp' }, -- ADDED
-                doc_width = 58,                                                 -- max. width of documentation window, default: 58
-                trigger_characters = { " ", ":", "(", '"', "@", "$" },          -- list of characters that trigger completion, default: {" ", ":", "(", '"', "@", "$"}
-                fun_data_1 = { 'select', 'rename', 'mutate', 'filter' },        -- list of functions where data.frame columns are use to autocomplete, default: {'select', 'rename', 'mutate', 'filter'}
-                fun_data_2 = { ggplot = { 'aes' }, with = { '*' } }             -- Dictionary with parent function as keys and list of nested functions as values, default: {ggplot = {'aes'}, with = {'*'}}
+                filetypes = { 'r', 'rmd', 'qmd', 'rnoweb', 'rhelp' },    -- default: {"r", "rmd", "qmd", "rnoweb", "rhelp"}
+                doc_width = 58,                                          -- max. width of documentation window, default: 58
+                trigger_characters = { " ", ":", "(", '"', "@", "$" },   -- list of characters that trigger completion, default: {" ", ":", "(", '"', "@", "$"}
+                fun_data_1 = { 'select', 'rename', 'mutate', 'filter' }, -- list of functions where data.frame columns are use to autocomplete, default: {'select', 'rename', 'mutate', 'filter'}
+                fun_data_2 = { ggplot = { 'aes' }, with = { '*' } }      -- Dictionary with parent function as keys and list of nested functions as values, default: {ggplot = {'aes'}, with = {'*'}}
                 -- quarto_intel = "PATH" -- Path to yaml-intelligence-resources.json which is part of quarto application and has all necessary information for completion of valid YAML options in an Quarto document. Default: nil (cmp-r will try to find the file).
             })
         end,
     },
     {
         'saghen/blink.cmp',
+        lazy = false,
         version = '1.*',
         event = 'InsertEnter',
         dependencies = {
@@ -30,24 +32,23 @@ return {
             'R-nvim/cmp-r',      -- R completions
             'jmbuhr/otter.nvim', -- specialized completion for Quarto and RMarkdown documents
         },
-        opts = {
-            sources = {
-                default = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
-                per_filetype = {
-                    r   = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
-                    rmd = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
-                    qmd = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
-                },
-                providers = {
-                    cmp_r = { name = 'cmp_r', module = 'blink.compat.source' },
-                },
-            }
-        },
+        opts = { },
         config = function()
             local blink = require('blink.cmp')
             local luasnip = require('luasnip')
 
             blink.setup({
+                sources = {
+                    default = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
+                    per_filetype = {
+                        r   = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
+                        rmd = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
+                        qmd = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
+                    },
+                    providers = {
+                        cmp_r = { name = 'cmp_r', module = 'blink.compat.source' },
+                    },
+                },
                 keymap = {
                     preset = 'default',
                     ['<C-e>'] = { 'hide' },

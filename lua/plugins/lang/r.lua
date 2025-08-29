@@ -1,6 +1,7 @@
 return {
     {
         "R-nvim/R.nvim",
+        lazy = false,
         ft = { 'r', 'rmd', 'qmd', 'quarto', 'rnoweb', 'rhelp' },
         config = function()
             -- Create a table with the options to be passed to setup()
@@ -169,5 +170,5 @@ return {
             vim.opt.softtabstop = 2
             vim.opt.shiftwidth = 2
         end
-    }
+    },
 }

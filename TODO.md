@@ -6,16 +6,8 @@
 - [ ] Move large keymapping sections in `remap.lua` into context-specific files
 - [ ] Remaining keymapping sections should be logically grouped and labelled
 - [ ] Implement auto-loading for the language-specific configurations based on filetype
-- [ ] Add conditional loading for heavy plugins to improve startup time
 - [ ] Organize larger init.lua files (like those in plugin subdirectories) into multiple smaller files
 
-
-## Performance
-
-- [ ] Profile startup time and optimize slow-loading plugins
-- [ ] Implement lazy-loading for more plugins based on events/commands
-- [ ] Cache results of expensive operations
-- [ ] Review and optimize autocmd usage
 
 ## Platform Support
 
@@ -26,7 +18,7 @@
 
 ## Plugin Improvements
 
-- [ ] Audit plugin list for duplicated functionality
+- [X] Audit plugin list for duplicated functionality
 - [ ] Add version pins for critical plugins
 - [ ] Add plugin health checks and conditional configuration
 
@@ -40,11 +32,10 @@
 
 ## AI Integration
 
-- [ ] Integrate with [MCPHub.nvim](https://github.com/ravitemer/mcphub.nvim) for Avante 
+- [ ] Integrate with [MCPHub.nvim](https://github.com/ravitemer/mcphub.nvim) for Avante
 - [ ] Configure MCPHub Avante integration using system_prompt and custom_tools
-- [ ] Consider adding blink.cmp fo- [ ] Explore use of
-  [Avante.nvim](https://github.com/yetone/avante.nvim) new  Claude Text
-  Editor Tool Mode
+- [ ] Consider adding blink.cmp fo
+- [ ] Explore use of [Avante.nvim](https://github.com/yetone/avante.nvim) new Claude Text Editor Tool Mode
 
 ## Documentation
 
@@ -52,13 +43,6 @@
 - [ ] Create a style guide for configuration contributions
 - [ ] Document key bindings in a user-friendly format
 - [ ] Add troubleshooting guide for common issues
-
-## Testing
-
-- [ ] Create a minimal test environment for validating configuration changes
-- [ ] Add checks for configuration load errors
-- [ ] Implement automated tests for critical functionality
-- [ ] Create a CI pipeline to validate changes on different platforms
 
 ## Cleanup
 

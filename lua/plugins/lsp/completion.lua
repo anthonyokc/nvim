@@ -2,7 +2,7 @@ return {
     -- Specialized completions
     {
         "R-nvim/cmp-r",
-        lazy = false,
+        event = { "BufRead", "BufNewFile" },
         config = function()
             require('cmp_r').setup({
                 filetypes = { 'r', 'rmd', 'qmd', 'rnoweb', 'rhelp' },    -- default: {"r", "rmd", "qmd", "rnoweb", "rhelp"}
@@ -16,10 +16,10 @@ return {
     },
     {
         'saghen/blink.cmp',
-        lazy = false,
         version = '1.*',
         event = 'InsertEnter',
         dependencies = {
+            { 'nvim-mini/mini.nvim', version = false },
             -- Snippet completion
             'L3MON4D3/LuaSnip',             -- the snippet engine
             'rafamadriz/friendly-snippets', -- snippet collections
@@ -29,17 +29,18 @@ return {
                 version = '2.*',
                 opt = {}
             },
-            'R-nvim/cmp-r',      -- R completions
-            'jmbuhr/otter.nvim', -- specialized completion for Quarto and RMarkdown documents
+            'R-nvim/cmp-r',           -- R completions
+            'jmbuhr/otter.nvim',      -- specialized completion for Quarto and RMarkdown documents
+            "moyiz/blink-emoji.nvim", -- emoji completion
         },
-        opts = { },
+        opts = {},
         config = function()
             local blink = require('blink.cmp')
             local luasnip = require('luasnip')
 
             blink.setup({
                 sources = {
-                    default = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
+                    default = { 'cmp_r', 'lazydev', 'lsp', 'path', 'snippets', 'buffer', 'omni', 'emoji' },
                     per_filetype = {
                         r   = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
                         rmd = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
@@ -47,6 +48,24 @@ return {
                     },
                     providers = {
                         cmp_r = { name = 'cmp_r', module = 'blink.compat.source' },
+                        lazydev = {
+                            name = "LazyDev",
+                            module = "lazydev.integrations.blink",
+                            -- make lazydev completions top priority (see `:h blink.cmp`)
+                            score_offset = 100,
+                        },
+                        emoji = {
+                            module = "blink-emoji",
+                            name = "Emoji",
+                            score_offset = 15, -- Tune by preference
+                            opts = {
+                                insert = true, -- Insert emoji (default) or complete its name
+                                ---@type string|table|fun():table
+                                trigger = function()
+                                    return { ":" }
+                                end,
+                            },
+                        }
                     },
                 },
                 keymap = {
@@ -79,27 +98,34 @@ return {
                     },
                 },
 
-
+                -- Completion menu: the floating window that shows the list of completion items as you type
                 completion = {
                     trigger = {
                         show_on_trigger_character = true,
                     },
                     menu = {
-                        border = 'rounded',
+                        auto_show = true,
+
+                        border = "rounded",
                         draw = {
-                            columns = { { 'label', 'label_description', gap = 1 }, { 'kind_icon', 'kind' } },
+                            columns = {
+                                { "label",     "label_description", gap = 1 },
+                                { "kind_icon", "kind",              "source_name", gap = 1 }
+                            },
                         },
                     },
+                    -- Documentation: the floating window that shows details about the currently selected completion item
                     documentation = {
                         window = { border = 'rounded' },
                         auto_show = true,
                         auto_show_delay_ms = 0,
                     },
                     list = {
-                        selection = { preselect = false, auto_insert = true },
+                        selection = { preselect = true, auto_insert = true },
                     },
                 },
 
+                -- Signature help: the floating window that shows function signatures as you type
                 signature = {
                     enabled = true,
                     trigger = {
@@ -109,36 +135,46 @@ return {
                         show_on_keyword = false,
                         blocked_trigger_characters = {},
                         blocked_retrigger_characters = {},
-                        -- Show the signature help window after typing a trigger character
-                        show_on_trigger_character = false,
-                        -- Show the signature help window when entering insert mode
-                        show_on_insert = false,
-                        -- Show the signature help window when the cursor comes after a trigger character when entering insert mode
-                        show_on_insert_on_trigger_character = true,
+                        show_on_trigger_character = true,           -- Show the signature help window after typing a trigger character
+                        show_on_insert = true,                      -- Show the signature help window when entering insert mode
+                        show_on_insert_on_trigger_character = true, -- Show the signature help window when the cursor comes after a trigger character when entering insert mode
                     },
                     window = {
                         min_width = 1,
-                        max_width = 100,
+                        max_width = 150,
                         max_height = 10,
-                        border = nil, -- Defaults to `vim.o.winborder` on nvim 0.11+ or 'padded' when not defined/<=0.10
+                        border = "rounded", -- Defaults to `vim.o.winborder` on nvim 0.11+ or 'padded' when not defined/<=0.10
                         winblend = 0,
                         winhighlight = 'Normal:BlinkCmpSignatureHelp,FloatBorder:BlinkCmpSignatureHelpBorder',
-                        -- Which directions to show the window,
-                        -- falling back to the next direction when there's not enough space,
-                        -- or another window is in the way
                         direction_priority = { 'n', 's' },
-                        -- Can accept a function if you need more control
-                        -- direction_priority = function()
-                        --   if condition then return { 'n', 's' } end
-                        --   return { 's', 'n' }
-                        -- end,
-
-                        -- Disable if you run into performance issues
                         treesitter_highlighting = true,
-                        show_documentation = false,
+                        show_documentation = true,
                     },
-                }
+                },
+                cmdline = {
+                    keymap = { preset = 'inherit' },
+                    completion = { menu = { auto_show = true } },
+                },
 
+            })
+            -- For blink.nvim completion menu
+            -- Make the completion menu and doc window have a transparent background
+            -- so that the colors from the main colorscheme show through
+            -- NOTE: Aesthetic - Set up autocmd to apply highlights after colorscheme loads
+            local function set_blink_highlights()
+                vim.api.nvim_set_hl(0, "BlinkCmpMenu", { bg = "NONE" })       -- menu body
+                vim.api.nvim_set_hl(0, "BlinkCmpMenuBorder", { bg = "NONE" }) -- menu border
+                vim.api.nvim_set_hl(0, "BlinkCmpDoc", { bg = "NONE" })        -- docs window body
+                vim.api.nvim_set_hl(0, "BlinkCmpDocBorder", { bg = "NONE" })  -- docs window border
+            end
+
+            -- Set highlights after colorscheme is loaded and on colorscheme changes
+            vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
+                group = vim.api.nvim_create_augroup("BlinkCmpHighlights", { clear = true }),
+                callback = function()
+                    vim.schedule(set_blink_highlights) -- Use vim.schedule to ensure this runs after other highlight groups are set
+                end,
+                desc = "Set blink.cmp transparent highlights after colorscheme loads/changes"
             })
 
             -- Filetype-specific configurations are handled via the 'enabled' functions

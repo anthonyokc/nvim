@@ -1,3 +1,4 @@
+-- autocmds.lua: Houses autocommand configurations for Neovim.
 -- Autocommands configuration
 local augroup = vim.api.nvim_create_augroup
 local ConfigGroup = augroup('ConfigGroup', {})
@@ -34,22 +35,23 @@ autocmd('LspAttach', {
         vim.keymap.set("n", "<leader>vd", function() vim.diagnostic.open_float() end, opts)
         vim.keymap.set("n", "<leader>vca", function() vim.lsp.buf.code_action() end, opts)
         vim.keymap.set("n", "<leader>vrr", function() vim.lsp.buf.references() end, opts)
-        vim.keymap.set("n", "]d", function() vim.diagnostic.goto_next() end, opts)
-        vim.keymap.set("n", "[d", function() vim.diagnostic.goto_prev() end, opts)
+        vim.keymap.set("n", "]d", function() vim.diagnostic.jump({ count = 1 }) end, opts)
+        vim.keymap.set("n", "[d", function() vim.diagnostic.jump({ count = -1 }) end, opts)
     end
 })
 
--- Open help files in a tab
-autocmd('BufEnter', {
+-- Open help files in a tab and don't if
+autocmd('BufRead', {
     pattern = '*.txt',
     callback = function()
         if vim.bo.filetype == 'help' then
-            vim.cmd('wincmd T')
-            vim.cmd('AerialToggle!')
+            if vim.fn.exists(':AerialToggle') == 2 then
+                vim.cmd('wincmd T')
+                vim.cmd('AerialToggle!')
+            end
         end
     end,
 })
-
 -- Avante AI prompt toggle
 vim.api.nvim_create_autocmd("User", {
     pattern = "ToggleMyPrompt",
@@ -59,9 +61,9 @@ vim.api.nvim_create_autocmd("User", {
 
 
 -- iron.nvim REPL setup
-vim.api.nvim_create_autocmd("FileType", {
-    pattern = "nix",
-    callback = function()
-        require("iron.core").repl_for("nix") -- Ensure the REPL is set up for Nix files
-    end,
-})
+-- vim.api.nvim_create_autocmd("FileType", {
+--     pattern = "nix",
+--     callback = function()
+--         require("iron.core").repl_for("nix") -- Ensure the REPL is set up for Nix files
+--     end,
+-- })

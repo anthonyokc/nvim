@@ -44,7 +44,7 @@ return {
                         cmd = { sh, flag },
                         args = { cmd },
                         components = {
-                            { "on_complete_notify", statuses = { } },
+                            { "on_complete_notify", statuses = {} },
                             "default",
                             { "on_output_quickfix", open = true },
                             "on_result_diagnostics",

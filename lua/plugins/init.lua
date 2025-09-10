@@ -5,8 +5,8 @@ return {
   { import = "plugins.git" },
   { import = "plugins.lsp" },
   { import = "plugins.editor" },
-  { import = "plugins.lang" },
+  { import = "plugins.languages" },
   { import = "plugins.ai" },
-  { import = "plugins.debug" },
-  { import = "plugins.fun" },
+  { import = "plugins.debugger" },
+  { import = "plugins.goofing" },
 }

@@ -1,4 +1,5 @@
--- WSL-specific configuration
+-- wsl.lua: WSL (Windows Subsystem for Linux) specific settings for Neovim
+-- This file is loaded only when Neovim is running inside WSL
 local M = {}
 
 M.setup = function()

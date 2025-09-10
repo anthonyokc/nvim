@@ -1,7 +1,9 @@
+-- windows.lua: Windows-specific settings
+-- Currently empty, but can be used for Windows-specific configurations
 return {}
 -- Windows-specific configuration
 -- local M = {}
--- 
+--
 -- M.setup = function()
 --     -- Fix shell issues on Windows
 --     if vim.fn.has('win32') == 1 then
@@ -19,12 +21,12 @@ return {}
 --             vim.o.shellcmdflag = '/s /c chcp 65001 >nul && '
 --         end
 --     end
--- 
+--
 --     -- Set proper Python executable path on Windows
 --     if vim.fn.executable('python') == 1 then
 --         vim.g.python3_host_prog = vim.fn.exepath('python')
 --     end
--- 
+--
 --     -- Fix clipboard on Windows
 --     vim.g.clipboard = {
 --         name = 'win32yank',
@@ -38,13 +40,13 @@ return {}
 --         },
 --         cache_enabled = 0,
 --     }
--- 
+--
 --     -- Fix path separators for Windows
 --     vim.opt.shellslash = true
 -- end
--- 
+--
 -- return M ocal M = {}
--- 
+--
 -- M.setup = function()
 --     -- Fix shell issues on Windows
 --     if vim.fn.has('win32') == 1 then

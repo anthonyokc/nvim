@@ -1,20 +1,30 @@
+-- options.lua: Neovim options configuration
+-- Start with "vim.opt."
+-- These are different than globals which start with "vim.g." those are in globals.lua
+-- See :help options for a list of options
+-- See :help vim.opt for how to use vim.opt
 vim.opt.nu = true
 vim.opt.relativenumber = true
 
-vim.opt.tabstop = 4
-vim.opt.softtabstop = 4
-vim.opt.shiftwidth = 4
-vim.opt.expandtab = true
+
+-- Set tabs and indentation based on file type (using autocmd)
+vim.opt.tabstop = 2      -- Number of spaces a <Tab> in the file counts for
+vim.opt.softtabstop = 2  -- Number of spaces a <Tab> counts for while performing editing operations
+vim.opt.shiftwidth = 2   -- Indent by 2 spaces when using >> or <<
+vim.opt.expandtab = true -- Use spaces instead of tabs
 
 vim.opt.smartindent = true
 
-vim.opt.wrap = false
+vim.opt.wrap = false -- No line wrappingk
+vim.opt.textwidth = 80 -- Set maximum text width to 80 characters
+
+vim.opt.showmode = false -- we don't need to see things like "-- INSERT --" anymore
 
 vim.opt.swapfile = false -- thank god
 vim.opt.backup = false
 
 -- Where to put the undo directory
-local path_separator = package.config:sub(1,1)
+local path_separator = package.config:sub(1, 1)
 local home_directory = os.getenv("HOME") or os.getenv("USERPROFILE") -- USERPROFILE is used in Windows
 vim.opt.undodir = home_directory .. path_separator .. ".vim" .. path_separator .. "undodir"
 vim.opt.undofile = true
@@ -53,4 +63,3 @@ vim.opt.listchars = 'space:·'
 --
 -- -- Set tab settings for R files
 -- set_tab_settings(".R|.Rmd|.qmd", 2, 2, 2)
-

@@ -1,3 +1,4 @@
+-- Description: Configuration for Git-related plugins and settings
 -- Git-related configurations
 local M = {}
 
@@ -13,4 +14,4 @@ M.setup = function()
     }
 end
 
-return M 
+return M

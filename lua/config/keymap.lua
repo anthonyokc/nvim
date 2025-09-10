@@ -1,3 +1,8 @@
+-- keymap.lua: Key mappings for Neovim
+-- Primarily for mapping custom keybindings of native vim functions
+-- or custom self-made functions
+
+-- # Custom Keybindings of Native Vim Functions
 vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "Open file explorer" })
 
@@ -26,38 +31,36 @@ vim.keymap.set("n", "Q", "<nop>")
 vim.keymap.set("n", "<leader>F", function()
     vim.lsp.buf.format({ timeout_ms = 5000 })
 end, { desc = "Format buffer" })
+vim.keymap.set("n", "<leader>g", "gqap", { desc = "Format paragraph" })
+vim.keymap.set("v", "<leader>g", "gqa", { desc = "Format selection" })
+vim.keymap.set("x", "<leader>g", "gqa", { desc = "Format selection" })
 
 vim.keymap.set("n", "<c-n>", "<cmd>cnext<cr>zz")
 vim.keymap.set("n", "<c-b>", "<cmd>cprev<cr>zz")
 vim.keymap.set("n", "<leader>n", "<cmd>lnext<cr>zz", { desc = "Next location list item" })
 vim.keymap.set("n", "<leader>b", "<cmd>lprev<CR>zz", { desc = "Previous location list item" })
 
-vim.keymap.set("n", "<leader>ss", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]], { desc = "Search and replace current word" })
+vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]], { desc = "Search and replace current word" })
 vim.keymap.set("n", "<leader>rh", [[:%s/read.csv("\(.*\)")/read_csv(here("data\/\1"))/gI<Left><Left><Left>]], { desc = "Convert read.csv to read_csv with here()" })
-vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = false })
+vim.keymap.set("n", "<leader>X", "<cmd>!chmod +x %<CR>", { silent = false })
 vim.keymap.set("n", "<leader>hx", "<cmd>%!xxd<CR>", { silent = false })
 
-
-vim.keymap.set(
-    "n",
-    "<leader>ee",
-    "oif err != nil {<CR>}<Esc>Oreturn err<Esc>"
-)
 
 vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/anthony/packer.lua<CR>", { desc = "Edit packer.lua" });
 vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>");
 
+-- source current file
 vim.keymap.set("n", "<leader><leader>", function()
-    vim.cmd("so")
+    vim.cmd("so") --
 end)
 
 -- Close all windows
 vim.api.nvim_create_user_command('CloseAll', function()
     vim.cmd('qa')
 end, { desc = 'Close all windows and NvimTree if open' })
-vim.keymap.set("n", "<C-z>", vim.cmd.CloseAll)
-vim.keymap.set("n", "<C-s>", "<cmd>w<CR>")
-vim.keymap.set("n", "<C-S>", "<cmd>wa<CR>")
+vim.keymap.set("n", "<C-z>", vim.cmd.CloseAll) -- close all windows, including NvimTree if open
+vim.keymap.set("n", "<C-s>", "<cmd>w<CR>") -- save current buffer
+vim.keymap.set("n", "<C-S>", "<cmd>wa<CR>") -- save all buffers
 vim.keymap.set("n", "<C-x>", "<cmd>q<CR>") -- close current window
 
 -- Remap Ctrl + Z to undo in Insert mode
@@ -66,14 +69,14 @@ vim.api.nvim_set_keymap('i', '<C-z>', '<C-o>u', { noremap = true, silent = true 
 vim.api.nvim_set_keymap('i', '<C-y>', '<C-o><C-r>', { noremap = true, silent = true })
 
 -- Remap case conversion commands for normal, visual, and visual block modes
-vim.keymap.set("n", "su", "vu", { noremap = true, desc = "Convert to lowercase (normal)" })
-vim.keymap.set("n", "sU", "vU", { noremap = true, desc = "Convert to uppercase (normal)" })
-vim.keymap.set("n", "s~", "v~", { noremap = true, desc = "Toggle case (normal)" })
+vim.keymap.set("n", "<leader>su", "vu", { noremap = true, desc = "Convert to lowercase (normal)" })
+vim.keymap.set("n", "<leader>sU", "vU", { noremap = true, desc = "Convert to uppercase (normal)" })
+vim.keymap.set("n", "<leader>s~", "v~", { noremap = true, desc = "Toggle case (normal)" })
 
 -- Visual mode case conversion
-vim.keymap.set("x", "su", "u", { noremap = true, desc = "Convert to lowercase (visual)" })
-vim.keymap.set("x", "sU", "U", { noremap = true, desc = "Convert to uppercase (visual)" })
-vim.keymap.set("x", "s~", "~", { noremap = true, desc = "Toggle case (visual)" })
+vim.keymap.set("x", "<leader>su", "u", { noremap = true, desc = "Convert to lowercase (visual)" })
+vim.keymap.set("x", "<leader>sU", "U", { noremap = true, desc = "Convert to uppercase (visual)" })
+vim.keymap.set("x", "<leader>s~", "~", { noremap = true, desc = "Toggle case (visual)" })
 
 -- Disable the default case conversion bindings in normal mode
 vim.keymap.set("n", "u", "u", { noremap = true, desc = "Undo" }) -- Keep u as undo only
@@ -88,21 +91,14 @@ vim.keymap.set("x", "U", "<nop>", { noremap = true, desc = "Disabled" })
 vim.api.nvim_set_keymap('n', 'gV', '`[v`]', { noremap = true })
 vim.api.nvim_set_keymap('n', 'g=', '`[v`]=', { noremap = true })
 
--- open new file in current buffer
-vim.keymap.set("n", ",e", function()
-    local current_dir = vim.fn.getcwd()               -- Save the current working directory
-    local path = vim.fn.expand('%:p:h') .. '/'        -- Construct the path to the directory of the current file and append a slash
-    vim.cmd('edit ' .. path)                          -- Open the new file in the specified path
-    vim.cmd('cd ' .. vim.fn.fnameescape(current_dir)) -- Restore the original working directory
-end)
-
 -- See list of buffers
 vim.keymap.set("n", "<leader>ls", "<cmd>ls<CR>", { desc = "List buffers" })
 -- See list of modified buffers
 vim.keymap.set("n", "<leader>lm", "<cmd>ls!<CR>", { desc = "List modified buffers" })
 
-
 local comment_styles = { "#", "//", "--" } -- -- Define the comment styles
+
+-- # Custom Keybindings of Self-Made Functions
 
 -- Function to convert top line comments to inline comments
 local function convert_top_to_inline_comments()
@@ -300,3 +296,14 @@ end
 -- Keybinding to create a listed terminal
 vim.keymap.set("n", "<leader>tt", vim.cmd.TermToggle, { desc = "Toggle terminal", silent = true })
 vim.keymap.set("t", "<C-t>", vim.cmd.TermToggle, { desc = "Toggle [^][T]erminal", silent = true })
+
+-- For plugins to lazy load on keypress
+vim.keymap.set("n", "<leader>a", "<cmd>AvanteToggle<CR>" , { desc = "Open Avante" })
+vim.keymap.set("n", "<leader>ae", "<cmd>AvanteEdit<CR>" , { desc = "Open Avante Edit" })
+vim.keymap.set("n", "<leader>an", "<cmd>AvanteChatNew<CR>" , { desc = "New Avante Chat" })
+
+-- Function to reload a module (for development purposes)
+-- Usage: R("config") to reload the config module
+function R(name)
+    require("plenary.reload").reload_module(name)
+end

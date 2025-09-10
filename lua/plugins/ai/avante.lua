@@ -1,8 +1,33 @@
 return {
     "yetone/avante.nvim",
-    event = "VeryLazy",
-    lazy = false,
+    cmd = { "AvanteToggle", "AvanteChat", "AvanteChatNew", "AvanteAsk", "AvanteEdit", "AvanteBuild"},
     version = false,
+    dependencies = {
+        -- required dependencies
+        "stevearc/dressing.nvim",
+        "nvim-lua/plenary.nvim",
+        "MunifTanjim/nui.nvim",
+        -- Optional dependencies
+        "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
+        -- {
+        --     -- support for image pasting
+        --     "HakonHarnes/img-clip.nvim",
+        --     event = "VeryLazy",
+        --     opts = {
+        --         -- recommended settings
+        --         default = {
+        --             embed_image_as_base64 = false,
+        --             prompt_for_file_name = false,
+        --             drag_and_drop = {
+        --                 insert_mode = true,
+        --             },
+        --         },
+        --     },
+        -- },
+    },
+    opts = {
+        -- add any opts here
+    },
     config = function()
         require("avante").setup({
             provider = "claude",
@@ -54,6 +79,7 @@ return {
             },
         })
 
+        -- -- Example of custom keymaps for cycling through suggestions
         -- local Utils = require("avante.utils")
         --
         -- Utils.safe_keymap_set('i', '<M-]>', function()
@@ -76,38 +102,4 @@ return {
         --     replace_keycodes = false
         -- })
     end,
-    opts = {
-        -- add any opts here
-    },
-    dependencies = {
-        "stevearc/dressing.nvim",
-        "nvim-lua/plenary.nvim",
-        "MunifTanjim/nui.nvim",
-        --- The below dependencies are optional,
-        "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
-        -- "zbirenbaum/copilot.lua", -- for providers='copilot'
-        -- {
-        --     -- support for image pasting
-        --     "HakonHarnes/img-clip.nvim",
-        --     event = "VeryLazy",
-        --     opts = {
-        --         -- recommended settings
-        --         default = {
-        --             embed_image_as_base64 = false,
-        --             prompt_for_file_name = false,
-        --             drag_and_drop = {
-        --                 insert_mode = true,
-        --             },
-        --         },
-        --     },
-        -- },
-        -- {
-        --     -- Make sure to setup it properly if you have lazy=true
-        --     'MeanderingProgrammer/render-markdown.nvim',
-        --     opts = {
-        --         file_types = { "markdown", "Avante" },
-        --     },
-        --     ft = { "markdown", "Avante" },
-        -- },
-    },
 }

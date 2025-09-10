@@ -2,17 +2,17 @@
 -- It also sets some basic highlight groups to ensure a transparent background.
 function ColorMyPencils(color)
     color = color or "catppuccin" -- Default to "catppuccin" if no color is specified
-    vim.cmd.colorscheme(color) -- Set the colorscheme
+    vim.cmd.colorscheme(color)    -- Set the colorscheme
 
 
     -- Set some basic highlight groups to ensure a transparent background
     -- Setting { bg = "none" } makes them transparent so your terminal background shows through.
-    vim.api.nvim_set_hl(0, "Normal", { bg = "none" })          -- "Normal" → main editor text area
+    vim.api.nvim_set_hl(0, "Normal", { bg = "none" }) -- "Normal" → main editor text area
     vim.api.nvim_set_hl(0, "FloatBorder", { bg = "none" })
     vim.api.nvim_set_hl(0, "FloatTitle", { bg = "none" })
     vim.api.nvim_set_hl(0, "FloatFooter", { bg = "none" })
-    vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })     -- "NormalFloat" → floating windows (popups)
-    vim.api.nvim_set_hl(0, "NormalNC", { bg = "none" })     -- "NormalNC" → non-current windows
+    vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" }) -- "NormalFloat" → floating windows (popups)
+    vim.api.nvim_set_hl(0, "NormalNC", { bg = "none" })    -- "NormalNC" → non-current windows
 end
 
 -- Theme options
@@ -38,7 +38,6 @@ return {
             })
         end
     },
-
     {
         "catppuccin/nvim",
         name = "catppuccin",
@@ -54,15 +53,20 @@ return {
             ColorMyPencils()
         end
     },
-
     {
-        "chrisbra/Colorizer",
-        config = function()
-            vim.cmd.ColorToggle()
-            require('avante_lib').load()
-        end
+        "catgoose/nvim-colorizer.lua",
+        event = "BufReadPre",
+        opts = {
+            user_default_options = {
+                css = true,
+                tailwind = true,
+                tailwind_opts = {
+                    update_names = true, -- update color names when user changes them, e.g., from `red-500` to `red-400`
+                },
+                xterm = true, -- enable xterm 256 colors, e.g., `xterm:grey50`
+            },
+        },
     },
-
     {
         "HiPhish/rainbow-delimiters.nvim"
     }

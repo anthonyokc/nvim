@@ -17,11 +17,11 @@ vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
 
-vim.keymap.set("x", "p", [["_dP]])                 -- when you paste over some text, keep the text in the vim clipboard
+vim.keymap.set("x", "p", [["_dP]])                                                           -- when you paste over some text, keep the text in the vim clipboard
 
-vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Copy to system clipboard" }) -- copy selection to system clipboard
-vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "Copy line to system clipboard" })          -- copy whole line to system clipboard
-vim.keymap.set("n", "yay", "<cmd>%y+<CR>", { desc = "Copy whole file to system clipboard" })          -- copy whole line to system clipboard
+vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Copy to system clipboard" })    -- copy selection to system clipboard
+vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "Copy line to system clipboard" })        -- copy whole line to system clipboard
+vim.keymap.set("n", "yay", "<cmd>%y+<CR>", { desc = "Copy whole file to system clipboard" }) -- copy whole line to system clipboard
 
 vim.keymap.set({ "n", "v" }, "D", [["_d]])
 
@@ -40,13 +40,16 @@ vim.keymap.set("n", "<c-b>", "<cmd>cprev<cr>zz")
 vim.keymap.set("n", "<leader>n", "<cmd>lnext<cr>zz", { desc = "Next location list item" })
 vim.keymap.set("n", "<leader>b", "<cmd>lprev<CR>zz", { desc = "Previous location list item" })
 
-vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]], { desc = "Search and replace current word" })
-vim.keymap.set("n", "<leader>rh", [[:%s/read.csv("\(.*\)")/read_csv(here("data\/\1"))/gI<Left><Left><Left>]], { desc = "Convert read.csv to read_csv with here()" })
+vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]],
+    { desc = "Search and replace current word" })
+vim.keymap.set("n", "<leader>rh", [[:%s/read.csv("\(.*\)")/read_csv(here("data\/\1"))/gI<Left><Left><Left>]],
+    { desc = "Convert read.csv to read_csv with here()" })
 vim.keymap.set("n", "<leader>X", "<cmd>!chmod +x %<CR>", { silent = false })
 vim.keymap.set("n", "<leader>hx", "<cmd>%!xxd<CR>", { silent = false })
 
 
-vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/anthony/packer.lua<CR>", { desc = "Edit packer.lua" });
+vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/anthony/packer.lua<CR>",
+    { desc = "Edit packer.lua" });
 vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>");
 
 -- source current file
@@ -59,9 +62,9 @@ vim.api.nvim_create_user_command('CloseAll', function()
     vim.cmd('qa')
 end, { desc = 'Close all windows and NvimTree if open' })
 vim.keymap.set("n", "<C-z>", vim.cmd.CloseAll) -- close all windows, including NvimTree if open
-vim.keymap.set("n", "<C-s>", "<cmd>w<CR>") -- save current buffer
-vim.keymap.set("n", "<C-S>", "<cmd>wa<CR>") -- save all buffers
-vim.keymap.set("n", "<C-x>", "<cmd>q<CR>") -- close current window
+vim.keymap.set("n", "<C-s>", "<cmd>w<CR>")     -- save current buffer
+vim.keymap.set("n", "<C-S>", "<cmd>wa<CR>")    -- save all buffers
+vim.keymap.set("n", "<C-x>", "<cmd>q<CR>")     -- close current window
 
 -- Remap Ctrl + Z to undo in Insert mode
 vim.api.nvim_set_keymap('i', '<C-z>', '<C-o>u', { noremap = true, silent = true })
@@ -79,7 +82,7 @@ vim.keymap.set("x", "<leader>sU", "U", { noremap = true, desc = "Convert to uppe
 vim.keymap.set("x", "<leader>s~", "~", { noremap = true, desc = "Toggle case (visual)" })
 
 -- Disable the default case conversion bindings in normal mode
-vim.keymap.set("n", "u", "u", { noremap = true, desc = "Undo" }) -- Keep u as undo only
+vim.keymap.set("n", "u", "u", { noremap = true, desc = "Undo" })         -- Keep u as undo only
 vim.keymap.set("n", "U", "<nop>", { noremap = true, desc = "Disabled" }) -- Disable U completely
 
 -- Disable the default case conversion bindings in visual mode
@@ -102,45 +105,45 @@ local comment_styles = { "#", "//", "--" } -- -- Define the comment styles
 
 -- Function to convert top line comments to inline comments
 local function convert_top_to_inline_comments()
-  -- Determine the mode: normal or visual
-  local mode = vim.fn.mode()
+    -- Determine the mode: normal or visual
+    local mode = vim.fn.mode()
 
-  -- Get the current line or the selected lines in visual mode
-  local start_line, end_line
-  if mode == 'v' or mode == 'V' then
-    start_line = vim.fn.line("'<")
-    end_line = vim.fn.line("'>")
-  else
-    start_line = vim.fn.line('.')
-    end_line = start_line
-  end
-
-  for line_number = start_line, end_line do
-    local current_line = vim.fn.getline(line_number)
-
-    -- Iterate over the comment styles and perform the conversion if a match is found
-    for _, comment in ipairs(comment_styles) do
-      -- Check if the line starts with a comment
-      if current_line:match("^%s*" .. comment) then
-        -- Extract the comment part
-        local comment_part = current_line:match("^%s*" .. comment .. "%s*(.*)")
-
-        -- Get the line below the current line
-        local next_line_number = line_number + 1
-        local next_line = vim.fn.getline(next_line_number)
-
-        -- Create the new line with the inline comment
-
-  local new_line = next_line .. " " .. " " .. comment_part
-        -- Replace the next line with the new line
-        vim.fn.setline(next_line_number, new_line)
-
-        -- Delete the current line (original comment line)
-        vim.fn.setline(line_number, '')
-        break
-      end
+    -- Get the current line or the selected lines in visual mode
+    local start_line, end_line
+    if mode == 'v' or mode == 'V' then
+        start_line = vim.fn.line("'<")
+        end_line = vim.fn.line("'>")
+    else
+        start_line = vim.fn.line('.')
+        end_line = start_line
     end
-  end
+
+    for line_number = start_line, end_line do
+        local current_line = vim.fn.getline(line_number)
+
+        -- Iterate over the comment styles and perform the conversion if a match is found
+        for _, comment in ipairs(comment_styles) do
+            -- Check if the line starts with a comment
+            if current_line:match("^%s*" .. comment) then
+                -- Extract the comment part
+                local comment_part = current_line:match("^%s*" .. comment .. "%s*(.*)")
+
+                -- Get the line below the current line
+                local next_line_number = line_number + 1
+                local next_line = vim.fn.getline(next_line_number)
+
+                -- Create the new line with the inline comment
+
+                local new_line = next_line .. " " .. " " .. comment_part
+                -- Replace the next line with the new line
+                vim.fn.setline(next_line_number, new_line)
+
+                -- Delete the current line (original comment line)
+                vim.fn.setline(line_number, '')
+                break
+            end
+        end
+    end
 end
 
 -- Create a custom command to run the conversion function
@@ -149,31 +152,31 @@ vim.api.nvim_create_user_command('ConvertComments', convert_top_to_inline_commen
 -- Bind the function to the shortcut key (leader #) in normal and visual mode
 vim.keymap.set("n", "<leader>#", convert_top_to_inline_comments, { desc = "Convert top line comments to inline" })
 vim.keymap.set("v", "<leader>#", function()
-  vim.cmd('ConvertComments')
+    vim.cmd('ConvertComments')
 end, { desc = "Convert top line comments to inline" })
 
 -- Switch between terminal buffer and the leftmost pane
 local function switch_to_terminal()
-  -- Save the current window ID
-  local current_win = vim.api.nvim_get_current_win()
+    -- Save the current window ID
+    local current_win = vim.api.nvim_get_current_win()
 
-  -- Check if the current window is the terminal buffer
-  if vim.bo.buftype == 'terminal' then
-    -- Move to the leftmost window
-    vim.cmd('wincmd t')
-  else
-    -- Find the terminal buffer window and switch to it
-    local term_win = -1
-    for win = 1, vim.fn.winnr('$') do
-      if vim.fn.getbufvar(vim.fn.winbufnr(win), '&buftype') == 'terminal' then
-        term_win = win
-        break
-      end
+    -- Check if the current window is the terminal buffer
+    if vim.bo.buftype == 'terminal' then
+        -- Move to the leftmost window
+        vim.cmd('wincmd t')
+    else
+        -- Find the terminal buffer window and switch to it
+        local term_win = -1
+        for win = 1, vim.fn.winnr('$') do
+            if vim.fn.getbufvar(vim.fn.winbufnr(win), '&buftype') == 'terminal' then
+                term_win = win
+                break
+            end
+        end
+        if term_win > 0 then
+            vim.cmd(term_win .. 'wincmd w')
+        end
     end
-    if term_win > 0 then
-      vim.cmd(term_win .. 'wincmd w')
-    end
-  end
 end
 
 -- Map <leader>' to the switch_to_terminal function
@@ -181,42 +184,43 @@ vim.keymap.set('n', '<leader>\'', switch_to_terminal, { noremap = true, silent =
 
 -- Toggle terminal window visibility
 local function toggle_terminal_visibility()
-  local term_win = -1
-  local term_buf = -1
+    local term_win = -1
+    local term_buf = -1
 
-  -- Find the terminal buffer and window
-  for _, win in ipairs(vim.api.nvim_list_wins()) do
-    local buf = vim.api.nvim_win_get_buf(win)
-    if vim.api.nvim_buf_get_option(buf, 'buftype') == 'terminal' then
-      term_win = win
-      term_buf = buf
-      break
+    -- Find the terminal buffer and window
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+        local buf = vim.api.nvim_win_get_buf(win)
+        if vim.api.nvim_buf_get_option(buf, 'buftype') == 'terminal' then
+            term_win = win
+            term_buf = buf
+            break
+        end
     end
-  end
 
-  if term_win ~= -1 then
-    -- Terminal window exists, toggle its visibility
-    if vim.api.nvim_win_is_valid(term_win) then
-      -- Hide the terminal window
-      vim.api.nvim_win_hide(term_win)
+    if term_win ~= -1 then
+        -- Terminal window exists, toggle its visibility
+        if vim.api.nvim_win_is_valid(term_win) then
+            -- Hide the terminal window
+            vim.api.nvim_win_hide(term_win)
+        else
+            -- Show the terminal window
+            vim.api.nvim_open_win(term_buf, true, {
+                relative = 'editor',
+                row = vim.o.lines - 15,
+                col = 0,
+                width = vim.o.columns,
+                height = 15,
+                style = 'minimal'
+            })
+        end
     else
-      -- Show the terminal window
-      vim.api.nvim_open_win(term_buf, true, {
-        relative = 'editor',
-        row = vim.o.lines - 15,
-        col = 0,
-        width = vim.o.columns,
-        height = 15,
-        style = 'minimal'
-      })
+        -- No terminal window found, create a new one
+        vim.cmd('botright 15split | terminal')
     end
-  else
-    -- No terminal window found, create a new one
-    vim.cmd('botright 15split | terminal')
-  end
 end
 
-vim.keymap.set('n', '<leader>ht', toggle_terminal_visibility, { noremap = true, silent = true, desc = "Toggle terminal visibility" })
+vim.keymap.set('n', '<leader>ht', toggle_terminal_visibility,
+    { noremap = true, silent = true, desc = "Toggle terminal visibility" })
 
 vim.api.nvim_create_user_command("TermToggle", function()
     local is_open = vim.g.term_win_id ~= nil and vim.api.nvim_win_is_valid(vim.g.term_win_id)
@@ -298,12 +302,76 @@ vim.keymap.set("n", "<leader>tt", vim.cmd.TermToggle, { desc = "Toggle terminal"
 vim.keymap.set("t", "<C-t>", vim.cmd.TermToggle, { desc = "Toggle [^][T]erminal", silent = true })
 
 -- For plugins to lazy load on keypress
-vim.keymap.set("n", "<leader>a", "<cmd>AvanteToggle<CR>" , { desc = "Open Avante" })
-vim.keymap.set("n", "<leader>ae", "<cmd>AvanteEdit<CR>" , { desc = "Open Avante Edit" })
-vim.keymap.set("n", "<leader>an", "<cmd>AvanteChatNew<CR>" , { desc = "New Avante Chat" })
+vim.keymap.set("n", "<leader>a", "<cmd>AvanteToggle<CR>", { desc = "Open Avante" })
+vim.keymap.set("n", "<leader>ae", "<cmd>AvanteEdit<CR>", { desc = "Open Avante Edit" })
+vim.keymap.set("n", "<leader>an", "<cmd>AvanteChatNew<CR>", { desc = "New Avante Chat" })
 
 -- Function to reload a module (for development purposes)
 -- Usage: R("config") to reload the config module
 function R(name)
     require("plenary.reload").reload_module(name)
 end
+
+
+vim.g.tofu_provider_source  = vim.g.tofu_provider_source  or "opentofu/google"
+vim.g.tofu_provider_version = vim.g.tofu_provider_version or "latest"  -- "latest" also works
+
+function tofu_open_docs()
+  -- try to auto-detect provider source/version from required_providers (only if not set)
+  if not vim.g.tofu_autodetected then
+    for _, b in ipairs(vim.api.nvim_list_bufs()) do
+      for _, l in ipairs(vim.api.nvim_buf_get_lines(b, 0, -1, false)) do
+        local src = l:match('%f[%w]source%s*=%s*"([^"]+)"')
+        if src and src:find("/") then vim.g.tofu_provider_source = src end
+        local ver = l:match('%f[%w]version%s*=%s*"([%d%p]+)"')
+        if ver then
+          vim.g.tofu_provider_version = ver:match("^v") and ver or ("v" .. ver)
+        end
+      end
+    end
+    vim.g.tofu_autodetected = true
+  end
+
+  local src = vim.g.tofu_provider_source or "opentofu/google"
+  local ver = vim.g.tofu_provider_version or "latest"
+  if ver:match("^%d") then ver = "v" .. ver end
+
+  local base = ("https://search.opentofu.org/provider/%s/%s/docs/"):format(src, ver)
+  local open = (vim.fn.has("mac") == 1 and "open")
+            or (vim.loop.os_uname().sysname == "Windows_NT" and "start")
+            or "xdg-open"
+
+  local word = vim.fn.expand("<cword>")
+  local row = vim.api.nvim_win_get_cursor(0)[1]
+  local buf = 0
+
+  -- Look upward a bit to find the block header the cursor is inside.
+  local kind, type_str
+  for i = row, math.max(1, row - 40), -1 do
+    local ln = vim.api.nvim_buf_get_lines(buf, i-1, i, false)[1]
+    local r = ln:match('^%s*resource%s+"([^"]+)"')
+    if r then kind, type_str = "resource", r; break end
+    local d = ln:match('^%s*data%s+"([^"]+)"')
+    if d then kind, type_str = "data", d; break end
+  end
+
+  local url
+  if kind == "resource" then
+    -- resources drop the provider prefix: google_organization_policy -> organization_policy
+    url = base .. "resources/" .. type_str
+  elseif kind == "data" then
+    -- datasources also drop prefix: google_folder_iam_policy -> folder_iam_policy
+    url = base .. "datasources/" .. type_str
+  elseif vim.api.nvim_get_current_line():find(word .. "%s*%(") then
+    -- function call on this line: name_from_id(...)
+    url = base .. "functions/" .. word
+  else
+    -- fallback: open a guide using the full identifier (keeps provider prefix)
+    url = base .. "guides/" .. word
+  end
+
+  vim.fn.jobstart({open, url}, {detach = true})
+end
+
+vim.keymap.set("n", "<leader>to", tofu_open_docs, {desc = "Hover or open OpenTofu docs" })
+

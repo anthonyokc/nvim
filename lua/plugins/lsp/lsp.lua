@@ -1,7 +1,8 @@
 -- LSP Configuration for Neovim
 -- 1. Mason: Package manager for LSP servers, DAP servers, linters, and formatters
 -- 2. Mason LSP Config: Bridge between Mason and nvim-lspconfig
--- 3. nvim-navic: A simple statusline/winbar component that uses LSP to show your current code context
+-- 3. nvim-lspconfig: Provides sensible default configurations for LSP servers
+-- 4. nvim-navic: A simple statusline/winbar component that uses LSP to show your current code context
 return {
     -- 1. Mason: Package‑manager for LSP servers, DAP servers, linters, and formatters.
     -- Does not handle configurations.
@@ -35,6 +36,7 @@ return {
                 "ruff",                            -- Ruff for Python
                 "rust-analyzer",                   -- Rust Analyzer for Rust
                 "terraform-ls",                    -- Terraform Language Server
+                "tofu-ls",                         -- OpenTofu Language Server
                 "texlab",                          -- TexLab for LaTeX
                 "tflint",                          -- TFLint for Terraform
                 "typescript-language-server",      -- TypeScript Language Server
@@ -76,16 +78,25 @@ return {
         }
     },
 
-    -- 2. LSP Configurations: Provides sensible default configurations for LSP servers
+    -- 2. Mason LSP Config: Bridge between Mason and nvim-lspconfig
+    -- Maps Mason package names to nvim-lspconfig server names
+    -- Can automatically installs LSP servers installed with Mason
+    -- Can auto enable LSP servers with nvim-lspconfig
+    -- Can automatically set up servers with default configurations
+    {
+        "mason-org/mason-lspconfig.nvim",
+        event = "VeryLazy",
+        dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
+        opts = { automatic_enable = true }, -- default, but kept explicit
+    },
+
+    -- 3. LSP Configurations: Provides sensible default configurations for LSP servers
     -- Optionally, you can add server-specific configurations
     {
         "neovim/nvim-lspconfig",
-        event = { "BufReadPre", "BufNewFile" },
+        event = { "BufReadPre" },
         dependencies = { "saghen/blink.cmp" },
-        config = function()
-            local lspconfig = require("lspconfig") -- Import nvim-lspconfig
-            local util = require("lspconfig.util")
-
+        init = function()
             -- Create a global table to hold LSP configurations ##############
             -- This allows sharing configurations across different files
             -- without polluting the global namespace
@@ -106,15 +117,15 @@ return {
 
             -- Apply nvim-navic to servers with documentSymbol capability,
             -- and set the on_attach function for all servers
-                util.default_config = vim.tbl_deep_extend("force", util.default_config, {
-                  capabilities = caps,
-                  on_attach = on_attach,
-                })
+            vim.lsp.config("*", {
+                capabilities = capabilities,
+                on_attach = on_attach,
+            })
             -- End of global LSP configurations ##############################
 
 
             -- Configure LSP servers with specific settings
-            lspconfig.lua_ls.setup( {
+            vim.lsp.config("lua_ls", {
                 settings = {
                     Lua = {
                         format = {
@@ -132,7 +143,7 @@ return {
                     }
                 }
             })
-            lspconfig.harper_ls.setup( {
+            vim.lsp.config("harper_ls", {
                 settings = {
                     ["harper-ls"] = {
                         linters = {
@@ -162,7 +173,7 @@ return {
         end,
     },
 
-    -- 3. nvim-navic: A simple statusline/winbar component that uses LSP to show your current code context
+    -- 4. nvim-navic: A simple statusline/winbar component that uses LSP to show your current code context
     -- Requires LSP servers to support the 'textDocument/documentSymbol' capability
     {
         "SmiteshP/nvim-navic",

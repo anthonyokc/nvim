@@ -5,7 +5,8 @@ return {
         dependencies = 'kevinhwang91/promise-async',
         config = function()
             require('ufo').setup()
-            vim.opt.foldlevel = 100
+            vim.opt.foldlevelstart = 99
+            vim.opt.foldlevel = 99
         end
     }
 }

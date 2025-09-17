@@ -91,14 +91,15 @@ return {
             end, { desc = "Find Full Highlighted Word" })
 
             -- Git operations
+            vim.keymap.set("n", "<leader>fc", builtin.git_commits, { desc = "Find Git Commits" })
+            vim.keymap.set("n", "<leader>fC", builtin.git_bcommits, { desc = "Find Git Commits for Buffer" })
+            vim.keymap.set("n", "<leader>fi", "<cmd>AdvancedGitSearch<CR>", { desc = "Find with Advanced Git Search" })
+            -- Git Worktree operations
             vim.keymap.set("n", "<leader>fr", "<CMD>lua require('telescope').extensions.git_worktree.git_worktree()<CR>",
                 { desc = "Find Git Worktree" })
             vim.keymap.set("n", "<leader>fR",
                 "<CMD>lua require('telescope').extensions.git_worktree.create_git_worktree({prefix = '../'})<CR>",
                 { desc = "Create Git Worktree" })
-            vim.keymap.set("n", "<leader>fc", builtin.git_commits, { desc = "Find Git Commits" })
-            vim.keymap.set("n", "<leader>fC", builtin.git_bcommits, { desc = "Find Git Commits for Buffer" })
-            vim.keymap.set("n", "<leader>fi", "<cmd>AdvancedGitSearch<CR>", { desc = "Find with Advanced Git Search" })
 
             -- LSP and diagnostics
             vim.keymap.set("n", "<leader>fd", "<cmd>Telescope diagnostics<CR>", { desc = "Find Diagnostics" })

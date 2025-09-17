@@ -1,6 +1,6 @@
 return {
     "yetone/avante.nvim",
-    cmd = { "AvanteToggle", "AvanteChat", "AvanteChatNew", "AvanteAsk", "AvanteEdit", "AvanteBuild"},
+    cmd = { "AvanteToggle", "AvanteChat", "AvanteChatNew", "AvanteAsk", "AvanteEdit", "AvanteBuild" },
     version = false,
     dependencies = {
         -- required dependencies
@@ -25,12 +25,30 @@ return {
         --     },
         -- },
     },
+    init = function()
+        vim.keymap.set("n", "<leader>aa", "<cmd>AvanteToggle<cr>", { desc = "Avante: toggle sidebar" })
+        vim.keymap.set("n", "<leader>ac", "<cmd>AvanteChat<cr>", { desc = "Avante: chat" })
+        vim.keymap.set("n", "<leader>ae", "<cmd>AvanteEdit<cr>", { desc = "Avante: edit with AI" })
+    end,
     opts = {
         -- add any opts here
     },
     config = function()
         require("avante").setup({
-            provider = "claude",
+            provider = "openai", -- Required, default provider for Avante
+            providers = {
+                openai = {
+                    model = "gpt-5", -- or "gpt-5-mini" for lower latency
+                    endpoint = "https://api.openai.com/v1",
+                    timeout = 60000, -- reasoning models benefit from a higher timeout
+                    extra_request_body = {
+                        temperature = 1, -- no temp for gpt-5
+                        reasoning_effort = "minimal", -- speed > long chain-of-thought
+                        verbosity = "low", -- concise final answers
+                        max_completion_tokens = 8192, -- room for reasoning + output
+                    },
+                }
+            },
             auto_suggestions_provider = "claude",
             cursor_applying_provider = nil, -- The provider used in the applying phase of Cursor Planning Mode, defaults to nil, when nil uses Config.provider as the provider for the applying phase
             dual_boost = {

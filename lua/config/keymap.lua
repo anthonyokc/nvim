@@ -37,8 +37,6 @@ vim.keymap.set("x", "<leader>g", "gqa", { desc = "Format selection" })
 
 vim.keymap.set("n", "<c-n>", "<cmd>cnext<cr>zz")
 vim.keymap.set("n", "<c-b>", "<cmd>cprev<cr>zz")
-vim.keymap.set("n", "<leader>n", "<cmd>lnext<cr>zz", { desc = "Next location list item" })
-vim.keymap.set("n", "<leader>b", "<cmd>lprev<CR>zz", { desc = "Previous location list item" })
 
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]],
     { desc = "Search and replace current word" })
@@ -374,4 +372,9 @@ function tofu_open_docs()
 end
 
 vim.keymap.set("n", "<leader>to", tofu_open_docs, {desc = "Hover or open OpenTofu docs" })
+
+-- Toggle TODO at start of current line, language-aware
+vim.keymap.set("n", "<leader>td", function()
+    require("config.util").toggle_todo_current_line()
+end, { desc = "Toggle TODO on current line" })
 

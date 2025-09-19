@@ -53,6 +53,7 @@ return {
 
             -- Comments
             { "<leader>C",   desc = "Toggle comment" },
+            { "<leader>td",  desc = "Toggle TODO on current line" },
 
             -- Avante
             { "<leader>a",   group = "Avante" },

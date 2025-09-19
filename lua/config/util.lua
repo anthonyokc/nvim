@@ -106,4 +106,63 @@ end
 
 
 
+-- Infer a single-line comment prefix for the current buffer
+M.get_comment_prefix = function()
+    local ft = vim.bo.filetype
+    local map = {
+        r = "#",
+        rmd = "#",
+        qmd = "#",
+        quarto = "#",
+        lua = "--",
+        rust = "//",
+        rs = "//",
+        c = "//",
+        h = "//",
+        cpp = "//",
+        cxx = "//",
+        hpp = "//",
+        hxx = "//",
+        bash = "#",
+        sh = "#",
+        zsh = "#",
+        fish = "#",
+        go = "//",
+        python = "#",
+        py = "#",
+    }
+
+    if map[ft] then return map[ft] end
+
+    local cs = vim.bo.commentstring or ""
+    if cs ~= "" and cs:find("%%s") then
+        local before = cs:match("^(.*)%%s") or ""
+        local after = cs:match("%%s(.*)$") or ""
+        before = before:gsub("%s+$", "")
+        after = after:gsub("^%s+", "")
+        if before ~= "" and after == "" then
+            return before
+        end
+    end
+
+    return "#"
+end
+
+-- Toggle "<comment> TODO: " at the start of the current line (preserves indent)
+M.toggle_todo_current_line = function()
+    local prefix = M.get_comment_prefix()
+    local line = vim.api.nvim_get_current_line()
+    local indent = line:match("^%s*") or ""
+    local content = line:sub(#indent + 1)
+
+    local todo_prefix = prefix .. " TODO: "
+
+    if content:sub(1, #todo_prefix) == todo_prefix then
+        local new_content = content:sub(#todo_prefix + 1)
+        vim.api.nvim_set_current_line(indent .. new_content)
+    else
+        vim.api.nvim_set_current_line(indent .. todo_prefix .. content)
+    end
+end
+
 return M

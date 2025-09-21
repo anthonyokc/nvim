@@ -24,6 +24,9 @@ return {
                 group = vim.api.nvim_create_augroup("OpencodeTerminalKeymaps", { clear = true }),
                 callback = function(args)
                     if vim.bo[args.buf].filetype == "opencode_terminal" then
+                        -- Disable textwidth for opencode terminal to prevent line wrapping
+                        vim.bo[args.buf].textwidth = 0
+                        
                         -- Exit insert mode with Ctrl+C
                         vim.keymap.set('t', '<C-c>', function()
                             vim.cmd("stopinsert")

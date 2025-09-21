@@ -73,32 +73,9 @@ return {
                 },
                 keymap = {
                     preset = 'default',
-                    ['<C-e>'] = { 'hide' },
+                    ['<C-e>'] = { 'show' },
                     ['<C-y>'] = { 'select_and_accept' },
                     ['<Tab>'] = { 'select_and_accept' },
-                    -- Snippet navigation
-                    ['<M-j>'] = {
-                        function(cmp)
-                            if luasnip.expand_or_jumpable() then
-                                luasnip.expand_or_jump()
-                            else
-                                cmp.select_next()
-                            end
-                        end,
-                        'snippet_forward',
-                        'fallback'
-                    },
-                    ['<M-k>'] = {
-                        function(cmp)
-                            if luasnip.jumpable(-1) then
-                                luasnip.jump(-1)
-                            else
-                                cmp.select_prev()
-                            end
-                        end,
-                        'snippet_backward',
-                        'fallback'
-                    },
                 },
 
                 -- Completion menu: the floating window that shows the list of completion items as you type

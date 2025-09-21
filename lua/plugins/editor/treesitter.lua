@@ -140,10 +140,5 @@ return {
         --         node = node:parent()
         --     end
         -- end
-
-        vim.api.nvim_set_keymap('n', '<leader>rf', '<cmd>lua FormatRFunction()<CR>',
-            { noremap = true, silent = true })
-        vim.api.nvim_set_keymap('n', '<leader>rr', '<cmd>lua UnformatRFunction()<CR>',
-            { noremap = true, silent = true })
     end
 }

@@ -47,7 +47,10 @@ return {
                         qmd = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
                     },
                     providers = {
-                        cmp_r = { name = 'cmp_r', module = 'blink.compat.source' },
+                        cmp_r = {
+                            name = 'cmp_r',
+                            module = 'blink.compat.source',
+                        },
                         lazydev = {
                             name = "LazyDev",
                             module = "lazydev.integrations.blink",
@@ -176,7 +179,6 @@ return {
                 end,
                 desc = "Set blink.cmp transparent highlights after colorscheme loads/changes"
             })
-
             -- Filetype-specific configurations are handled via the 'enabled' functions
             -- in the provider configurations above
 

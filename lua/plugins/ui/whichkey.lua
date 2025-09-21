@@ -2,7 +2,7 @@ return {
     "folke/which-key.nvim",
     event = "VeryLazy",
     config = function()
-        local wk =  require("which-key")
+        local wk = require("which-key")
         wk.add({
             -- Case conversion commands
             { "su",          desc = "Convert to lowercase" },
@@ -16,6 +16,8 @@ return {
             { "<leader>p",   group = "File Explorer" },
             { "<leader>pv",  desc = "Open file explorer" },
             { "<leader>vpp", desc = "Edit packer.lua" },
+
+            { "<leader>l",   group = "Lists" },
             { "<leader>ls",  desc = "List buffers" },
             { "<leader>lm",  desc = "List modified buffers" },
 
@@ -52,7 +54,7 @@ return {
             { "<leader>j",   desc = "Toggle window size to 50%" },
 
             -- Comments
-            { "<leader>C",   desc = "Toggle comment" },
+            { "<leader>C",   desc = "Toggle comment", cond = function() return vim.tbl_contains({ "r", "rmd", "quarto" }, vim.bo.filetype) end },
             { "<leader>td",  desc = "Toggle TODO on current line" },
 
             -- Avante
@@ -94,28 +96,30 @@ return {
             { "<leader>gt",  desc = "Neogit" },
             { "<leader>m",   group = "Markdown" },
             { "<leader>mp",  desc = "Toggle Markdown Preview" },
-            { "<leader>r",   group = "R Commands" },
-            { "<leader>rf",  group = "R Format Function" },
-            { "<leader>rr",  group = "R Unformat Function" },
-            { "<leader>rR",  group = "renv Restore" },
-            { "<leader>rh",  desc = "Convert read.csv to read_csv and use here()" },
-            { "<leader>ri",  desc = "Install R package with renv" },
-            { "<leader>rI",  desc = "Initialize renv" },
-            { "<leader>rs",  desc = "renv status" },
-            { "<leader>rS",  desc = "renv snapshot" },
-            { "<leader>rd",  desc = "Roxygen Document" },
-            { "<leader>rc",  desc = "Run R CMD check" },
-            { "<leader>rl",  desc = "Load all packages" },
-            { "<leader>rt",  desc = "Test active file" },
-            { "<leader>rT",  desc = "Test all" },
-            { "<leader>rv",  desc = "Test coverage active file" },
-            { "<leader>rV",  desc = "Test coverage all" },
-            { "<leader>ru",  group = "usethis Commands" },
-            { "<leader>rut", desc = "usethis Test" },
-            { "<leader>rup", desc = "usethis Package (Imports)" },
-            { "<leader>rus", desc = "usethis Package (Suggests)" },
-            { "<leader>df",  desc = "Diffview Open" },
-            { "<leader>df",  desc = "Diffview Close" },
+            {
+                cond = function() return vim.tbl_contains({ "r", "rmd", "quarto" }, vim.bo.filetype) end,
+                { "<leader>r",   group = "R Commands" },
+                { "<leader>rf",  desc = "R Format Function" },
+                { "<leader>rr",  desc = "R Unformat Function" },
+                { "<leader>rh",  desc = "Convert read.csv to read_csv and use here()" },
+                { "<leader>ri",  desc = "Install R package with renv" },
+                { "<leader>rR",  desc = "renv Restore" },
+                { "<leader>rI",  desc = "Initialize renv" },
+                { "<leader>rs",  desc = "renv status" },
+                { "<leader>rS",  desc = "renv snapshot" },
+                { "<leader>rd",  desc = "Roxygen Document" },
+                { "<leader>rc",  desc = "Run R CMD check" },
+                { "<leader>rl",  desc = "Load all packages" },
+                { "<leader>rt",  desc = "Test active file" },
+                { "<leader>rT",  desc = "Test all" },
+                { "<leader>rv",  desc = "Test coverage active file" },
+                { "<leader>rV",  desc = "Test coverage all" },
+                { "<leader>ru",  group = "usethis Commands" },
+                { "<leader>rut", desc = "usethis Test" },
+                { "<leader>rup", desc = "usethis Package (Imports)" },
+                { "<leader>rus", desc = "usethis Package (Suggests)" },
+            },
+            { "<leader>df",  desc = "Diffview Toggle" },
             { "<leader>hS",  desc = "Stage Buffer" },
             { "<leader>ha",  desc = "Stage Hunk" },
             { "<leader>hu",  desc = "Undo Stage Hunk" },
@@ -125,7 +129,6 @@ return {
             { "<leader>tB",  desc = "Toggle Current Line Blame" },
             { "<leader>hd",  desc = "Diff This on Index" },
             { "<leader>hD",  desc = "Diff This on Last Commit" },
-            { "<leader>g",   group = "ChatGPT.nvim" },
             { "<leader>gc",  desc = "ChatGPT" },
             { "<leader>ge",  desc = "Edit with instruction" },
             { "<leader>gd",  desc = "Docstring" },

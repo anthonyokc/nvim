@@ -61,6 +61,16 @@ return {
             { "<leader>a",   group = "Avante" },
             { "<leader>am",  desc = "Toggle my prompt" },
 
+            -- OpenCode
+            { "<leader>o",   group = "OpenCode" },
+            { "<leader>ot",  desc = "Toggle opencode" },
+            { "<leader>oA",  desc = "Ask opencode" },
+            { "<leader>oa",  desc = "Ask opencode about this" },
+            { "<leader>on",  desc = "New opencode session" },
+            { "<leader>oy",  desc = "Copy last opencode response" },
+            { "<leader>os",  desc = "Select opencode prompt" },
+            { "<leader>oe",  desc = "Explain this code" },
+
             -- Find commands group
             { "<leader>f",   group = "Find" },
             -- File and buffer operations

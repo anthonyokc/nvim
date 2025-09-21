@@ -9,12 +9,33 @@ return {
         config = function()
             vim.g.opencode_opts = {
                 terminal = {
-                    win = { enter = true },
+                    win = { 
+                        enter = true,
+                        bo = { filetype = "opencode_terminal" },
+                    },
                 },
             }
 
             -- Required for `opts.auto_reload`
             vim.opt.autoread = true
+
+            -- Set up keymaps for opencode terminal to exit insert mode with Ctrl+C or Esc
+            vim.api.nvim_create_autocmd("TermOpen", {
+                group = vim.api.nvim_create_augroup("OpencodeTerminalKeymaps", { clear = true }),
+                callback = function(args)
+                    if vim.bo[args.buf].filetype == "opencode_terminal" then
+                        -- Exit insert mode with Ctrl+C
+                        vim.keymap.set('t', '<C-c>', function()
+                            vim.cmd("stopinsert")
+                        end, { buffer = args.buf, desc = "Exit insert mode with Ctrl+C" })
+                        
+                        -- Exit insert mode with single Esc
+                        vim.keymap.set('t', '<esc>', function()
+                            vim.cmd("stopinsert")
+                        end, { buffer = args.buf, desc = "Exit insert mode with Esc" })
+                    end
+                end,
+            })
 
             -- Core opencode functionality keymaps
             -- Toggle opencode interface
@@ -40,6 +61,14 @@ return {
             vim.keymap.set('n', '<leader>oy', function()
                 require('opencode').command('messages_copy')
             end, { desc = 'Copy last opencode response' })
+            
+            -- Abort current generation and kill session (custom keybinds)
+            vim.keymap.set('n', '<leader>ok', function()
+                require('opencode').command('session_interrupt')
+            end, { desc = 'Kill current opencode generation' })
+            vim.keymap.set('n', '<leader>oq', function()
+                require('opencode').command('app_exit')
+            end, { desc = 'Quit opencode session' })
 
             -- Navigation keymaps
             vim.keymap.set('n', '<S-C-u>', function()

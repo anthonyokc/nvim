@@ -50,16 +50,20 @@ return {
                 map('n', '<leader>hd', function()
                     if vim.wo.diff then
                         vim.cmd.diffoff()
-                        vim.cmd.close()
+                        require('config.git').switch_to_related_diffwin_and_close()
+                        vim.cmd.MaximizerToggle()
                     else
+                        vim.cmd.MaximizerToggle()
                         gs.diffthis()
                     end
                 end)
                 map('n', '<leader>hD', function()
                     if vim.wo.diff then
                         vim.cmd.diffoff()
-                        vim.cmd.close()
+                        require('config.git').switch_to_related_diffwin_and_close()
+                        vim.cmd.MaximizerToggle()
                     else
+                        vim.cmd.MaximizerToggle()
                         gs.diffthis('~')
                     end
                 end)

@@ -57,9 +57,38 @@ end)
 
 -- Close all windows
 vim.api.nvim_create_user_command('CloseAll', function()
-    vim.cmd('qa')
+    -- Check for modified buffers before attempting to quit
+    local modified_buffers = {}
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_buf_get_option(buf, 'modified') then
+            local buf_name = vim.api.nvim_buf_get_name(buf)
+            table.insert(modified_buffers, buf_name ~= '' and buf_name or '[No Name]')
+        end
+    end
+    
+    if #modified_buffers > 0 then
+        local message = "Unsaved changes in: " .. table.concat(modified_buffers, ', ')
+        vim.notify(message, vim.log.levels.WARN)
+        local choice = vim.fn.confirm('Unsaved changes detected. What would you like to do?', '&Save and Quit\n&Quit without Saving\n&Cancel', 1)
+        if choice == 1 then
+            -- Save all buffers and quit
+            vim.cmd('wa')
+            vim.cmd('qa')
+        elseif choice == 2 then
+            -- Quit without saving
+            vim.cmd('qa!')
+        end
+        -- choice == 3 means cancel, do nothing
+    else
+        vim.cmd('qa')
+    end
 end, { desc = 'Close all windows and NvimTree if open' })
-vim.keymap.set("n", "<C-z>", vim.cmd.CloseAll) -- close all windows, including NvimTree if open
+vim.keymap.set("n", "<C-z>", function()
+    local ok, err = pcall(vim.cmd.CloseAll)
+    if not ok then
+        vim.notify("Failed to close all windows: " .. tostring(err), vim.log.levels.ERROR)
+    end
+end, { desc = "Close all windows safely" })
 vim.keymap.set("n", "<C-s>", "<cmd>w<CR>")     -- save current buffer
 vim.keymap.set("n", "<C-S>", "<cmd>wa<CR>")    -- save all buffers
 vim.keymap.set("n", "<C-x>", "<cmd>q<CR>")     -- close current window

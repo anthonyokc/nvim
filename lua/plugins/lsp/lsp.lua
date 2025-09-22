@@ -29,11 +29,10 @@ return {
                 "eslint-lsp",                      -- ESLint Language Server for JavaScript and TypeScript
                 "gopls",                           -- Go Language Server
                 "jsonlsp",                         -- JSON Language Server
-                "lua-langeuage-server",            -- Lua Language Server
+                "lua-language-server",            -- Lua Language Server
                 -- "ltex-ls", true                     -- LTeX for text, markdown, latex, restructuredtext
                 "nil",                             -- Nix Language Server
                 "r_language_server",               -- R Language Server
-                "ruff",                            -- Ruff for Python
                 "rust-analyzer",                   -- Rust Analyzer for Rust
                 "terraform-ls",                    -- Terraform Language Server
                 "tofu-ls",                         -- OpenTofu Language Server
@@ -112,6 +111,10 @@ return {
             local on_attach = function(client, bufnr)
                 if client.server_capabilities and client.server_capabilities.documentSymbolProvider then
                     pcall(require("nvim-navic").attach, client, bufnr)
+                end
+                -- Re-enable diagnostics for lua_ls
+                if client.name == "lua_ls" and vim.bo[bufnr].filetype == "lua" then
+                    vim.diagnostic.enable(true, { bufnr = bufnr })
                 end
             end
 

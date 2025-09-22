@@ -67,3 +67,14 @@ vim.api.nvim_create_autocmd("User", {
 --         require("iron.core").repl_for("nix") -- Ensure the REPL is set up for Nix files
 --     end,
 -- })
+
+-- Defer Lua diagnostics until lua_ls is ready
+local LuaDiag = vim.api.nvim_create_augroup("LuaDeferredDiagnostics", { clear = true })
+
+vim.api.nvim_create_autocmd("FileType", {
+  group = LuaDiag,
+  pattern = "lua",
+  callback = function(args)
+    vim.diagnostic.enable(false, { args.buf })
+  end,
+})

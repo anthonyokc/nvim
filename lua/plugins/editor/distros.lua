@@ -30,7 +30,6 @@ return {
             bigfile = { enabled = true },
             explorer = {
                 enabled = true,
-                layout = { preview = true },
                 replace_netrw = true, -- Replace netrw with the snacks explorer
             },
             words = { enabled = true },
@@ -40,7 +39,17 @@ return {
             dashboard = { enabled = false },
             indent = { enabled = false },
             input = { enabled = false },
-            picker = { enabled = false },
+            picker = {
+                enabled = true,
+                defaults = { hidden = true, ignored = true },
+                sources = {
+                    explorer = {
+                        ignored = true,
+                        hidden = true, -- Show hidden files by default
+                        layout = { preset = "sidebar", preview = false },
+                    },
+                },
+            },
             notifier = { enabled = false },
             quickfile = { enabled = false },
             scope = { enabled = false },

@@ -21,6 +21,7 @@
 - [X] Audit plugin list for duplicated functionality
 - [ ] Add version pins for critical plugins
 - [ ] Add plugin health checks and conditional configuration
+- [ ] Improve unified notifications picker in telescope.lua to match native notify/noice formatting and preview capabilities
 
 ## R Language Support
 
@@ -36,6 +37,8 @@
 - [ ] Configure MCPHub Avante integration using system_prompt and custom_tools
 - [ ] Consider adding blink.cmp fo
 - [ ] Explore use of [Avante.nvim](https://github.com/yetone/avante.nvim) new Claude Text Editor Tool Mode
+- [ ] Add diff preview for opencode.nvim file edits before saving (see lua/plugins/ai/opencode.lua)
+- [ ] Move opencode.nvim helper functions to lua/config/ directory
 
 ## Documentation
 

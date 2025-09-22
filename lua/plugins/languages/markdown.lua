@@ -1,24 +1,28 @@
 return {
     {
         'MeanderingProgrammer/render-markdown.nvim',
-        ft = { "markdown", "r", "Avante" },
-        dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
-        -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' }, -- if you use the mini.nvim suite
-        -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.icons' }, -- if you use standalone mini plugins
-        -- install without yarn or npm
+        event = 'VeryLazy',
+        dependencies = {
+            'nvim-treesitter/nvim-treesitter',
+            'nvim-tree/nvim-web-devicons', -- if you prefer nvim-web-devicons
+            'folke/noice.nvim',            -- ensure noice loads first so we can override
+        },
+        opts = {
+            code = {
+                language_border = ' ',
+                language_left = '',
+                language_right = '',
+            },
+            heading = {
+                width = 'block',
+                min_width = 30,
+                sign = false
+            }
+        },
         config = function(_, opts)
-            require("render-markdown").setup({
-                code = {
-                    language_border = ' ',
-                    language_left = '',
-                    language_right = '',
-                },
-                heading = {
-                    width = 'block',
-                    min_width = 30,
-                    sign = false
-                }
-            })
+            local ok, rm = pcall(require, 'render-markdown')
+            if ok then rm.setup(opts) end
+
             vim.api.nvim_create_autocmd("FileType", {
                 pattern = { "markdown", "Avante", "r" },
                 callback = function()
@@ -122,6 +126,29 @@ return {
                     km("zi", function() vim.cmd("normal gk|normal! za|zz") end, "[P]Fold heading above")
                 end,
             })
+
+            -- Hook LSP/cmp markdown floats and sanitize R HTML noise
+            local util = vim.lsp.util
+            if ok and rm.stylize_markdown then
+                util.stylize_markdown = rm.stylize_markdown
+            end
+            local sanitize = function(c)
+                local s = require('util.markdown').sanitize_html
+                return s and s(c) or c
+            end
+            local orig_open = util.open_floating_preview
+            util.open_floating_preview = function(contents, syntax, opts, ...)
+                if syntax == 'markdown' then
+                    contents = sanitize(contents)
+                    if type(contents) == 'string' then contents = { contents } end
+                    if type(contents) == 'table' then
+                        for i, line in ipairs(contents) do
+                            contents[i] = line:gsub('```%s*rout', '```text')
+                        end
+                    end
+                end
+                return orig_open(contents, syntax, opts, ...)
+            end
         end,
 
     },

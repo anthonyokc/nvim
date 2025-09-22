@@ -1,6 +1,7 @@
 return {
     "lewis6991/gitsigns.nvim",
     event = { "BufReadPre", "BufNewFile" },
+    dependencies = { "szw/vim-maximizer" },
     config = function()
         require("gitsigns").setup {
             signs = {

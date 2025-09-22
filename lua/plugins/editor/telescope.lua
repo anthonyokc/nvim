@@ -109,9 +109,49 @@ return {
             vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Find Help Tags" })
             vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "Find Keymaps" })
 
+            -- Unified notifications picker
+            local function notifications_picker()
+                local pickers = require("telescope.pickers")
+                local finders = require("telescope.finders")
+                local conf = require("telescope.config").values
+
+                local entries = {}
+
+                -- grab from notify plugin if available
+                local notify_ok, notify = pcall(require, "notify")
+                if notify_ok and notify.history then
+                    local notify_history = notify.history() or {}
+                    for _, n in ipairs(notify_history) do
+                        local message = type(n.message) == "table" and vim.inspect(n.message) or tostring(n.message or "unknown")
+                        table.insert(entries, "[notify] " .. message)
+                    end
+                end
+
+                -- grab from noice plugin if available
+                local noice_ok, noice = pcall(require, "noice")
+                if noice_ok and noice.api and noice.api.history and noice.api.history.list then
+                    local noice_history = noice.api.history.list() or {}
+                    for _, n in ipairs(noice_history) do
+                        local message = type(n.message) == "table" and vim.inspect(n.message) or tostring(n.message or n.event or "unknown")
+                        table.insert(entries, "[noice] " .. message)
+                    end
+                end
+
+                if #entries == 0 then
+                    table.insert(entries, "No notifications found")
+                end
+
+                pickers.new({}, {
+                    prompt_title = "Notifications",
+                    finder = finders.new_table(entries),
+                    sorter = conf.generic_sorter({}),
+                }):find()
+            end
+
             -- Notifications and clipboard
             vim.keymap.set('n', '<leader>fn', "<cmd>Telescope notify<CR>", { desc = "Find Notifications" })
             vim.keymap.set('n', '<leader>fN', "<cmd>Telescope noice<CR>", { desc = "Find Noice Messages" })
+            vim.keymap.set('n', '<leader>fun', notifications_picker, { desc = "Find All Notifications" })
             vim.keymap.set('n', '<leader>fy', "<cmd>Telescope neoclip<CR>", { desc = "Find Clipboard History" })
 
             -- Harpoon

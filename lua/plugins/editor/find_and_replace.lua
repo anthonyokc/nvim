@@ -1,5 +1,10 @@
 return {
     "nvim-pack/nvim-spectre",
+    keys = {
+        { "<leader>S", desc = "Toggle Spectre" },
+        { "<leader>sw", desc = "Search current word" },
+        { "<leader>sp", desc = "Search on current file" },
+    },
     config = function()
         require('spectre').setup({
             open_cmd = 'tabnew',

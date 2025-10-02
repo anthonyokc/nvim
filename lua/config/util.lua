@@ -156,11 +156,24 @@ M.toggle_todo_current_line = function()
     local content = line:sub(#indent + 1)
 
     local todo_prefix = prefix .. " TODO: "
+    local comment_prefix = prefix .. " "
 
     if content:sub(1, #todo_prefix) == todo_prefix then
+        -- Line starts with "<comment> TODO: " - remove just "TODO: " if there's text after it
         local new_content = content:sub(#todo_prefix + 1)
-        vim.api.nvim_set_current_line(indent .. new_content)
+        if new_content:match("^%s*$") then
+            -- No text after TODO:, remove entire comment
+            vim.api.nvim_set_current_line(indent .. new_content)
+        else
+            -- Text exists after TODO:, keep the comment prefix
+            vim.api.nvim_set_current_line(indent .. comment_prefix .. new_content)
+        end
+    elseif content:sub(1, #comment_prefix) == comment_prefix then
+        -- Line starts with just "<comment> " - add TODO:
+        local new_content = content:sub(#comment_prefix + 1)
+        vim.api.nvim_set_current_line(indent .. todo_prefix .. new_content)
     else
+        -- Line doesn't start with comment - add full TODO: comment
         vim.api.nvim_set_current_line(indent .. todo_prefix .. content)
     end
 end

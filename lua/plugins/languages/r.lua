@@ -116,8 +116,8 @@ return {
 
             -- R Object Browser
             objbr_place = "right",
-            objbr_opendf = true,
-            objbr_openlist = true,
+            objbr_opendf = false,
+            objbr_openlist = false,
 
             -- R Help & Documentation
             nvimpager = "tab",

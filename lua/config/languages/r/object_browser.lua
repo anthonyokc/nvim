@@ -41,10 +41,10 @@ local function float_objbr()
   if not (buf and api.nvim_buf_is_valid(buf)) then
     return false
   end
-  
+
   -- Open FLOAT first (keeps buf alive even if the split closes)
-  local W = math.floor(vim.o.columns * 0.35)
-  local H = math.floor(vim.o.lines * 0.60)
+  local W = math.floor(vim.o.columns * 0.4)
+  local H = math.floor(vim.o.lines * 0.80)
   local float = api.nvim_open_win(buf, true, {
     relative = "editor",
     width = W,
@@ -55,12 +55,12 @@ local function float_objbr()
     style = "minimal",
     noautocmd = true,
   })
-  
+
   -- Close the original OB split if it exists and isn't our float
   if win and api.nvim_win_is_valid(win) and win ~= float then
     pcall(api.nvim_win_close, win, true)
   end
-  
+
   ob.win, ob.buf = float, buf
   return true
 end
@@ -70,7 +70,7 @@ local function ensure_objbr_then_float()
   -- If neither buffer nor window exists, start one
   local w0, b0 = find_objbr_win()
   if not (b0 or w0) then start_objbr() end
-  
+
   -- Retry a few times while R.nvim creates the buffer/window
   local tries, interval = 30, 50 -- ~1.5s max
   local function step()

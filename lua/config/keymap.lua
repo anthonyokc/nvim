@@ -407,3 +407,6 @@ vim.keymap.set("n", "<leader>td", function()
     require("config.util").toggle_todo_current_line()
 end, { desc = "Toggle TODO on current line" })
 
+vim.keymap.set({ "n", "x" }, "<leader>tD", function()
+    require("config.util").toggle_todo_consider_deleting()
+end, { desc = "TODO consider deleting" })

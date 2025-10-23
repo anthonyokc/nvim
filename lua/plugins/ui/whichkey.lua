@@ -56,6 +56,7 @@ return {
             -- Comments
             { "<leader>C",   desc = "Toggle comment", cond = function() return vim.tbl_contains({ "r", "rmd", "quarto" }, vim.bo.filetype) end },
             { "<leader>td",  desc = "Toggle TODO on current line" },
+            { "<leader>tD",  desc = "TODO consider deleting" },
 
             -- Avante
             { "<leader>a",   group = "Avante" },

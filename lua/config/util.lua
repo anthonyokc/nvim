@@ -148,18 +148,19 @@ M.get_comment_prefix = function()
     return "#"
 end
 
--- Toggle "<comment> TODO: " at the start of the current line (preserves indent)
-M.toggle_todo_current_line = function()
+local toggle_todo_line = function(suffix)
+    suffix = suffix or ""
     local prefix = M.get_comment_prefix()
     local line = vim.api.nvim_get_current_line()
     local indent = line:match("^%s*") or ""
     local content = line:sub(#indent + 1)
 
-    local todo_prefix = prefix .. " TODO: "
+    local suffix_part = (suffix ~= "" and (suffix .. " ")) or ""
+    local todo_prefix = prefix .. " TODO: " .. suffix_part
     local comment_prefix = prefix .. " "
 
     if content:sub(1, #todo_prefix) == todo_prefix then
-        -- Line starts with "<comment> TODO: " - remove just "TODO: " if there's text after it
+        -- Line starts with "<comment> TODO: ..." - remove just the TODO portion if needed
         local new_content = content:sub(#todo_prefix + 1)
         if new_content:match("^%s*$") then
             -- No text after TODO:, remove entire comment
@@ -175,6 +176,62 @@ M.toggle_todo_current_line = function()
     else
         -- Line doesn't start with comment - add full TODO: comment
         vim.api.nvim_set_current_line(indent .. todo_prefix .. content)
+    end
+end
+
+local comment_selection_with_todo = function(suffix)
+    suffix = suffix or ""
+    local prefix = M.get_comment_prefix()
+    local todo_line = prefix .. " TODO:"
+    if suffix ~= "" then
+        todo_line = todo_line .. " " .. suffix
+    end
+
+    local buf = 0
+    local start_mark = vim.api.nvim_buf_get_mark(buf, "<")
+    local end_mark = vim.api.nvim_buf_get_mark(buf, ">")
+    if not start_mark or not end_mark then return end
+
+    local start_line = math.min(start_mark[1], end_mark[1]) - 1
+    local end_line = math.max(start_mark[1], end_mark[1]) - 1
+    if start_line < 0 or end_line < start_line then return end
+
+    local lines = vim.api.nvim_buf_get_lines(buf, start_line, end_line + 1, false)
+    if #lines == 0 then return end
+
+    local first_indent = lines[1]:match("^%s*") or ""
+    local comment_prefix = prefix .. " "
+
+    for idx, line in ipairs(lines) do
+        local indent = line:match("^%s*") or ""
+        local remainder = line:sub(#indent + 1)
+        if remainder == "" then
+            lines[idx] = indent .. comment_prefix
+        else
+            lines[idx] = indent .. comment_prefix .. remainder
+        end
+    end
+
+    table.insert(lines, 1, first_indent .. todo_line)
+    vim.api.nvim_buf_set_lines(buf, start_line, end_line + 1, false, lines)
+
+    -- Leave visual mode cleanly
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+end
+
+-- Toggle "<comment> TODO: " at the start of the current line (preserves indent)
+M.toggle_todo_current_line = function()
+    toggle_todo_line()
+end
+
+M.toggle_todo_consider_deleting = function(mode)
+    mode = mode or vim.fn.mode()
+    if mode == "n" then
+        toggle_todo_line("🗑️ Consider deleting")
+    elseif mode == "v" or mode == "V" or mode == "\22" then
+        comment_selection_with_todo("🗑️ Consider deleting")
+    else
+        toggle_todo_line("🗑️ Consider deleting")
     end
 end
 

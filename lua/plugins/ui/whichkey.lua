@@ -27,8 +27,7 @@ return {
             { "<leader>yay", desc = "Copy whole file to system clipboard" },
 
             -- Search and replace
-            { "<leader>s",   group = "Search and Replace" },
-            { "<leader>ss",  desc = "Search and replace current word" },
+            { "<leader>s",  desc = "Search and replace current word" },
             { "<leader>rh",  desc = "Convert read.csv to read_csv with here()" },
             { "<leader>#",   desc = "Convert top line comments to inline" },
 

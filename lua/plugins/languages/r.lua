@@ -35,6 +35,8 @@ return {
                         { "v", "<Enter>",        "<Plug>RDSendSelection",     "Send selection to R",             { remap = true } },
                         { "n", "<LocalLeader>f", "<Plug>RFormat",             "Format buffer",                   { remap = true } },
                         { "v", "<LocalLeader>f", "<Plug>RFormat",             "Format selection",                { remap = true } },
+                        { "n", "<leader>V",      "<Plug>RViewDF",             "View object",                     { remap = true } },
+                        { "v", "<leader>V",      "<Plug>RViewDF",             "View object",                     { remap = true } },
 
                         -- Custom paragraph sending
                         { "n", ",",              helpers.send_paragraph_to_r, "Send paragraph to R" },
@@ -70,10 +72,6 @@ return {
                         { "n", "<leader>rus", helpers.r_action(
                             '(function(package){ rlang::as_label(rlang::enexpr(package)) |> usethis::use_package(type="Suggests") })'
                         ), 'use_package("Suggests")' },
-
-                        -- View commands
-                        { "n", "<leader>V",        helpers.r_action("(function(data){ data |> View() })"), "View object" },
-                        { "v", "<leader>V",        helpers.r_action("(function(data){ data |> View() })"), "View selection" },
 
                         -- Other R commands
                         { "n", "<LocalLeader>hgd", helpers.r_cmd("hgd()"),                                 "hgd()" },
@@ -118,6 +116,11 @@ return {
             objbr_place = "right",
             objbr_opendf = false,
             objbr_openlist = false,
+
+            -- TODO: Add clear console command
+            -- clear_console = "<leader>rc",
+            -- TODO: Insert Assing & Pipe
+            -- clear_console = "<leader>rc",
 
             -- R Help & Documentation
             nvimpager = "tab",

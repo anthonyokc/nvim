@@ -45,8 +45,8 @@ return {
 
 
                         -- R actions and helpers
-                        { "n", "<leader><CR>",   helpers.r_action(""),        "Run (context)" },
-                        { "n", "<leader>rg",     helpers.r_action("glimpse"), "glimpse()" },
+                        { "n", "<leader><CR>",   helpers.r_action(""),            "Run (context)"  },
+                        { "n", "<leader>rg",     helpers.r_action("glimpse"),     "glimpse(data)"  },
                         { "n", "<leader>ri", helpers.r_action(
                             '(function(package){ rlang::as_label(rlang::enexpr(package)) |> renv::install(prompt=FALSE) })'
                         ), "renv install pkg" },

@@ -41,6 +41,8 @@ return {
                         -- Custom paragraph sending
                         { "n", ",",              helpers.send_paragraph_to_r, "Send paragraph to R" },
                         { "v", "<leader>rH",     helpers.read_csv_to_object,  "Write->Read CSV replace (visual)" },
+                        { "n", "<leader>rG",     helpers.send_chain_glimpse,  "Send pipe chain & glimpse()" },
+
 
                         -- R actions and helpers
                         { "n", "<leader><CR>",   helpers.r_action(""),        "Run (context)" },

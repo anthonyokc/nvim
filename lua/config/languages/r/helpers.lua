@@ -75,4 +75,25 @@ function M.send_paragraph_to_r()
   vim.fn.feedkeys(api.nvim_replace_termcodes('<Plug>RDSendSelection', true, true, true), 'n')
 end
 
+-- Send the current pipe chain and inspect the result with glimpse()
+function M.send_chain_glimpse()
+  local glimpse_fn = vim.g.r_chain_glimpse_fn or "dplyr::glimpse"
+
+  local send = require("r.send")
+  local ok, err = pcall(send.chain)
+  if not ok then
+    vim.notify(string.format("Sending pipe chain failed: %s", err), vim.log.levels.WARN)
+    return
+  end
+
+  local cmd = string.format("%s(.Last.value)", glimpse_fn)
+  local send_ok, send_result = pcall(send.cmd, cmd)
+  if not send_ok then
+    vim.notify(string.format("glimpse() failed: %s", send_result), vim.log.levels.WARN)
+  elseif send_result == false then
+    local msg = "R is not ready"
+    vim.notify(string.format("glimpse() failed: %s", msg), vim.log.levels.WARN)
+  end
+end
+
 return M

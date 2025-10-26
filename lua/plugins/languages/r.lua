@@ -29,14 +29,15 @@ return {
                     local keymaps = {
                         -- Built-in R.nvim keymaps (need remap=true for <Plug> mappings)
                         -- Format is: { "mode", "key", "action", "description", { options } }
-                        { "i", "<C-k>",          "<Plug>RInsertAssign",       "Insert <-",                       { remap = true } },
-                        { "i", "<C-l>",          "<Plug>RInsertPipe",         "Insert |>",                       { remap = true } },
-                        { "n", "<Enter>",        "<Plug>RDSendLine",          "Send line to R",                  { remap = true } },
-                        { "v", "<Enter>",        "<Plug>RDSendSelection",     "Send selection to R",             { remap = true } },
-                        { "n", "<LocalLeader>f", "<Plug>RFormat",             "Format buffer",                   { remap = true } },
-                        { "v", "<LocalLeader>f", "<Plug>RFormat",             "Format selection",                { remap = true } },
-                        { "n", "<leader>V",      "<Plug>RViewDF",             "View object",                     { remap = true } },
-                        { "v", "<leader>V",      "<Plug>RViewDF",             "View object",                     { remap = true } },
+                        { "i", "<C-k>",            "<Plug>RInsertAssign",   "Insert <-",                             { remap = true } },
+                        { "i", "<C-l>",            "<Plug>RInsertPipe",     "Insert |>",                             { remap = true } },
+                        { "n", "<Enter>",          "<Plug>RDSendLine",      "Send line to R",                        { remap = true } },
+                        { "v", "<Enter>",          "<Plug>RDSendSelection", "Send selection to R",                   { remap = true } },
+                        { "n", "<LocalLeader>f",   "<Plug>RFormat",         "Format buffer",                         { remap = true } },
+                        { "v", "<LocalLeader>f",   "<Plug>RFormat",         "Format selection",                      { remap = true } },
+                        { "n", "<leader>V",        "<Plug>RViewDF",         "View object",                           { remap = true } },
+                        { "v", "<leader>V",        "<Plug>RViewDF",         "View object",                           { remap = true } },
+                        { "n", "<leader>r<Enter>", "<Plug>RSendChain",      "Send piped chain up to current cursor", { remap = true } },
 
                         -- Custom paragraph sending
                         { "n", ",",              helpers.send_paragraph_to_r, "Send paragraph to R" },
@@ -50,7 +51,7 @@ return {
                         { "n", "<leader>rp",     helpers.r_action("problems"),  "problems(data)" },
                         { "n", "<leader>ri", helpers.r_action(
                             '(function(package){ rlang::as_label(rlang::enexpr(package)) |> renv::install(prompt=FALSE) })'
-                        ), "renv install pkg" },
+                        ), "renv install package" },
 
                         -- renv commands
                         { "n", "<leader>rI",  helpers.r_cmd("renv::init()"),                          "renv::init()" },
@@ -86,6 +87,7 @@ return {
                     for _, keymap in ipairs(keymaps) do
                         helpers.bufmap(keymap[1], keymap[2], keymap[3], keymap[4], keymap[5])
                     end
+
                 end,
             },
 

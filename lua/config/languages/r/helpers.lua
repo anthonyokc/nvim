@@ -41,14 +41,14 @@ end
 function M.read_csv_to_object()
   local start_line, end_line = vim.fn.getpos("'<")[2], vim.fn.getpos("'>")[2]
   local lines = api.nvim_buf_get_lines(0, start_line - 1, end_line, false)
-  
+
   for i, line in ipairs(lines) do
     local object_name, file_path = line:match('write_csv%(([%w_]+),%s*here%("(.+)"%)%)')
     if object_name and file_path then
       lines[i] = string.format('%s <- read_csv(here("%s"))', object_name, file_path)
     end
   end
-  
+
   api.nvim_buf_set_lines(0, start_line - 1, end_line, false, lines)
 end
 
@@ -57,7 +57,7 @@ function M.send_paragraph_to_r()
   local start_line = vim.fn.line('.')
   local end_line = start_line
   local total_lines = vim.fn.line('$')
-  
+
   -- Find the next blank line or end of file
   for i = start_line + 1, total_lines do
     local line = vim.fn.getline(i)
@@ -69,7 +69,7 @@ function M.send_paragraph_to_r()
       end_line = i
     end
   end
-  
+
   -- Send the range
   vim.cmd('normal! ' .. start_line .. 'GV' .. end_line .. 'G')
   vim.fn.feedkeys(api.nvim_replace_termcodes('<Plug>RDSendSelection', true, true, true), 'n')

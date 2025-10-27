@@ -1,6 +1,7 @@
 local helpers = require("config.languages.r.helpers")
 local folds = require("config.languages.r.folds")
 local object_browser = require("config.languages.r.object_browser")
+local object_picker = require("config.languages.r.object_picker")
 
 return {
     "R-nvim/R.nvim",
@@ -47,6 +48,8 @@ return {
 
                         -- R actions and helpers
                         { "n", "<leader><CR>",   helpers.r_action(""),            "Run (context)"  },
+                        { "n", "<leader>fo",    object_picker.open_global_env,      "Find R object (.GlobalEnv)" },
+                        { "n", "<leader>fl",    object_picker.open_library_objects, "Find R library object" },
                         { "n", "<leader>ra",    function()
                             require("config.languages.r").toggle_assignment_current_object()
                         end, "Toggle pipe assignment" },

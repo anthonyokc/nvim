@@ -47,6 +47,9 @@ return {
 
                         -- R actions and helpers
                         { "n", "<leader><CR>",   helpers.r_action(""),            "Run (context)"  },
+                        { "n", "<leader>ra",    function()
+                            require("config.languages.r").toggle_assignment_current_object()
+                        end, "Toggle pipe assignment" },
                         { "n", "<leader>rg",     helpers.r_action("glimpse"),     "glimpse(data)"  },
                         { "n", "<leader>rp",     helpers.r_action("problems"),  "problems(data)" },
                         { "n", "<leader>ri", helpers.r_action(

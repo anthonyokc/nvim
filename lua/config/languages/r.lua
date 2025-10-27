@@ -150,6 +150,34 @@ M.toggle_comment_current_line = function()
     end
 end
 
+-- Toggle adding/removing `<name> <-` prefix for a pipe chain
+M.toggle_assignment_current_object = function()
+    local line = vim.api.nvim_get_current_line()
+    local cursor_row, cursor_col = unpack(vim.api.nvim_win_get_cursor(0))
+
+    -- Try to remove `<name> <- <name> |> ...`
+    local indent, lhs, rhs = line:match("^(%s*)([%w_%.]+)%s*<%-%s*(.+)$")
+    if lhs and rhs then
+        local rhs_trim = rhs:gsub("^%s*", "")
+        local rhs_name, rest = rhs_trim:match("^([%w_%.]+)(%s*|>.*)$")
+        if rhs_name and rest and rhs_name == lhs then
+            vim.api.nvim_set_current_line(indent .. rhs_name .. rest)
+            vim.api.nvim_win_set_cursor(0, { cursor_row, math.max(cursor_col - (#lhs + 4), 0) })
+            return
+        end
+    end
+
+    -- Add assignment when the line starts with `<name |> ...`
+    local indent2, name, rest2 = line:match("^(%s*)([%w_%.]+)(%s*|>.*)$")
+    if name and rest2 then
+        vim.api.nvim_set_current_line(string.format("%s%s <- %s%s", indent2, name, name, rest2))
+        vim.api.nvim_win_set_cursor(0, { cursor_row, cursor_col + #name + 4 })
+        return
+    end
+
+    print("No pipe chain found to toggle assignment.")
+end
+
 -- Setup function to be called from init.lua
 M.setup = function()
     -- Set up R-specific keymaps
@@ -166,6 +194,8 @@ M.setup = function()
                 { noremap = true, silent = true, desc = "Format R function" })
             vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ru', ':lua require("config.lang.r").unformat_r_function()<CR>',
                 { noremap = true, silent = true, desc = "Unformat R function" })
+            vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ra', ':lua require("config.languages.r").toggle_assignment_current_object()<CR>',
+                { noremap = true, silent = true, desc = "Toggle pipe assignment" })
         end
     })
 end
@@ -204,4 +234,3 @@ vim.api.nvim_create_autocmd({ "FileType", "BufWinEnter" }, {
 })
 
 return M
-

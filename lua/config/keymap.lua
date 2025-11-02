@@ -5,6 +5,7 @@
 -- # Custom Keybindings of Native Vim Functions
 vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "Open file explorer" })
+vim.keymap.set("n", "<leader>w", "<C-w>w", { desc = "Switch to next window" })
 
 vim.keymap.set("n", "T", "<cmd>retab<CR>")
 vim.keymap.set("v", "T", "<cmd>retab<CR>")

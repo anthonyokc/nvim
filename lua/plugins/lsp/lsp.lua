@@ -28,6 +28,8 @@ return {
                 "dockerfile-language-server",      -- Dockerfile Language Server
                 "eslint-lsp",                      -- ESLint Language Server for JavaScript and TypeScript
                 "gopls",                           -- Go Language Server
+                "html-lsp",                        -- HTML Language Server
+                "htmx-lsp",                        -- HTMX Language Server
                 "jsonlsp",                         -- JSON Language Server
                 "lua-language-server",            -- Lua Language Server
                 -- "ltex-ls", true                     -- LTeX for text, markdown, latex, restructuredtext
@@ -64,11 +66,12 @@ return {
 
                 -- Formatters
                 "Nixfmt",  -- NixFmt for Nix formatting
+                "htmlbeautifier", -- HTML Beautifier for HTML formatting
                 "fixjson", -- FixJSON for JSON formatting
                 "gci",     -- GCI, a tool that control golang package import order and make it always deterministic.
                 "jq",      -- JQ for JSON processing
                 "stylua",  -- Stylua for Lua and Luau formatting
-                "tex-fmt", -- Tex FMT for LaTeX formatting
+                -- "tex-fmt", -- Tex FMT for LaTeX formatting
                 "usort",   -- Usort for Python sorting imports
 
                 -- Other tools

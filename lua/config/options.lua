@@ -6,11 +6,10 @@
 vim.opt.nu = true
 vim.opt.relativenumber = true
 
-
 -- Set tabs and indentation based on file type (using autocmd)
-vim.opt.tabstop = 2      -- Number of spaces a <Tab> in the file counts for
-vim.opt.softtabstop = 2  -- Number of spaces a <Tab> counts for while performing editing operations
-vim.opt.shiftwidth = 2   -- Indent by 2 spaces when using >> or <<
+vim.opt.tabstop = 2 -- Number of spaces a <Tab> in the file counts for
+vim.opt.softtabstop = 2 -- Number of spaces a <Tab> counts for while performing editing operations
+vim.opt.shiftwidth = 2 -- Indent by 4 spaces when using >> or <<
 vim.opt.expandtab = true -- Use spaces instead of tabs
 
 vim.opt.smartindent = true
@@ -47,7 +46,7 @@ vim.opt.updatetime = 50
 vim.opt.colorcolumn = "80"
 
 vim.opt.list = true
-vim.opt.listchars = 'space:·'
+vim.opt.listchars = "space:·,tab:→·"
 
 -- -- Set Tabs for specific files
 -- local set_tab_settings = function(extension, ts, sw, sts)

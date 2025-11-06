@@ -4,14 +4,13 @@
          event = 'VeryLazy',
          dependencies = {
             -- Recommended for better prompt input, and required to use `opencode.nvim`'s embedded terminal — otherwise optional
-            { 'folke/snacks.nvim', opts = { input = { enabled = true } } },
+            { "folke/snacks.nvim", opts = { input = { enabled = true }, picker = {}, terminal = {} } },
         },
         config = function()
             vim.g.opencode_opts = {
-                terminal = {
-                    win = {
-                        enter = true,
-                        bo = { filetype = "opencode_terminal" },
+                provider = {
+                    enabled = "snacks",
+                    snacks = {
                     },
                 },
             }
@@ -46,63 +45,89 @@
            vim.api.nvim_create_autocmd("TermOpen", {
                group = vim.api.nvim_create_augroup("OpencodeAutoReloadSSE", { clear = true }),
                callback = function(args)
-                   if vim.bo[args.buf].filetype == "opencode_terminal" and not sse_connected then
-                       -- Setup the built-in SSE-based auto-reload
-                       require("opencode.reload").setup()
+                   if vim.bo[args.buf].filetype ~= "opencode_terminal" or sse_connected then
+                       return
+                   end
 
+                   local ok, err = pcall(function()
+                       local server_mod = require("opencode.cli.server")
+                       local client_mod = require("opencode.cli.client")
+                       if type(server_mod) ~= "table" or type(server_mod.get_port) ~= "function"
+                           or type(client_mod) ~= "table" or type(client_mod.listen_to_sse) ~= "function" then
+                           error("invalid opencode SSE modules")
+                       end
 
+                       -- Connect to SSE for real-time file.edited events
+                       -- Delay this to prevent double terminal creation during initialization
+                       vim.defer_fn(function()
+                           server_mod.get_port()
+                               :next(function(port)
+                                   client_mod.listen_to_sse(port, function(event)
+                                       vim.api.nvim_exec_autocmds("User", {
+                                           pattern = "OpencodeEvent",
+                                           data = {
+                                               event = event,
+                                               port = port,
+                                           },
+                                       })
 
-                        -- Connect to SSE for real-time file.edited events
-                        -- Delay this to prevent double terminal creation during initialization
-                        vim.defer_fn(function()
-                            require("opencode.server").get_port(function(ok, port)
-                                if ok then
-                                    require("opencode.client").listen_to_sse(port, function(event)
-                                        vim.api.nvim_exec_autocmds("User", {
-                                            pattern = "OpencodeEvent",
-                                            data = event,
-                                        })
+                                       -- Check for file.edited events (original design)
+                                       if event.type == "file.edited" then
+                                           vim.cmd('silent! checktime')
+                                       end
 
-                                        -- Check for file.edited events (original design)
-                                        if event.type == "file.edited" then
-                                            vim.cmd('silent! checktime')
-                                        end
+                                       -- Check for edit tool completion events
+                                       if event.type == "message.part.updated" and
+                                          event.properties and
+                                          event.properties.part and
+                                          event.properties.part.tool == "edit" and
+                                          event.properties.part.state and
+                                          event.properties.part.state.status == "completed" then
+                                           local filePath = event.properties.part.state.input and event.properties.part.state.input.filePath
+                                           local oldString = event.properties.part.state.input and event.properties.part.state.input.oldString
+                                           local newString = event.properties.part.state.input and event.properties.part.state.input.newString
+                                       end
 
-                                        -- Check for edit tool completion events
-                                        if event.type == "message.part.updated" and
-                                           event.properties and
-                                           event.properties.part and
-                                           event.properties.part.tool == "edit" and
-                                           event.properties.part.state and
-                                           event.properties.part.state.status == "completed" then
-                                            local filePath = event.properties.part.state.input and event.properties.part.state.input.filePath
-                                            local oldString = event.properties.part.state.input and event.properties.part.state.input.oldString
-                                            local newString = event.properties.part.state.input and event.properties.part.state.input.newString
-                                        end
+                                       -- Also check for write tool events
+                                       if event.type == "message.part.updated" and
+                                          event.properties and
+                                          event.properties.part and
+                                          event.properties.part.tool == "write" and
+                                          event.properties.part.state and
+                                          event.properties.part.state.status == "completed" then
+                                           local filePath = event.properties.part.state.input and event.properties.part.state.input.filePath
+                                           if filePath then
+                                               vim.schedule(function()
+                                                   vim.cmd('silent! checktime')
+                                               end)
+                                           end
+                                       end
+                                   end)
+                                   sse_connected = true
+                                   stop_polling_fallback()
+                                   return port
+                               end)
+                               :catch(function(port_err)
+                                   local message = "[opencode] SSE auto-reload unavailable, using polling fallback"
+                                   if port_err ~= nil then
+                                       local err_msg = type(port_err) == "string" and port_err or vim.inspect(port_err)
+                                       if err_msg ~= "" then
+                                           message = message .. ("\n" .. err_msg)
+                                       end
+                                   end
+                                   vim.notify(message, vim.log.levels.WARN)
+                                   start_polling_fallback()
+                               end)
+                       end, 500) -- Small delay to ensure terminal setup is complete
+                   end)
 
-                                        -- Also check for write tool events
-                                        if event.type == "message.part.updated" and
-                                           event.properties and
-                                           event.properties.part and
-                                           event.properties.part.tool == "write" and
-                                           event.properties.part.state and
-                                           event.properties.part.state.status == "completed" then
-                                            local filePath = event.properties.part.state.input and event.properties.part.state.input.filePath
-                                            if filePath then
-                                                vim.schedule(function()
-                                                    vim.cmd('silent! checktime')
-                                                end)
-                                            end
-                                        end
-                                    end)
-                                    sse_connected = true
-                                else
-                                    -- SSE failed, use polling fallback
-                                    vim.notify("[opencode] SSE failed, using polling fallback", vim.log.levels.WARN)
-                                    start_polling_fallback()
-                                end
-                            end)
-                        end, 500) -- Small delay to ensure terminal setup is complete
+                   if not ok then
+                       local message = "[opencode] SSE auto-reload unavailable, using polling fallback"
+                       if type(err) == "string" and err ~= "" then
+                           message = message .. ("\n" .. err)
+                       end
+                       vim.notify(message, vim.log.levels.WARN)
+                       start_polling_fallback()
                    end
                end,
            })
@@ -148,6 +173,14 @@
             vim.keymap.set('n', '<leader>ot', function()
                     require('opencode').toggle()
             end, { desc = 'Toggle opencode' })
+
+            -- Opencode selection interface
+            vim.keymap.set('n', '<leader>fo', function()
+                    require('opencode').select()
+            end, { desc = 'Find opencode command' })
+            vim.keymap.set('v', '<leader>fo', function()
+                    require('opencode').select()
+            end, { desc = 'Find opencode command' })
 
             -- Ask opencode questions
             vim.keymap.set('n', '<leader>oA', function()

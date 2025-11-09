@@ -18,12 +18,40 @@
             -- Required for `opts.auto_reload`
             vim.opt.autoread = true
 
-           -- Enhanced auto-reload: SSE-based + polling fallback
-           local opencode_timer = nil
-           local sse_connected = false
+            -- Enhanced auto-reload: SSE-based + polling fallback
+            local opencode_timer = nil
+            local sse_connected = false
+
+            local provider_module = require("opencode.provider")
+            if provider_module and provider_module.start and not provider_module._opencode_start_guard then
+                local original_start = provider_module.start
+                local guard = { original = original_start, counter = 0 }
+                provider_module._opencode_start_guard = guard
+                provider_module.start = function(...)
+                    if guard.counter > 0 then
+                        guard.counter = guard.counter - 1
+                        return
+                    end
+                    return guard.original(...)
+                end
+            end
+
+            local function skip_next_provider_start()
+                local guard = provider_module and provider_module._opencode_start_guard
+                if not guard then
+                    return function() end
+                end
+                guard.counter = guard.counter + 1
+                return function()
+                    if guard.counter > 0 then
+                        guard.counter = guard.counter - 1
+                    end
+                end
+            end
 
 
-           local function start_polling_fallback()
+            local function start_polling_fallback()
+
                if opencode_timer then
                    vim.fn.timer_stop(opencode_timer)
                end
@@ -45,90 +73,123 @@
            vim.api.nvim_create_autocmd("TermOpen", {
                group = vim.api.nvim_create_augroup("OpencodeAutoReloadSSE", { clear = true }),
                callback = function(args)
-                   if vim.bo[args.buf].filetype ~= "opencode_terminal" or sse_connected then
-                       return
-                   end
+                    if vim.bo[args.buf].filetype ~= "opencode_terminal" or sse_connected then
+                        return
+                    end
 
-                   local ok, err = pcall(function()
-                       local server_mod = require("opencode.cli.server")
-                       local client_mod = require("opencode.cli.client")
-                       if type(server_mod) ~= "table" or type(server_mod.get_port) ~= "function"
-                           or type(client_mod) ~= "table" or type(client_mod.listen_to_sse) ~= "function" then
-                           error("invalid opencode SSE modules")
-                       end
+                    local release_skip = function() end
 
-                       -- Connect to SSE for real-time file.edited events
-                       -- Delay this to prevent double terminal creation during initialization
-                       vim.defer_fn(function()
-                           server_mod.get_port()
-                               :next(function(port)
-                                   client_mod.listen_to_sse(port, function(event)
-                                       vim.api.nvim_exec_autocmds("User", {
-                                           pattern = "OpencodeEvent",
-                                           data = {
-                                               event = event,
-                                               port = port,
-                                           },
-                                       })
+                    local ok, err = pcall(function()
 
-                                       -- Check for file.edited events (original design)
-                                       if event.type == "file.edited" then
-                                           vim.cmd('silent! checktime')
-                                       end
+                        local server_mod = require("opencode.cli.server")
+                        local client_mod = require("opencode.cli.client")
+                        if type(server_mod) ~= "table" or type(server_mod.get_port) ~= "function"
+                            or type(client_mod) ~= "table" or type(client_mod.listen_to_sse) ~= "function" then
+                            error("invalid opencode SSE modules")
+                        end
 
-                                       -- Check for edit tool completion events
-                                       if event.type == "message.part.updated" and
-                                          event.properties and
-                                          event.properties.part and
-                                          event.properties.part.tool == "edit" and
-                                          event.properties.part.state and
-                                          event.properties.part.state.status == "completed" then
-                                           local filePath = event.properties.part.state.input and event.properties.part.state.input.filePath
-                                           local oldString = event.properties.part.state.input and event.properties.part.state.input.oldString
-                                           local newString = event.properties.part.state.input and event.properties.part.state.input.newString
-                                       end
+                        if not server_mod._opencode_suppress_start_notify then
+                            local original_get_port = server_mod.get_port
+                            server_mod.get_port = function(...)
+                                local original_notify = vim.notify
+                                vim.notify = function(msg, level, opts)
+                                    if type(msg) == "string" and msg:find("No `opencode` processes — starting `opencode`…") then
+                                        return
+                                    end
+                                    return original_notify(msg, level, opts)
+                                end
+                                local ok, result = pcall(original_get_port, ...)
+                                vim.notify = original_notify
+                                if not ok then
+                                    error(result)
+                                end
+                                return result
+                            end
+                            server_mod._opencode_suppress_start_notify = true
+                        end
 
-                                       -- Also check for write tool events
-                                       if event.type == "message.part.updated" and
-                                          event.properties and
-                                          event.properties.part and
-                                          event.properties.part.tool == "write" and
-                                          event.properties.part.state and
-                                          event.properties.part.state.status == "completed" then
-                                           local filePath = event.properties.part.state.input and event.properties.part.state.input.filePath
-                                           if filePath then
-                                               vim.schedule(function()
-                                                   vim.cmd('silent! checktime')
-                                               end)
-                                           end
-                                       end
-                                   end)
-                                   sse_connected = true
-                                   stop_polling_fallback()
-                                   return port
-                               end)
-                               :catch(function(port_err)
-                                   local message = "[opencode] SSE auto-reload unavailable, using polling fallback"
-                                   if port_err ~= nil then
-                                       local err_msg = type(port_err) == "string" and port_err or vim.inspect(port_err)
-                                       if err_msg ~= "" then
-                                           message = message .. ("\n" .. err_msg)
-                                       end
-                                   end
-                                   vim.notify(message, vim.log.levels.WARN)
-                                   start_polling_fallback()
-                               end)
-                       end, 500) -- Small delay to ensure terminal setup is complete
+                        -- Connect to SSE for real-time file.edited events
+                        -- Delay this to prevent double terminal creation during initialization
+                        release_skip = skip_next_provider_start()
+                        vim.defer_fn(function()
+
+                            server_mod.get_port()
+                                :next(function(port)
+                                    release_skip()
+                                    release_skip = function() end
+                                    client_mod.listen_to_sse(port, function(event)
+                                        vim.api.nvim_exec_autocmds("User", {
+                                            pattern = "OpencodeEvent",
+                                            data = {
+                                                event = event,
+                                                port = port,
+                                            },
+                                        })
+
+                                        -- Check for file.edited events (original design)
+                                        if event.type == "file.edited" then
+                                            vim.cmd('silent! checktime')
+                                        end
+
+                                        -- Check for edit tool completion events
+                                        if event.type == "message.part.updated" and
+                                           event.properties and
+                                           event.properties.part and
+                                           event.properties.part.tool == "edit" and
+                                           event.properties.part.state and
+                                           event.properties.part.state.status == "completed" then
+                                            local filePath = event.properties.part.state.input and event.properties.part.state.input.filePath
+                                            local oldString = event.properties.part.state.input and event.properties.part.state.input.oldString
+                                            local newString = event.properties.part.state.input and event.properties.part.state.input.newString
+                                        end
+
+                                        -- Also check for write tool events
+                                        if event.type == "message.part.updated" and
+                                           event.properties and
+                                           event.properties.part and
+                                           event.properties.part.tool == "write" and
+                                           event.properties.part.state and
+                                           event.properties.part.state.status == "completed" then
+                                            local filePath = event.properties.part.state.input and event.properties.part.state.input.filePath
+                                            if filePath then
+                                                vim.schedule(function()
+                                                    vim.cmd('silent! checktime')
+                                                end)
+                                            end
+                                        end
+                                    end)
+                                    sse_connected = true
+                                    stop_polling_fallback()
+                                    return port
+                                end)
+                                :catch(function(port_err)
+                                    release_skip()
+                                    release_skip = function() end
+                                    local message = "[opencode] SSE auto-reload unavailable, using polling fallback"
+                                    if port_err ~= nil then
+                                        local err_msg = type(port_err) == "string" and port_err or vim.inspect(port_err)
+                                        if err_msg ~= "" then
+                                            message = message .. ("\n" .. err_msg)
+                                        end
+                                    end
+                                    vim.notify(message, vim.log.levels.WARN)
+                                    start_polling_fallback()
+                                end)
+                        end, 500) -- Small delay to ensure terminal setup is complete
+
                    end)
 
-                   if not ok then
-                       local message = "[opencode] SSE auto-reload unavailable, using polling fallback"
-                       if type(err) == "string" and err ~= "" then
-                           message = message .. ("\n" .. err)
-                       end
-                       vim.notify(message, vim.log.levels.WARN)
-                       start_polling_fallback()
-                   end
+                    if not ok then
+                        release_skip()
+                        release_skip = function() end
+                        local message = "[opencode] SSE auto-reload unavailable, using polling fallback"
+                        if type(err) == "string" and err ~= "" then
+                            message = message .. ("\n" .. err)
+                        end
+                        vim.notify(message, vim.log.levels.WARN)
+                        start_polling_fallback()
+                    end
+
                end,
            })
 

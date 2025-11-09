@@ -25,26 +25,24 @@
             local provider_module = require("opencode.provider")
             if provider_module and provider_module.start and not provider_module._opencode_start_guard then
                 local original_start = provider_module.start
-                local guard = { original = original_start, counter = 0 }
-                provider_module._opencode_start_guard = guard
                 provider_module.start = function(...)
-                    if guard.counter > 0 then
-                        guard.counter = guard.counter - 1
+                    if provider_module._opencode_skip_next_start then
+                        provider_module._opencode_skip_next_start = false
                         return
                     end
-                    return guard.original(...)
+                    return original_start(...)
                 end
+                provider_module._opencode_start_guard = original_start
             end
 
             local function skip_next_provider_start()
-                local guard = provider_module and provider_module._opencode_start_guard
-                if not guard then
+                if not (provider_module and provider_module._opencode_start_guard) then
                     return function() end
                 end
-                guard.counter = guard.counter + 1
+                provider_module._opencode_skip_next_start = true
                 return function()
-                    if guard.counter > 0 then
-                        guard.counter = guard.counter - 1
+                    if provider_module then
+                        provider_module._opencode_skip_next_start = false
                     end
                 end
             end
@@ -129,18 +127,6 @@
                                         -- Check for file.edited events (original design)
                                         if event.type == "file.edited" then
                                             vim.cmd('silent! checktime')
-                                        end
-
-                                        -- Check for edit tool completion events
-                                        if event.type == "message.part.updated" and
-                                           event.properties and
-                                           event.properties.part and
-                                           event.properties.part.tool == "edit" and
-                                           event.properties.part.state and
-                                           event.properties.part.state.status == "completed" then
-                                            local filePath = event.properties.part.state.input and event.properties.part.state.input.filePath
-                                            local oldString = event.properties.part.state.input and event.properties.part.state.input.oldString
-                                            local newString = event.properties.part.state.input and event.properties.part.state.input.newString
                                         end
 
                                         -- Also check for write tool events

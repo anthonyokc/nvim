@@ -31,7 +31,7 @@ return {
                 "html-lsp",                        -- HTML Language Server
                 "htmx-lsp",                        -- HTMX Language Server
                 "jsonlsp",                         -- JSON Language Server
-                "lua-language-server",            -- Lua Language Server
+                "lua-language-server",             -- Lua Language Server
                 -- "ltex-ls", true                     -- LTeX for text, markdown, latex, restructuredtext
                 "nil",                             -- Nix Language Server
                 "r_language_server",               -- R Language Server
@@ -65,14 +65,13 @@ return {
                 "vulture",            -- Vulture for Python dead code detection
 
                 -- Formatters
-                "Nixfmt",  -- NixFmt for Nix formatting
+                "Nixfmt",         -- NixFmt for Nix formatting
                 "htmlbeautifier", -- HTML Beautifier for HTML formatting
-                "fixjson", -- FixJSON for JSON formatting
-                "gci",     -- GCI, a tool that control golang package import order and make it always deterministic.
-                "jq",      -- JQ for JSON processing
-                "stylua",  -- Stylua for Lua and Luau formatting
+                "fixjson",        -- FixJSON for JSON formatting
+                "gci",            -- GCI, a tool that control golang package import order and make it always deterministic.
+                "jq",             -- JQ for JSON processing
                 -- "tex-fmt", -- Tex FMT for LaTeX formatting
-                "usort",   -- Usort for Python sorting imports
+                "usort",          -- Usort for Python sorting imports
 
                 -- Other tools
                 "harper_ls", -- Harper Language Server; grammar and style checker
@@ -115,7 +114,11 @@ return {
                 if client.server_capabilities and client.server_capabilities.documentSymbolProvider then
                     pcall(require("nvim-navic").attach, client, bufnr)
                 end
-                -- Re-enable diagnostics for lua_ls
+                -- Re-enable diagnostics for lua_ls (deferred until server is
+                -- ready to avoid false positives) This prevents diagnostic
+                -- errors from showing before the Lua language server has fully initialized
+                -- and attached to the buffer, avoiding false positives or
+                -- confusing error messages during startup
                 if client.name == "lua_ls" and vim.bo[bufnr].filetype == "lua" then
                     vim.diagnostic.enable(true, { bufnr = bufnr })
                 end
@@ -134,13 +137,6 @@ return {
             vim.lsp.config("lua_ls", {
                 settings = {
                     Lua = {
-                        format = {
-                            enable = true,
-                            defaultConfig = {
-                                indent_style = "space",
-                                indent_size = "4",
-                            },
-                        },
                         runtime = { version = "LuaJIT" }, -- Use LuaJIT runtime
                         diagnostics = {
                             -- Get LSP to recognize the globals like 'vim'

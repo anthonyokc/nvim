@@ -1,17 +1,41 @@
 return {
     "hkupty/iron.nvim",
+    ft = {
+        "nix",
+        "ruby",
+        "python",
+        "lua",
+        "javascript",
+        "typescript",
+        "sh",
+        "zsh",
+    },
     config = function()
         local iron = require("iron.core")
         local view = require("iron.view")
-        iron.setup {
+        local common = require("iron.fts.common")
+        iron.setup({
             config = {
                 repl_definition = {
                     nix = {
-                        command = { "nix", "repl" }
+                        command = { "nix", "repl" },
+                    },
+                    ruby = {
+                        command = { "pry" },
+                    },
+                    typescript = {
+                        command = { "deno" },
+                    },
+                    javascript = {
+                        command = { "deno" },
                     },
                 },
-                repl_open_cmd = view.split.vertical.botright()
+                repl_open_cmd = view.split.vertical.botright(),
             },
+            highlight = {
+                italic = true,
+            },
+            ignore_blank_lines = true,
             -- Iron doesn't set keymaps by default anymore.
             -- You can set them here or manually add keymaps to the functions in iron.core
             keymaps = {
@@ -38,11 +62,11 @@ return {
                 exit = "<space>sq",
                 clear = "<space>cl",
             },
-        }
+        })
         -- Remaps
         vim.keymap.set("n", "<enter>", function()
             iron.send(nil, string.format("%s\n", vim.fn.getline(".")))
             vim.cmd("normal! j")
         end, { desc = "Send line to REPL and move down" })
-    end
+    end,
 }

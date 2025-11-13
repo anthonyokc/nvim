@@ -32,14 +32,14 @@ vim.keymap.set("n", "Q", "<nop>")
 vim.keymap.set("n", "<leader>F", function()
     vim.lsp.buf.format({ timeout_ms = 5000 })
 end, { desc = "Format buffer" })
-vim.keymap.set("n", "<leader>g", "gqap", { desc = "Format paragraph" })
-vim.keymap.set("v", "<leader>g", "gqa", { desc = "Format selection" })
-vim.keymap.set("x", "<leader>g", "gqa", { desc = "Format selection" })
+vim.keymap.set("n", "<leader>gf", "gqap", { desc = "Format paragraph" })
+vim.keymap.set("v", "<leader>gf", "gqa", { desc = "Format selection" })
+vim.keymap.set("x", "<leader>gf", "gqa", { desc = "Format selection" })
 
 vim.keymap.set("n", "<c-n>", "<cmd>cnext<cr>zz")
 vim.keymap.set("n", "<c-b>", "<cmd>cprev<cr>zz")
 
-vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]],
+vim.keymap.set("n", "<leader>ss", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]],
     { desc = "Search and replace current word" })
 vim.keymap.set("n", "<leader>rh", [[:%s/read.csv("\(.*\)")/read_csv(here("data\/\1"))/gI<Left><Left><Left>]],
     { desc = "Convert read.csv to read_csv with here()" })
@@ -66,7 +66,7 @@ vim.api.nvim_create_user_command('CloseAll', function()
             table.insert(modified_buffers, buf_name ~= '' and buf_name or '[No Name]')
         end
     end
-    
+
     if #modified_buffers > 0 then
         local message = "Unsaved changes in: " .. table.concat(modified_buffers, ', ')
         vim.notify(message, vim.log.levels.WARN)

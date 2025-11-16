@@ -15,13 +15,173 @@ local function compiler_default_components()
 end
 
 return {
+    { -- The task runner we use
+        "stevearc/overseer.nvim",
+        version = "1.6.0",
+        event = "VeryLazy",
+        cmd = { "CompilerOpen", "CompilerToggleResults", "CompilerRedo", "CompilerStop" },
+        opts = {
+            task_list = {
+                direction = "right",
+                max_width = { 100, 0.5 },
+                -- min_width = {40, 0.1} means "the greater of 40 columns or 10% of total"
+                min_width = { 30, 0.2 },
+                -- optionally define an integer/float for the exact width of the task list
+                --width = 0.5,
+                default_detail = 1
+            },
+        },
+        config = function(_, opts)
+            local overseer = require("overseer")
+            overseer.setup(opts)
+
+            local function get_shell()
+                local is_win = (vim.loop.os_uname().sysname or ""):match("Windows")
+                if is_win then
+                    return "cmd", "/C"
+                end
+                return "bash", "-lc"
+            end
+
+            local function ts_runner(file)
+                if vim.fn.executable("tsx") == 1 then
+                    return ("tsx %q"):format(file)
+                end
+                if vim.fn.executable("ts-node") == 1 then
+                    return ("ts-node %q"):format(file)
+                end
+                return ("npx ts-node %q"):format(file)
+            end
+
+            local default_components = compiler_default_components()
+
+            overseer.register_template({
+                name = "Build & run current file",
+                builder = function()
+                    local file     = vim.fn.expand("%:p")
+                    local out      = vim.fn.expand("%:p:r")
+                    local ft       = vim.bo.filetype
+                    local sh, flag = get_shell()
+
+                    local function run_ts()
+                        return ts_runner(file)
+                    end
+
+                    local node_cmd = ("node %q"):format(file)
+                    local ts_cmd   = run_ts()
+
+                    local cmd      = ({
+                        c               = ("gcc %q -O2 -g -o %q && %q"):format(file, out, out),
+                        cpp             = ("g++ %q -O2 -g -std=c++20 -o %q && %q"):format(file, out, out),
+                        rust            = ("rustc %q -o %q && %q"):format(file, out, out),
+                        go              = ("go run %q"):format(file),
+                        python          = ("python3 %q"):format(file),
+                        lua             = ("lua %q"):format(file),
+                        sh              = ("bash %q"):format(file),
+                        ruby            = ("ruby %q"):format(file),
+                        javascript      = node_cmd,
+                        javascriptreact = node_cmd,
+                        node            = node_cmd,
+                        typescript      = ts_cmd,
+                        typescriptreact = ts_cmd,
+                    })[ft]
+
+                    if not cmd then
+                        vim.notify("No build&run template for filetype: " .. ft, vim.log.levels.ERROR)
+                        return
+                    end
+                    return {
+                        cmd = { sh, flag },
+                        args = { cmd },
+                        components = vim.deepcopy(default_components),
+                    }
+                end,
+                condition = { callback = function() return vim.fn.filereadable(vim.fn.expand("%:p")) == 1 end },
+            })
+
+            local function register_simple_runner(def)
+                overseer.register_template({
+                    name = def.name,
+                    condition = { filetype = def.filetypes },
+                    builder = function()
+                        local file = vim.fn.expand("%:p")
+                        if vim.fn.filereadable(file) ~= 1 then
+                            vim.notify("Save the file you want to run before invoking " .. def.name,
+                                vim.log.levels.WARN, { title = "Overseer" })
+                            return
+                        end
+                        local cmd_str = def.command(file)
+                        if not cmd_str or cmd_str == "" then
+                            return
+                        end
+                        local sh, flag = get_shell()
+                        return {
+                            cmd = { sh, flag },
+                            args = { cmd_str },
+                            components = vim.deepcopy(def.components or default_components),
+                        }
+                    end,
+                })
+            end
+
+            register_simple_runner({
+                name = "Ruby: Run current file",
+                filetypes = { "ruby" },
+                command = function(file)
+                    local join = (vim.fs and vim.fs.joinpath) or function(...) return table.concat({ ... }, "/") end
+                    local cwd = vim.loop.cwd()
+                    local use_bundle = vim.fn.filereadable(join(cwd, "Gemfile")) == 1
+                        or vim.fn.filereadable(join(cwd, "Gemfile.lock")) == 1
+                    local runner = use_bundle and "bundle exec ruby" or "ruby"
+                    return ("%s %q"):format(runner, file)
+                end,
+            })
+
+            register_simple_runner({
+                name = "Node: Run current file",
+                filetypes = { "javascript", "javascriptreact", "node" },
+                command = function(file)
+                    local runner = vim.fn.executable("bun") == 1 and "bun run" or "node"
+                    return ("%s %q"):format(runner, file)
+                end,
+            })
+
+            register_simple_runner({
+                name = "TypeScript: Run current file",
+                filetypes = { "typescript", "typescriptreact" },
+                command = ts_runner,
+            })
+
+            local language_template_lookup = {
+                ruby = "Ruby: Run current file",
+                javascript = "Node: Run current file",
+                javascriptreact = "Node: Run current file",
+                node = "Node: Run current file",
+                typescript = "TypeScript: Run current file",
+                typescriptreact = "TypeScript: Run current file",
+            }
+
+            -- Keymap (put anywhere)
+            vim.keymap.set("n", "<leader>bb", function()
+                local template = language_template_lookup[vim.bo.filetype] or "Build & run current file"
+                overseer.run_template({ name = template })
+                local previous_window = vim.api.nvim_get_current_win()
+                vim.cmd("OverseerOpen")
+                vim.schedule(function()
+                    if vim.api.nvim_win_is_valid(previous_window) then
+                        vim.api.nvim_set_current_win(previous_window)
+                    end
+                end)
+            end, { desc = "Run current file with Overseer" })
+        end
+    },
     { -- This plugin
         "Zeioth/compiler.nvim",
         event = "VeryLazy",
         cmd = { "CompilerOpen", "CompilerToggleResults", "CompilerRedo", "CompilerStop" },
         dependencies = { "stevearc/overseer.nvim", "nvim-telescope/telescope.nvim" }, -- there are also system dependencies for the compilers themselves [this may or not be how you want them installed]: https://github.com/Zeioth/Compiler.nvim/wiki/how-to-install-the-required-dependencies
         opts = {},
-        config = function (_, opts)
+        config = function(_, opts)
             require("compiler").setup(opts)
 
             local function configure_compiler_dropdown()
@@ -161,176 +321,18 @@ return {
             override_default_alias()
 
             -- Open compiler
-            vim.keymap.set("n", "<leader>bo", "<cmd>CompilerOpen<cr>", { noremap = true, silent = true, desc = "Compiler: open UI" })
+            vim.keymap.set("n", "<leader>bo", "<cmd>CompilerOpen<cr>",
+                { noremap = true, silent = true, desc = "Compiler: open UI" })
 
             -- Redo last selected option
             vim.keymap.set("n", "<leader>br",
-                 "<cmd>CompilerStop<cr>" -- (Optional, to dispose all tasks before redo)
-              .. "<cmd>CompilerRedo<cr>",
-             { noremap = true, silent = true, desc = "Compiler: redo last option" })
+                "<cmd>CompilerStop<cr>" -- (Optional, to dispose all tasks before redo)
+                .. "<cmd>CompilerRedo<cr>",
+                { noremap = true, silent = true, desc = "Compiler: redo last option" })
 
             -- Toggle compiler results
-            vim.keymap.set("n", "<leader>bt", "<cmd>CompilerToggleResults<cr>", { noremap = true, silent = true, desc = "Compiler: toggle results" })
-        end
-    },
-    { -- The task runner we use
-        "stevearc/overseer.nvim",
-        version = "1.6.0",
-        event = "VeryLazy",
-        cmd = { "CompilerOpen", "CompilerToggleResults", "CompilerRedo", "CompilerStop" },
-        opts = {
-            task_list = {
-                direction = "right",
-                max_width = { 100, 0.5 },
-                -- min_width = {40, 0.1} means "the greater of 40 columns or 10% of total"
-                min_width = { 30, 0.2 },
-                -- optionally define an integer/float for the exact width of the task list
-                --width = 0.5,
-                default_detail = 1
-            },
-        },
-        config = function(_, opts)
-            local overseer = require("overseer")
-            overseer.setup(opts)
-
-            local function get_shell()
-                local is_win = (vim.loop.os_uname().sysname or ""):match("Windows")
-                if is_win then
-                    return "cmd", "/C"
-                end
-                return "bash", "-lc"
-            end
-
-            local function ts_runner(file)
-                if vim.fn.executable("tsx") == 1 then
-                    return ("tsx %q"):format(file)
-                end
-                if vim.fn.executable("ts-node") == 1 then
-                    return ("ts-node %q"):format(file)
-                end
-                return ("npx ts-node %q"):format(file)
-            end
-
-            local default_components = compiler_default_components()
-
-            overseer.register_template({
-                name = "Build & run current file",
-                builder = function()
-                    local file     = vim.fn.expand("%:p")
-                    local out      = vim.fn.expand("%:p:r")
-                    local ft       = vim.bo.filetype
-                    local sh, flag = get_shell()
-
-                    local function run_ts()
-                        return ts_runner(file)
-                    end
-
-                    local node_cmd   = ("node %q"):format(file)
-                    local ts_cmd     = run_ts()
-
-                    local cmd      = ({
-                        c               = ("gcc %q -O2 -g -o %q && %q"):format(file, out, out),
-                        cpp             = ("g++ %q -O2 -g -std=c++20 -o %q && %q"):format(file, out, out),
-                        rust            = ("rustc %q -o %q && %q"):format(file, out, out),
-                        go              = ("go run %q"):format(file),
-                        python          = ("python3 %q"):format(file),
-                        lua             = ("lua %q"):format(file),
-                        sh              = ("bash %q"):format(file),
-                        ruby            = ("ruby %q"):format(file),
-                        javascript      = node_cmd,
-                        javascriptreact = node_cmd,
-                        node            = node_cmd,
-                        typescript      = ts_cmd,
-                        typescriptreact = ts_cmd,
-                    })[ft]
-
-                    if not cmd then
-                        vim.notify("No build&run template for filetype: " .. ft, vim.log.levels.ERROR)
-                        return
-                    end
-                    return {
-                        cmd = { sh, flag },
-                        args = { cmd },
-                        components = vim.deepcopy(default_components),
-                    }
-                end,
-                condition = { callback = function() return vim.fn.filereadable(vim.fn.expand("%:p")) == 1 end },
-            })
-
-            local function register_simple_runner(def)
-                overseer.register_template({
-                    name = def.name,
-                    condition = { filetype = def.filetypes },
-                    builder = function()
-                        local file = vim.fn.expand("%:p")
-                        if vim.fn.filereadable(file) ~= 1 then
-                            vim.notify("Save the file you want to run before invoking " .. def.name,
-                                vim.log.levels.WARN, { title = "Overseer" })
-                            return
-                        end
-                        local cmd_str = def.command(file)
-                        if not cmd_str or cmd_str == "" then
-                            return
-                        end
-                        local sh, flag = get_shell()
-                        return {
-                            cmd = { sh, flag },
-                            args = { cmd_str },
-                            components = vim.deepcopy(def.components or default_components),
-                        }
-                    end,
-                })
-            end
-
-            register_simple_runner({
-                name = "Ruby: Run current file",
-                filetypes = { "ruby" },
-                command = function(file)
-                    local join = (vim.fs and vim.fs.joinpath) or function(...) return table.concat({ ... }, "/") end
-                    local cwd = vim.loop.cwd()
-                    local use_bundle = vim.fn.filereadable(join(cwd, "Gemfile")) == 1
-                        or vim.fn.filereadable(join(cwd, "Gemfile.lock")) == 1
-                    local runner = use_bundle and "bundle exec ruby" or "ruby"
-                    return ("%s %q"):format(runner, file)
-                end,
-            })
-
-            register_simple_runner({
-                name = "Node: Run current file",
-                filetypes = { "javascript", "javascriptreact", "node" },
-                command = function(file)
-                    local runner = vim.fn.executable("bun") == 1 and "bun run" or "node"
-                    return ("%s %q"):format(runner, file)
-                end,
-            })
-
-            register_simple_runner({
-                name = "TypeScript: Run current file",
-                filetypes = { "typescript", "typescriptreact" },
-                command = ts_runner,
-            })
-
-            local language_template_lookup = {
-                ruby = "Ruby: Run current file",
-                javascript = "Node: Run current file",
-                javascriptreact = "Node: Run current file",
-                node = "Node: Run current file",
-                typescript = "TypeScript: Run current file",
-                typescriptreact = "TypeScript: Run current file",
-            }
-
-            -- Keymap (put anywhere)
-            vim.keymap.set("n", "<leader>bb", function()
-                local template = language_template_lookup[vim.bo.filetype] or "Build & run current file"
-                overseer.run_template({ name = template })
-                local previous_window = vim.api.nvim_get_current_win()
-                vim.cmd("OverseerOpen")
-                vim.schedule(function()
-                    if vim.api.nvim_win_is_valid(previous_window) then
-                        vim.api.nvim_set_current_win(previous_window)
-                    end
-                end)
-            end, { desc = "Run current file with Overseer" })
+            vim.keymap.set("n", "<leader>bt", "<cmd>CompilerToggleResults<cr>",
+                { noremap = true, silent = true, desc = "Compiler: toggle results" })
         end
     },
 }

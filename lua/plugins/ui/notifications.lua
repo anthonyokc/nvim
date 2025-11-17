@@ -51,7 +51,7 @@ return {
             -- you can enable a preset for easier configuration
             views = {
                 mini = {
-                    format = { "{cmdline}\n", "{title}", "{level}", "{event} ", "{kind}", "\n{message}" },
+                    format = { "\n{cmdline}\n", "{title}", "{level}", "{event} ", "{kind}", "{message}" },
                     timeout = 5000, -- 5s before disappearing
                     focusable = true,
                     border = { style = "rounded", },

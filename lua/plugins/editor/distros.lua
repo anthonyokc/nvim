@@ -35,10 +35,6 @@ return {
             words = { enabled = true },
             gitbrowse = { enabled = true },
             image = { enabled = true },
-            -- diasbled modules
-            dashboard = { enabled = false },
-            indent = { enabled = false },
-            input = { enabled = false },
             picker = {
                 enabled = true,
                 defaults = { hidden = true, ignored = true },
@@ -50,6 +46,10 @@ return {
                     },
                 },
             },
+            -- diasbled modules
+            dashboard = { enabled = false },
+            indent = { enabled = false },
+            input = { enabled = false },
             notifier = { enabled = false },
             quickfile = { enabled = false },
             scope = { enabled = false },
@@ -58,10 +58,6 @@ return {
         },
         keys = {
             ---@diagnostic disable: undefined-global
-            { "<leader>xx", function() Snacks.diagnostic() end,           desc = "Show Diagnostics" },
-            { "<leader>xX", function() Snacks.diagnostic(true) end,       desc = "Show All Diagnostics" },
-            { "[x",         function() Snacks.diagnostic.goto_prev() end, desc = "Previous Diagnostic" },
-            { "]x",         function() Snacks.diagnostic.goto_next() end, desc = "Next Diagnostic" },
             { "<leader>e",  function() Snacks.explorer() end,             desc = "File Explorer" },
             { "<leader>gB", function() Snacks.gitbrowse() end,            desc = "Git Browse",          mode = { "n", "v" } },
             { "<leader>gg", function() Snacks.lazygit() end,              desc = "Lazygit" },

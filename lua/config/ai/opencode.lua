@@ -224,9 +224,20 @@ end
 -- Setup user keymaps
 local function setup_user_keymaps()
     -- Core opencode functionality keymaps
+    local function focus_opencode_terminal()
+        for _, win in ipairs(vim.api.nvim_list_wins()) do
+            local buf = vim.api.nvim_win_get_buf(win)
+            if vim.bo[buf].filetype == "opencode_terminal" then
+                vim.api.nvim_set_current_win(win)
+                break
+            end
+        end
+    end
+
     -- Toggle opencode interface
     vim.keymap.set({ 'n', 't' }, '<leader>ot', function()
         require('opencode').toggle()
+        focus_opencode_terminal()
     end, { desc = 'Toggle opencode' })
 
     -- Opencode selection interface
@@ -245,14 +256,7 @@ local function setup_user_keymaps()
     -- Session and message management
     vim.keymap.set('n', '<leader>on', function()
         require('opencode').command('session.new')
-        -- Find and switch to opencode terminal window
-        for _, win in ipairs(vim.api.nvim_list_wins()) do
-            local buf = vim.api.nvim_win_get_buf(win)
-            if vim.bo[buf].filetype == "opencode_terminal" then
-                vim.api.nvim_set_current_win(win)
-                break
-            end
-        end
+        focus_opencode_terminal()
     end, { desc = 'New opencode session' })
 
     -- Abort current generation and kill session (custom keybinds)

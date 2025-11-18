@@ -94,7 +94,8 @@ return {
                     preset = 'default',
                     ['<C-e>'] = { 'show' },
                     ['<C-y>'] = { 'select_and_accept' },
-                    ['<Tab>'] = { 'select_and_accept' },
+                    ['<Tab>'] = { 'snippet_forward', 'select_and_accept', 'fallback' },
+                    ['<S-Tab>'] = { 'snippet_backward', 'select_prev', 'fallback' },
                 },
 
                 -- Completion menu: the floating window that shows the list of completion items as you type

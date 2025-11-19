@@ -22,6 +22,20 @@ return {
             vim.g.db_ui_use_nerd_fonts = true
             vim.g.db_ui_use_nvim_notify = true
             vim.g.db_ui_execute_on_save = false
+
+            local group = vim.api.nvim_create_augroup("DadbodUIWindowSizing", { clear = true })
+            vim.api.nvim_create_autocmd("FileType", {
+                pattern = "dbout",
+                group = group,
+                callback = function(args)
+                    local editor_height = vim.o.lines - vim.o.cmdheight
+                    local target = math.max(5, math.floor(editor_height * 0.4))
+                    local win = vim.api.nvim_get_current_win()
+                    if vim.api.nvim_win_is_valid(win) then
+                        vim.api.nvim_win_set_height(win, target)
+                    end
+                end,
+            })
         end,
     },
 

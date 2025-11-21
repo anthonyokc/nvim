@@ -64,8 +64,8 @@ return {
 
                         -- targets commands and actions
                         { "n", "<leader>tm",  helpers.r_cmd("targets::tar_make()"),                   "targets::tar_make()" },
-                        { "n", "<leader>tl",  helpers.r_action("targets::tar_load()"),                "tar_load(data)" },
-                        { "n", "<leader>tL",  helpers.r_action("targets::tar_load_everything()"),     "tar_load_everything()" },
+                        { "n", "<leader>tl",  helpers.r_action("targets::tar_load"),                  "tar_load(data)" },
+                        { "n", "<leader>tL",  helpers.r_cmd("targets::tar_load_everything()"),        "tar_load_everything()" },
                         { "n", "<leader>tr",  helpers.r_cmd("targets::tar_read()"),                   "targets::tar_read()" },
                         { "n", "<leader>tv",  helpers.r_cmd("targets::tar_visnetwork()"),             "targets::tar_visnetwork()" },
 

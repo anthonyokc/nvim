@@ -53,6 +53,9 @@ return {
                         { "n", "<leader>ra", function()
                             require("config.languages.r").toggle_assignment_current_object()
                         end, "Toggle pipe assignment" },
+                        { "n", "<leader>re", function()
+                            require("config.languages.r").assign_defaults_current_function()
+                        end, "Assign function defaults to Global Environment" },
                         { "n", "<leader>rg", helpers.r_action("dplyr::glimpse"), "glimpse(data)" },
                         { "n", "<leader>rp", helpers.r_action("problems"),       "problems(data)" },
                         { "n", "<leader>ri", helpers.r_action(

@@ -2,6 +2,7 @@
 -- This file is loaded from init.lua to set up R-specific keymaps and functions
 -- It also includes a custom fold expression for R headings
 local M = {}
+local levels = vim.log.levels
 
 -- Function to reformat R function calls
 local function reformat_r_function(mode)
@@ -178,6 +179,74 @@ M.toggle_assignment_current_object = function()
     print("No pipe chain found to toggle assignment.")
 end
 
+local function extract_current_function_expr()
+    local word = vim.fn.expand("<cword>")
+    if type(word) == "string" then
+        word = vim.trim(word)
+        if word ~= "" and word:match("^[%w_:%.$@]+$") then
+            return word
+        end
+    end
+
+    local wide = vim.fn.expand("<cWORD>")
+    if type(wide) ~= "string" then
+        return ""
+    end
+    wide = vim.trim(wide)
+    if wide == "" then
+        return ""
+    end
+    wide = wide:gsub("^`", "")
+    wide = wide:gsub("`$", "")
+    wide = wide:gsub("%(.+$", "")
+    wide = wide:gsub("[,;]+$", "")
+    wide = vim.trim(wide)
+
+    if wide == "" then
+        return ""
+    end
+
+    local candidate = wide:match("([%w_:%.$@]+)$")
+    if candidate and candidate ~= "" then
+        return candidate
+    end
+
+    candidate = wide:match("^([%w_:%.$@]+)")
+    if candidate and candidate ~= "" then
+        return candidate
+    end
+
+    return ""
+end
+
+M.assign_defaults_current_function = function()
+    local expr = extract_current_function_expr()
+    if expr == "" then
+        vim.notify("No function name under cursor.", levels.WARN, { title = "R defaults" })
+        return
+    end
+
+    if not vim.g.R_Nvim_status or vim.g.R_Nvim_status < 7 then
+        vim.notify("Start R (use :RStart) before assigning defaults.", levels.WARN, { title = "R defaults" })
+        return
+    end
+
+    local send_ok, send_mod = pcall(require, "r.send")
+    if not send_ok then
+        vim.notify("r.send module is unavailable.", levels.ERROR, { title = "R defaults" })
+        return
+    end
+
+    local command = string.format([=[(function(expr){f<-tryCatch(eval(parse(text=expr),envir=.GlobalEnv),error=function(e)NULL);if(is.null(f))f<-tryCatch(eval(parse(text=expr),envir=parent.frame()),error=function(e)NULL);if(is.null(f)){message("Function not found: ",expr);return(invisible(FALSE))};if(!is.function(f)){message("Object is not a function: ",expr);return(invisible(FALSE))};d<-formals(f);if(length(d)==0){message("No defaults for: ",expr);return(invisible(TRUE))};e<-environment(f);if(is.null(e))e<-.GlobalEnv;a<-character(0);for(n in names(d)){v<-d[[n]];if(!(is.symbol(v)&&as.character(v)=="")){val<-tryCatch(eval(v,envir=e),error=function(err)structure(list(error=err),class="try-error"));if(!inherits(val,"try-error")){assign(n,val,envir=.GlobalEnv);a<-c(a,n)}}};if(length(a)==0)message("No defaults assigned for: ",expr)else message("Defaults assigned for ",expr,": ",paste(a,collapse=", "));invisible(TRUE)})(%q)]=], expr)
+
+    local ok, result = pcall(send_mod.cmd, command)
+    if not ok then
+        vim.notify(string.format("Failed to assign defaults: %s", result), levels.ERROR, { title = "R defaults" })
+    elseif result == false then
+        vim.notify("R is not ready to receive commands.", levels.WARN, { title = "R defaults" })
+    end
+end
+
 -- Setup function to be called from init.lua
 M.setup = function()
     -- Set up R-specific keymaps
@@ -194,7 +263,8 @@ M.setup = function()
                 { noremap = true, silent = true, desc = "Format R function" })
             vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ru', ':lua require("config.lang.r").unformat_r_function()<CR>',
                 { noremap = true, silent = true, desc = "Unformat R function" })
-            vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ra', ':lua require("config.languages.r").toggle_assignment_current_object()<CR>',
+            vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ra',
+                ':lua require("config.languages.r").toggle_assignment_current_object()<CR>',
                 { noremap = true, silent = true, desc = "Toggle pipe assignment" })
         end
     })

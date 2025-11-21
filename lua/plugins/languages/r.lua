@@ -30,34 +30,41 @@ return {
                     local keymaps = {
                         -- Built-in R.nvim keymaps (need remap=true for <Plug> mappings)
                         -- Format is: { "mode", "key", "action", "description", { options } }
-                        { "i", "<C-k>",            "<Plug>RInsertAssign",   "Insert <-",                             { remap = true } },
-                        { "i", "<C-l>",            "<Plug>RInsertPipe",     "Insert |>",                             { remap = true } },
-                        { "n", "<Enter>",          "<Plug>RDSendLine",      "Send line to R",                        { remap = true } },
-                        { "v", "<Enter>",          "<Plug>RDSendSelection", "Send selection to R",                   { remap = true } },
-                        { "n", "<LocalLeader>f",   "<Plug>RFormat",         "Format buffer",                         { remap = true } },
-                        { "v", "<LocalLeader>f",   "<Plug>RFormat",         "Format selection",                      { remap = true } },
-                        { "n", "<leader>V",        "<Plug>RViewDF",         "View object",                           { remap = true } },
-                        { "v", "<leader>V",        "<Plug>RViewDF",         "View object",                           { remap = true } },
-                        { "n", "<leader>r<Enter>", "<Plug>RSendChain",      "Send piped chain up to current cursor", { remap = true } },
+                        { "i", "<C-k>",            "<Plug>RInsertAssign",              "Insert <-",                             { remap = true } },
+                        { "i", "<C-l>",            "<Plug>RInsertPipe",                "Insert |>",                             { remap = true } },
+                        { "n", "<Enter>",          "<Plug>RDSendLine",                 "Send line to R",                        { remap = true } },
+                        { "v", "<Enter>",          "<Plug>RDSendSelection",            "Send selection to R",                   { remap = true } },
+                        { "n", "<LocalLeader>f",   "<Plug>RFormat",                    "Format buffer",                         { remap = true } },
+                        { "v", "<LocalLeader>f",   "<Plug>RFormat",                    "Format selection",                      { remap = true } },
+                        { "n", "<leader>V",        "<Plug>RViewDF",                    "View object",                           { remap = true } },
+                        { "v", "<leader>V",        "<Plug>RViewDF",                    "View object",                           { remap = true } },
+                        { "n", "<leader>r<Enter>", "<Plug>RSendChain",                 "Send piped chain up to current cursor", { remap = true } },
 
                         -- Custom paragraph sending
-                        { "n", ",",              helpers.send_paragraph_to_r, "Send paragraph to R" },
-                        { "v", "<leader>rH",     helpers.read_csv_to_object,  "Write->Read CSV replace (visual)" },
-                        { "n", "<leader>rG",     helpers.send_chain_glimpse,  "Send pipe chain & glimpse()" },
+                        { "n", ",",                helpers.send_paragraph_to_r,        "Send paragraph to R" },
+                        { "v", "<leader>rH",       helpers.read_csv_to_object,         "Write->Read CSV replace (visual)" },
+                        { "n", "<leader>rG",       helpers.send_chain_glimpse,         "Send pipe chain & glimpse()" },
 
 
                         -- R actions and helpers
-                        { "n", "<leader><CR>",   helpers.r_action(""),            "Run (context)"  },
-                        { "n", "<leader>fo",    object_picker.open_global_env,      "Find R object (.GlobalEnv)" },
-                        { "n", "<leader>fl",    object_picker.open_library_objects, "Find R library object" },
-                        { "n", "<leader>ra",    function()
+                        { "n", "<leader><CR>",     helpers.r_action(""),               "Run (context)" },
+                        { "n", "<leader>fo",       object_picker.open_global_env,      "Find R object (.GlobalEnv)" },
+                        { "n", "<leader>fl",       object_picker.open_library_objects, "Find R library object" },
+                        { "n", "<leader>ra", function()
                             require("config.languages.r").toggle_assignment_current_object()
                         end, "Toggle pipe assignment" },
-                        { "n", "<leader>rg",     helpers.r_action("glimpse"),     "glimpse(data)"  },
-                        { "n", "<leader>rp",     helpers.r_action("problems"),  "problems(data)" },
+                        { "n", "<leader>rg", helpers.r_action("dplyr::glimpse"), "glimpse(data)" },
+                        { "n", "<leader>rp", helpers.r_action("problems"),       "problems(data)" },
                         { "n", "<leader>ri", helpers.r_action(
                             '(function(package){ rlang::as_label(rlang::enexpr(package)) |> renv::install(prompt=FALSE) })'
                         ), "renv install package" },
+
+                        -- targets commands and actions
+                        { "n", "<leader>tm",  helpers.r_cmd("targets::tar_make()"),                   "targets::tar_make()" },
+                        { "n", "<leader>tl",  helpers.r_action("targets::tar_load()"),                "tar_load(data)" },
+                        { "n", "<leader>tL",  helpers.r_action("targets::tar_load_everything()"),     "tar_load_everything()" },
+                        { "n", "<leader>tr",  helpers.r_cmd("targets::tar_read()"),                   "targets::tar_read()" },
+                        { "n", "<leader>tv",  helpers.r_cmd("targets::tar_visnetwork()"),             "targets::tar_visnetwork()" },
 
                         -- renv commands
                         { "n", "<leader>rI",  helpers.r_cmd("renv::init()"),                          "renv::init()" },
@@ -84,16 +91,13 @@ return {
                         ), 'use_package("Suggests")' },
 
                         -- Other R commands
-                        { "n", "<LocalLeader>hgd", helpers.r_cmd("hgd()"),                                 "hgd()" },
-                        { "n", "<leader>tm",       helpers.r_cmd("targets::tar_make()"),                   "targets::tar_make()" },
-                        { "n", "<leader>tv",       helpers.r_cmd("targets::tar_visnetwork()"),             "targets::tar_visnetwork()" },
+                        { "n", "<LocalLeader>hgd", helpers.r_cmd("hgd()"), "hgd()" },
                     }
 
                     -- Set all keymaps
                     for _, keymap in ipairs(keymaps) do
                         helpers.bufmap(keymap[1], keymap[2], keymap[3], keymap[4], keymap[5])
                     end
-
                 end,
             },
 
@@ -106,7 +110,7 @@ return {
             },
 
             -- Configuration options
-            min_editor_width = 18,
+            min_editor_width = 18, -- Minimum width for R console split
 
             -- R Console
             rconsole_width = 100,

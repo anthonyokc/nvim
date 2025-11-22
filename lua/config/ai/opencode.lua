@@ -4,7 +4,7 @@ local M = {}
 local opencode_timer = nil
 local sse_connected = false
 
-local CODE_WINDOW_TARGET_WIDTH = 90
+local CODE_WINDOW_TARGET_WIDTH = 120
 local TERMINAL_MIN_WIDTH = 1
 
 local window_layout_state = {

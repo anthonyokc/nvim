@@ -4,6 +4,91 @@ local M = {}
 local opencode_timer = nil
 local sse_connected = false
 
+local CODE_WINDOW_TARGET_WIDTH = 90
+local TERMINAL_MIN_WIDTH = 1
+
+local window_layout_state = {
+    code = nil,
+    terminals = {},
+}
+
+local function safe_set_width(win, width)
+    if not (win and vim.api.nvim_win_is_valid(win) and width) then
+        return
+    end
+    pcall(vim.api.nvim_win_set_width, win, math.max(1, math.floor(width)))
+end
+
+local function find_opencode_terminal_win()
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+        local buf = vim.api.nvim_win_get_buf(win)
+        if vim.bo[buf].filetype == "opencode_terminal" then
+            return win
+        end
+    end
+end
+
+local function opencode_terminal_is_open()
+    return find_opencode_terminal_win() ~= nil
+end
+
+local function pick_primary_code_window(preferred_win)
+    if preferred_win and vim.api.nvim_win_is_valid(preferred_win) then
+        local preferred_buf = vim.api.nvim_win_get_buf(preferred_win)
+        if vim.bo[preferred_buf].buftype ~= "terminal" then
+            return preferred_win
+        end
+    end
+
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+        local buf = vim.api.nvim_win_get_buf(win)
+        if vim.bo[buf].buftype ~= "terminal" and vim.bo[buf].filetype ~= "opencode_terminal" then
+            return win
+        end
+    end
+end
+
+local function apply_window_compaction(preferred_code_win)
+    window_layout_state.terminals = {}
+
+    local code_win = pick_primary_code_window(preferred_code_win)
+    if code_win then
+        local current_width = vim.api.nvim_win_get_width(code_win)
+        window_layout_state.code = { win = code_win, width = current_width }
+        if current_width > CODE_WINDOW_TARGET_WIDTH then
+            safe_set_width(code_win, CODE_WINDOW_TARGET_WIDTH)
+        end
+    else
+        window_layout_state.code = nil
+    end
+
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+        if win ~= code_win then
+            local buf = vim.api.nvim_win_get_buf(win)
+            if vim.bo[buf].buftype == "terminal" and vim.bo[buf].filetype ~= "opencode_terminal" then
+                local width = vim.api.nvim_win_get_width(win)
+                table.insert(window_layout_state.terminals, { win = win, width = width })
+                safe_set_width(win, math.min(width, TERMINAL_MIN_WIDTH))
+            end
+        end
+    end
+end
+
+local function restore_window_layout()
+    if window_layout_state.code and window_layout_state.code.win and window_layout_state.code.width then
+        safe_set_width(window_layout_state.code.win, window_layout_state.code.width)
+    end
+
+    for _, entry in ipairs(window_layout_state.terminals) do
+        if entry.win and entry.width then
+            safe_set_width(entry.win, entry.width)
+        end
+    end
+
+    window_layout_state.code = nil
+    window_layout_state.terminals = {}
+end
+
 -- Configure global options
 local function configure_globals()
     vim.g.opencode_opts = {
@@ -185,6 +270,9 @@ local function setup_auto_reload()
             if vim.bo[args.buf].filetype == "opencode_terminal" then
                 stop_polling_fallback()
                 sse_connected = false
+                if window_layout_state.code or #window_layout_state.terminals > 0 then
+                    restore_window_layout()
+                end
             end
         end,
     })
@@ -225,19 +313,33 @@ end
 local function setup_user_keymaps()
     -- Core opencode functionality keymaps
     local function focus_opencode_terminal()
-        for _, win in ipairs(vim.api.nvim_list_wins()) do
-            local buf = vim.api.nvim_win_get_buf(win)
-            if vim.bo[buf].filetype == "opencode_terminal" then
-                vim.api.nvim_set_current_win(win)
-                break
-            end
+        local opencode_win = find_opencode_terminal_win()
+        if opencode_win then
+            vim.api.nvim_set_current_win(opencode_win)
         end
     end
 
     -- Toggle opencode interface
-    vim.keymap.set({ 'n', 't' }, '<leader>ot', function()
+    vim.keymap.set({ 'n' }, '<leader>ot', function()
+        local trigger_win = vim.api.nvim_get_current_win()
+        local was_open = opencode_terminal_is_open()
+
         require('opencode').toggle()
-        focus_opencode_terminal()
+
+        vim.defer_fn(function()
+            local is_open = opencode_terminal_is_open()
+            if not was_open and is_open then
+                apply_window_compaction(trigger_win)
+            elseif was_open and not is_open then
+                if window_layout_state.code or #window_layout_state.terminals > 0 then
+                    restore_window_layout()
+                end
+            end
+
+            if is_open then
+                focus_opencode_terminal()
+            end
+        end, 40)
     end, { desc = 'Toggle opencode' })
 
     -- Opencode selection interface
@@ -261,6 +363,7 @@ local function setup_user_keymaps()
 
     -- Abort current generation and kill session (custom keybinds)
     vim.keymap.set('n', '<leader>ok', function()
+        require('opencode').command('session.interrupt')
         require('opencode').command('session.interrupt')
     end, { desc = 'Interrupt current opencode generation' })
 

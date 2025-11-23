@@ -169,7 +169,7 @@ local function setup_auto_reload()
                 local server_mod = require("opencode.cli.server")
                 local client_mod = require("opencode.cli.client")
                 if type(server_mod) ~= "table" or type(server_mod.get_port) ~= "function"
-                    or type(client_mod) ~= "table" or type(client_mod.listen_to_sse) ~= "function" then
+                    or type(client_mod) ~= "table" or type(client_mod.subscribe_to_sse) ~= "function" then
                     error("invalid opencode SSE modules")
                 end
 
@@ -201,7 +201,7 @@ local function setup_auto_reload()
                         :next(function(port)
                             release_skip()
                             release_skip = function() end
-                            client_mod.listen_to_sse(port, function(event)
+                            client_mod.subscribe_to_sse(port, function(event)
                                 vim.api.nvim_exec_autocmds("User", {
                                     pattern = "OpencodeEvent",
                                     data = {

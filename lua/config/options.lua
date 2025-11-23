@@ -48,6 +48,11 @@ vim.opt.colorcolumn = "80"
 vim.opt.list = true
 vim.opt.listchars = "space:·,tab:→·"
 
+-- Disables the "How to disable mouse" option in the right-click context menu
+-- You can still find this in "help disable-mouse"
+vim.cmd([[aunmenu PopUp.How-to\ disable\ mouse]])
+vim.cmd([[aunmenu PopUp.-2-]])
+
 -- -- Set Tabs for specific files
 -- local set_tab_settings = function(extension, ts, sw, sts)
 --   vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {

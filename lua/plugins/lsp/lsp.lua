@@ -34,6 +34,7 @@ return {
                 "lua-language-server",             -- Lua Language Server
                 -- "ltex-ls", true                     -- LTeX for text, markdown, latex, restructuredtext
                 "nil",                             -- Nix Language Server
+                "postgrest-language-server",       -- Postgres Language Server
                 "r_language_server",               -- R Language Server
                 "rust-analyzer",                   -- Rust Analyzer for Rust
                 "terraform-ls",                    -- Terraform Language Server
@@ -65,6 +66,7 @@ return {
                 "vulture",            -- Vulture for Python dead code detection
 
                 -- Formatters
+                "pgformatter",    -- PGFormatter for SQL formatting
                 "Nixfmt",         -- NixFmt for Nix formatting
                 "htmlbeautifier", -- HTML Beautifier for HTML formatting
                 "fixjson",        -- FixJSON for JSON formatting

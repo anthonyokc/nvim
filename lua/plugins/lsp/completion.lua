@@ -45,7 +45,8 @@ return {
                         r   = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
                         rmd = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
                         qmd = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
-                        sql = { 'snippets', 'dadbod', 'buffer', 'lsp' },
+                        sql = { 'lsp', 'snippets', 'dadbod', 'buffer',},
+                        psql = { 'lsp', 'snippets', 'dadbod', 'buffer',},
                     },
                     providers = {
                         cmp_r = {

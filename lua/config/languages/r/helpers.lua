@@ -4,6 +4,43 @@ local api = vim.api
 local map = vim.keymap
 local levels = vim.log.levels
 
+local cached_get_code_to_send
+
+local function get_code_to_send_fn()
+  if cached_get_code_to_send ~= nil then
+    return cached_get_code_to_send or nil
+  end
+
+  if type(debug) ~= "table" or type(debug.getupvalue) ~= "function" then
+    cached_get_code_to_send = false
+    return nil
+  end
+
+  local ok, send = pcall(require, "r.send")
+  if not ok or type(send.line) ~= "function" then
+    cached_get_code_to_send = false
+    return nil
+  end
+
+  local idx = 1
+  while true do
+    local name, value = debug.getupvalue(send.line, idx)
+    if not name then break end
+    if name == "get_code_to_send" then
+      cached_get_code_to_send = value
+      return value
+    end
+    idx = idx + 1
+  end
+
+  cached_get_code_to_send = false
+  return nil
+end
+
+local function is_boundary_line(line)
+  return not line or line:match("^%s*$") or line:match("^%s*#")
+end
+
 -- Helper to set buffer-local keymaps with descriptions
 function M.bufmap(mode, lhs, rhs, desc, opts)
   opts = opts or {}
@@ -53,13 +90,15 @@ function M.read_csv_to_object()
   api.nvim_buf_set_lines(0, start_line - 1, end_line, false, lines)
 end
 
--- Send paragraph to R (from current line to next blank line)
-function M.send_paragraph_to_r()
+-- Send paragraph to R (from current line to next blank line or comment)
+-- This intentionally can run multiple adjacent separate commands
+-- It can catch when the blank line is within a multi-line expression
+-- and continue sending until a real boundary is found
+local function legacy_send_paragraph()
   local start_line = vim.fn.line('.')
   local end_line = start_line
   local total_lines = vim.fn.line('$')
 
-  -- Find the next blank line or end of file
   for i = start_line + 1, total_lines do
     local line = vim.fn.getline(i)
     if line:match('^%s*$') then
@@ -71,9 +110,58 @@ function M.send_paragraph_to_r()
     end
   end
 
-  -- Send the range
   vim.cmd('normal! ' .. start_line .. 'GV' .. end_line .. 'G')
   vim.fn.feedkeys(api.nvim_replace_termcodes('<Plug>RDSendSelection', true, true, true), 'n')
+end
+
+function M.send_paragraph_to_r()
+  local get_code_fn = get_code_to_send_fn()
+  local ok_send, send = pcall(require, "r.send")
+
+  if not get_code_fn or not ok_send then
+    legacy_send_paragraph()
+    return
+  end
+
+  local total_lines = api.nvim_buf_line_count(0)
+  local current_line = api.nvim_win_get_cursor(0)[1]
+
+  while current_line <= total_lines do
+    api.nvim_win_set_cursor(0, { current_line, 0 })
+
+    local line_text = vim.fn.getline(current_line)
+    local lines, end_row = get_code_fn(line_text, current_line)
+
+    if not end_row or #lines == 0 then
+      legacy_send_paragraph()
+      return
+    end
+
+    local sent, err = pcall(send.line, "stay")
+    if not sent then
+      vim.notify(string.format("Sending expression failed: %s", err), levels.WARN)
+      return
+    end
+
+    local next_line = end_row + 2
+
+    if next_line > total_lines then
+      api.nvim_win_set_cursor(0, { total_lines, 0 })
+      break
+    end
+
+    local next_text = vim.fn.getline(next_line)
+    if is_boundary_line(next_text) then
+      api.nvim_win_set_cursor(0, { next_line, 0 })
+      break
+    end
+
+    if next_line <= current_line then
+      break
+    end
+
+    current_line = next_line
+  end
 end
 
 -- Send the current pipe chain and inspect the result with glimpse()

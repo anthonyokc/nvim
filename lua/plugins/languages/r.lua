@@ -145,7 +145,19 @@ return {
 
             -- View a data.frame or matrix
             view_df = {
-                open_app = "tmux new-window vd",
+                -- open_app = "terminal:vd"
+                open_app = "tmux new-window vd", -- Command to open the data viewer app, use "terminal:APP" to open in a terminal
+                how = "tabnew", -- How to display the data if doing it within Neovim
+                n_lines = 0,    -- Number of lines to save in the CSV (0 for all lines).
+                --csv_sep = "\t",  -- Field separator to be used when saving the CSV. Defaults to comma (,)
+                save_fun =
+                "function(obj, obj_name) {f <- paste0(obj_name, '.parquet'); arrow::write_parquet(obj, f) ; f}",
+                -- save_fun = "", -- R function to save the data.frame in a CSV file. Default uses base::write.table()
+                -- save_fun =
+                -- "function(obj, obj_name) {f <- paste0('/tmp/', obj_name, '.csv'); data.table::fwrite(obj, f, sep = ',') ; f}",
+                -- open_fun = "", -- R function to open the data.frame directly (no conversion to CSV needed)
+
+
             },
 
             -- Syntax Highlighting

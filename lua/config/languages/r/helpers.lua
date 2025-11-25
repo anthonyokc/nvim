@@ -2,6 +2,7 @@ local M = {}
 
 local api = vim.api
 local map = vim.keymap
+local levels = vim.log.levels
 
 -- Helper to set buffer-local keymaps with descriptions
 function M.bufmap(mode, lhs, rhs, desc, opts)
@@ -94,6 +95,65 @@ function M.send_chain_glimpse()
     local msg = "R is not ready"
     vim.notify(string.format("glimpse() failed: %s", msg), vim.log.levels.WARN)
   end
+end
+
+local function build_view_command(expr)
+  local config = require("r.config").get_config()
+  local view_cfg = config.view_df or {}
+
+  local n_lines = tonumber(view_cfg.n_lines) or -1
+  local argmnts = string.format(", nrows = %d", n_lines)
+
+  if view_cfg.open_fun and view_cfg.open_fun ~= "" then
+    local custom = view_cfg.open_fun
+    if custom:find("%(%)") then
+      custom = custom:gsub("()", "(" .. expr .. ")")
+    elseif custom:find("%%s") then
+      custom = custom:gsub("%%s", expr)
+    else
+      custom = string.format("%s(%s)", custom, expr)
+    end
+    custom = custom:gsub("'", '"')
+    custom = custom:gsub('"', '\\"')
+    argmnts = argmnts .. ", R_df_viewer = '" .. custom .. "'"
+  end
+
+  if view_cfg.save_fun and view_cfg.save_fun ~= "" then
+    argmnts = argmnts .. ", save_fun = " .. view_cfg.save_fun
+  end
+
+  return string.format("nvimcom:::nvim_viewobj(%s%s)", expr, argmnts)
+end
+
+local function view_expression(expr)
+  local send = require("r.send")
+  local cmd = build_view_command(expr)
+  local ok, result = pcall(send.cmd, cmd)
+  if not ok then
+    vim.notify(string.format("Viewing %s failed: %s", expr, result), levels.WARN)
+    return false
+  elseif result == false then
+    vim.notify("R is not ready to view objects.", levels.WARN)
+    return false
+  end
+  return true
+end
+
+-- View the result stored in .Last.value (used after running a pipe chain)
+function M.view_last_value()
+  return view_expression(".Last.value")
+end
+
+-- Send the current pipe chain and open it in the configured data viewer
+function M.send_chain_view()
+  local send = require("r.send")
+  local ok, err = pcall(send.chain)
+  if not ok then
+    vim.notify(string.format("Sending pipe chain failed: %s", err), levels.WARN)
+    return
+  end
+
+  view_expression(".Last.value")
 end
 
 return M

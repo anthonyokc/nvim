@@ -38,12 +38,15 @@ return {
                         { "v", "<LocalLeader>f",   "<Plug>RFormat",                    "Format selection",                      { remap = true } },
                         { "n", "<leader>V",        "<Plug>RViewDF",                    "View object",                           { remap = true } },
                         { "v", "<leader>V",        "<Plug>RViewDF",                    "View object",                           { remap = true } },
+                        { "n", "<leader>rv",       "<Plug>RViewDF",                    "View object under cursor",              { remap = true } },
+                        { "v", "<leader>rv",       "<Plug>RViewDF",                    "View object under cursor",              { remap = true } },
                         { "n", "<leader>r<Enter>", "<Plug>RSendChain",                 "Send piped chain up to current cursor", { remap = true } },
 
                         -- Custom paragraph sending
                         { "n", ",",                helpers.send_paragraph_to_r,        "Send paragraph to R" },
                         { "v", "<leader>rH",       helpers.read_csv_to_object,         "Write->Read CSV replace (visual)" },
                         { "n", "<leader>rG",       helpers.send_chain_glimpse,         "Send pipe chain & glimpse()" },
+                        { "n", "<leader>rV",       helpers.send_chain_view,            "Send pipe chain & view()" },
 
 
                         -- R actions and helpers
@@ -57,7 +60,7 @@ return {
                             require("config.languages.r").assign_defaults_current_function()
                         end, "Assign function defaults to Global Environment" },
                         { "n", "<leader>rg", helpers.r_action("dplyr::glimpse"), "glimpse(data)" },
-                        { "n", "<leader>rp", helpers.r_action("problems"),       "problems(data)" },
+                        { "n", "<leader>rP", helpers.r_action("problems"),       "problems(data)" },
                         { "n", "<leader>ri", helpers.r_action(
                             '(function(package){ rlang::as_label(rlang::enexpr(package)) |> renv::install(prompt=FALSE) })'
                         ), "renv install package" },
@@ -81,8 +84,8 @@ return {
                         { "n", "<leader>rl",  helpers.r_cmd("devtools::load_all()"),                  "devtools::load_all()" },
                         { "n", "<leader>rt",  helpers.r_cmd("devtools::test_active_file()"),          "devtools::test_active_file()" },
                         { "n", "<leader>rT",  helpers.r_cmd("devtools::test()"),                      "devtools::test()" },
-                        { "n", "<leader>rv",  helpers.r_cmd("devtools::test_coverage_active_file()"), "cov (file)" },
-                        { "n", "<leader>rV",  helpers.r_cmd("devtools::test_coverage()"),             "cov (all)" },
+                        { "n", "<leader>rk",  helpers.r_cmd("devtools::test_coverage_active_file()"), "cov (file)" },
+                        { "n", "<leader>rK",  helpers.r_cmd("devtools::test_coverage()"),             "cov (all)" },
 
                         -- usethis commands
                         { "n", "<leader>rut", helpers.r_cmd("usethis::use_test()"),                   "usethis::use_test()" },

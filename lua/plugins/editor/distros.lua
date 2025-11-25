@@ -19,6 +19,14 @@ return {
                 mode = { 'n', 'v' },
                 desc = 'Toggle , at eol',
             },
+            {
+                '<leader>,', -- this alternative mapping is here when it conflicts with R.nvim send paragraph
+                function()
+                    require('blink.chartoggle').toggle_char_eol(',')
+                end,
+                mode = { 'n', 'v' },
+                desc = 'Toggle , at eol',
+            },
         },
     },
     {

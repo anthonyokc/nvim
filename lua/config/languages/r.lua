@@ -179,6 +179,28 @@ M.toggle_assignment_current_object = function()
     print("No pipe chain found to toggle assignment.")
 end
 
+-- Toggle adding/removing a trailing native pipe (`|>`) on the current line
+M.toggle_trailing_pipe_current_line = function()
+    local cursor_row, cursor_col = unpack(vim.api.nvim_win_get_cursor(0))
+    local line = vim.api.nvim_get_current_line()
+    local trailing_ws = line:match("%s*$") or ""
+    local trimmed = line:sub(1, #line - #trailing_ws)
+
+    if trimmed:sub(-2) == "|>" then
+        local before = trimmed:sub(1, -3)
+        before = before:gsub("%s+$", "")
+        vim.api.nvim_set_current_line(before .. trailing_ws)
+        local new_col = math.min(cursor_col, #before)
+        vim.api.nvim_win_set_cursor(0, { cursor_row, new_col })
+        return
+    end
+
+    local spacer = trimmed == "" and "" or " "
+    local updated = trimmed .. spacer .. "|>"
+    vim.api.nvim_set_current_line(updated .. trailing_ws)
+    vim.api.nvim_win_set_cursor(0, { cursor_row, #updated })
+end
+
 local function extract_current_function_expr()
     local word = vim.fn.expand("<cword>")
     if type(word) == "string" then
@@ -266,6 +288,9 @@ M.setup = function()
             vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ra',
                 ':lua require("config.languages.r").toggle_assignment_current_object()<CR>',
                 { noremap = true, silent = true, desc = "Toggle pipe assignment" })
+            vim.api.nvim_buf_set_keymap(0, 'n', '<leader>rp',
+                ':lua require("config.languages.r").toggle_trailing_pipe_current_line()<CR>',
+                { noremap = true, silent = true, desc = "Toggle trailing pipe" })
         end
     })
 end

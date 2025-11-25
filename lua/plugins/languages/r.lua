@@ -56,6 +56,9 @@ return {
                         { "n", "<leader>ra", function()
                             require("config.languages.r").toggle_assignment_current_object()
                         end, "Toggle pipe assignment" },
+                        { "n", "<leader>rp", function()
+                            require("config.languages.r").toggle_trailing_pipe_current_line()
+                        end, "Toggle trailing pipe" },
                         { "n", "<leader>re", function()
                             require("config.languages.r").assign_defaults_current_function()
                         end, "Assign function defaults to Global Environment" },

@@ -40,9 +40,9 @@ return {
 
             blink.setup({
                 sources = {
-                    default = { 'cmp_r', 'lazydev', 'lsp', 'path', 'snippets', 'buffer', 'omni', 'emoji' },
+                    default = { 'lazydev', 'lsp', 'path', 'snippets', 'buffer', 'omni', 'emoji' },
                     per_filetype = {
-                        r   = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
+                        r   = { 'lsp', 'path', 'snippets', 'buffer' },
                         rmd = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
                         qmd = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
                         sql = { 'lsp', 'snippets', 'dadbod', 'buffer',},

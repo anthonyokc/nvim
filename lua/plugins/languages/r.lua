@@ -69,7 +69,8 @@ return {
                         ), "renv install package" },
 
                         -- targets commands and actions
-                        { "n", "<leader>tm",  helpers.r_cmd("targets::tar_make()"),                   "targets::tar_make()" },
+                        { "n", "<leader>tm",  helpers.r_action("targets::tar_make()"),                "targets::tar_make(data)" },
+                        { "n", "<leader>tM",  helpers.r_cmd("targets::tar_make()"),                   "targets::tar_make()" },
                         { "n", "<leader>tl",  helpers.r_action("targets::tar_load"),                  "tar_load(data)" },
                         { "n", "<leader>tL",  helpers.r_cmd("targets::tar_load_everything()"),        "tar_load_everything()" },
                         { "n", "<leader>tr",  helpers.r_cmd("targets::tar_read()"),                   "targets::tar_read()" },
@@ -153,8 +154,8 @@ return {
             view_df = {
                 -- open_app = "terminal:vd"
                 open_app = "tmux new-window vd", -- Command to open the data viewer app, use "terminal:APP" to open in a terminal
-                how = "tabnew", -- How to display the data if doing it within Neovim
-                n_lines = 0,    -- Number of lines to save in the CSV (0 for all lines).
+                how = "tabnew",                  -- How to display the data if doing it within Neovim
+                n_lines = 0,                     -- Number of lines to save in the CSV (0 for all lines).
                 --csv_sep = "\t",  -- Field separator to be used when saving the CSV. Defaults to comma (,)
                 save_fun =
                 "function(obj, obj_name) {f <- paste0(obj_name, '.parquet'); arrow::write_parquet(obj, f) ; f}",

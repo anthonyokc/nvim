@@ -27,10 +27,10 @@ return {
         end,
         config = function()
             -- Global defaults so regular buffers get modern folding by default
-            vim.opt.foldcolumn = '1'
-            vim.opt.foldlevel = 99
-            vim.opt.foldlevelstart = 99
-            vim.opt.foldenable = true
+            vim.opt.foldcolumn = '0' -- Turn off fold column, can be set to '1' to see fold markers
+            vim.opt.foldlevel = 99 -- Open all folds by default
+            vim.opt.foldlevelstart = 99  -- Open all folds when a file is opened
+            vim.opt.foldenable = true -- Enable folding
 
             local ufo = require('ufo')
             ufo.setup({

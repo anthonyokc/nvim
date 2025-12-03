@@ -1,30 +1,30 @@
 return {
-         {
-             "zbirenbaum/copilot.lua",
-             cmd = "Copilot",
-             event = "InsertEnter",
-             config = function()
-                 require("copilot").setup({
-                     suggestion = {
-                         enabled = true,
-                         auto_trigger = true,
-                         debounce = 20,
-                         keymap = {
-                             accept = "<C-CR>"
-                         }
-                     },
-                     panel = {
-                         enabled = true,
-                         keymap = {
-                             open = "<C-y>",
-                         }
-                     }
-                 })
-                 vim.api.nvim_set_keymap('i', '<C-j>', '<cmd>lua require("copilot.suggestion").accept()<CR>', {
-                     noremap = true
-                 })
-             end
-         },
+    {
+        "zbirenbaum/copilot.lua",
+        cmd = "Copilot",
+        event = "InsertEnter",
+        config = function()
+            require("copilot").setup({
+                suggestion = {
+                    enabled = true,
+                    auto_trigger = true,
+                    debounce = 20,
+                    keymap = {
+                        accept = "<C-CR>"
+                    }
+                },
+                panel = {
+                    enabled = true,
+                    keymap = {
+                        open = "<C-y>",
+                    }
+                }
+            })
+            vim.api.nvim_set_keymap('i', '<C-j>', '<cmd>lua require("copilot.suggestion").accept()<CR>', {
+                noremap = true
+            })
+        end
+    },
     --     {
     --         "zbirenbaum/copilot-cmp",
     --         config = function()

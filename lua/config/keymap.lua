@@ -27,6 +27,8 @@ vim.keymap.set("n", "yay", "<cmd>%y+<CR>", { desc = "Copy whole file to system c
 vim.keymap.set({ "n", "v" }, "D", [["_d]])
 
 vim.keymap.set("i", "<C-c>", "<Esc>")
+vim.keymap.set("n", "<C-o>", "<C-i>")
+vim.keymap.set("n", "<C-i>", "<C-o>")
 
 vim.keymap.set("n", "Q", "<nop>")
 vim.keymap.set("n", "<leader>F", function()

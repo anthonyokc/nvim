@@ -30,7 +30,7 @@ return {
                     local keymaps = {
                         -- Built-in R.nvim keymaps (need remap=true for <Plug> mappings)
                         -- Format is: { "mode", "key", "action", "description", { options } }
-                        { "i", "<C-k>",            "<Plug>RInsertAssign",              "Insert <-",                             { remap = true } },
+                        { "i", "<C-h>",            "<Plug>RInsertAssign",              "Insert <-",                             { remap = true } },
                         { "i", "<C-l>",            "<Plug>RInsertPipe",                "Insert |>",                             { remap = true } },
                         { "n", "<Enter>",          "<Plug>RDSendLine",                 "Send line to R",                        { remap = true } },
                         { "v", "<Enter>",          "<Plug>RDSendSelection",            "Send selection to R",                   { remap = true } },

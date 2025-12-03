@@ -22,19 +22,75 @@ return {
             local blink = require('blink.cmp')
             local luasnip = require('luasnip')
 
+            -- Global toggle for R package prefixing
+            vim.g.blink_cmp_r_prefix_enabled = vim.g.blink_cmp_r_prefix_enabled ~= nil and vim.g.blink_cmp_r_prefix_enabled or true
+
             blink.setup({
                 sources = {
                     default = { 'lazydev', 'lsp', 'path', 'snippets', 'buffer', 'omni', 'emoji' },
                     per_filetype = {
-                        r   = { 'lsp', 'path', 'snippets', 'buffer' },
-                        rmd = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
-                        qmd = { 'cmp_r', 'lsp', 'path', 'snippets', 'buffer' },
-                        sql = { 'lsp', 'snippets', 'dadbod', 'buffer',},
-                        psql = { 'lsp', 'snippets', 'dadbod', 'buffer',},
+                        r    = { 'lsp', 'path', 'snippets', 'buffer' },
+                        rmd  = { 'lsp', 'path', 'snippets', 'buffer' },
+                        qmd  = { 'lsp', 'path', 'snippets', 'buffer' },
+                        sql  = { 'lsp', 'snippets', 'dadbod', 'buffer', },
+                        psql = { 'lsp', 'snippets', 'dadbod', 'buffer', },
                     },
                     providers = {
+                        lsp = {
+                            -- Tranformers allow modifying completion items before they are displayed
+                            transform_items = function(ctx, items)
+                                -- Check if prefixing is enabled
+                                if not vim.g.blink_cmp_r_prefix_enabled then
+                                    return items
+                                end
+
+                                -- For R completions, add the `pkg::` prefix to functions
+                                -- if the package name can be determined from the detail field
+                                -- and if it's not already present
+                                local ft = vim.bo[ctx.bufnr].filetype
+                                if ft ~= "r" and ft ~= "rmd" and ft ~= "qmd" and ft ~= "rnoweb" then
+                                    return items
+                                end
+
+                                    -- Only apply to function types (kind = 3)
+                                    if item.kind == 3 then
+                                        -- r_ls puts the environment/package name here
+                                        local env = item.env
+
+                                        if env then
+                                            -- Strip prefixes like "package:" or "namespace:"
+                                            local pkg = env:gsub("^package:", ""):gsub("^namespace:", "")
+
+                                            -- Don't prefix globals, already-namespaced things, or R default packages
+                                            local default_packages = { "base", "stats", "utils", "datasets", "graphics", "grDevices", "methods" }
+                                            local is_default = false
+                                            for _, default_pkg in ipairs(default_packages) do
+                                                if pkg == default_pkg then
+                                                    is_default = true
+                                                    break
+                                                end
+                                            end
+
+                                            if pkg ~= ".GlobalEnv" and not tostring(item.label):match("::") and not is_default then
+                                                local base_label = item.label
+                                                local base_insert = base_label
+
+                                                -- What gets shown & inserted
+                                                local shown = pkg .. "::" .. base_label
+                                                local inserted = pkg .. "::" .. base_insert
+
+                                                item.label = shown
+                                                item.insertText = inserted
+
+                                                -- 🔑 What the fuzzy matcher uses
+                                                -- This keeps matching based on just `func`, not `pkg::func`
+                                                item.filterText = base_insert
+                                                item.sortText = base_insert
+                                            end
+                                        end
                                     end
                                 end
+
                                 return items
                             end,
                         },
@@ -162,6 +218,13 @@ return {
             -- Extend snippet filetypes
             luasnip.filetype_extend('quarto', { 'markdown' })
             luasnip.filetype_extend('rmarkdown', { 'markdown' })
+
+            -- Toggle R package prefixing
+            vim.keymap.set('n', '<leader>rc', function()
+                vim.g.blink_cmp_r_prefix_enabled = not vim.g.blink_cmp_r_prefix_enabled
+                local status = vim.g.blink_cmp_r_prefix_enabled and 'enabled' or 'disabled'
+                vim.notify('R package prefixing ' .. status, vim.log.levels.INFO)
+            end, { desc = 'Toggle R package prefixing' })
         end,
     }
 }

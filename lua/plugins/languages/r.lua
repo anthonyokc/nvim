@@ -84,7 +84,7 @@ return {
 
                         -- devtools commands
                         { "n", "<leader>rd",  helpers.r_cmd("devtools::document()"),                  "devtools::document()" },
-                        { "n", "<leader>rc",  helpers.r_cmd("devtools::check()"),                     "devtools::check()" },
+                        { "n", "<leader>rC",  helpers.r_cmd("devtools::check()"),                     "devtools::check()" },
                         { "n", "<leader>rl",  helpers.r_cmd("devtools::load_all()"),                  "devtools::load_all()" },
                         { "n", "<leader>rt",  helpers.r_cmd("devtools::test_active_file()"),          "devtools::test_active_file()" },
                         { "n", "<leader>rT",  helpers.r_cmd("devtools::test()"),                      "devtools::test()" },

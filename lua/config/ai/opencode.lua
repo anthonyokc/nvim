@@ -217,12 +217,13 @@ local function setup_auto_reload()
 
                                 -- Also check for write tool events
                                 if event.type == "message.part.updated" and
-                                   event.properties and
-                                   event.properties.part and
-                                   event.properties.part.tool == "write" and
-                                   event.properties.part.state and
-                                   event.properties.part.state.status == "completed" then
-                                    local filePath = event.properties.part.state.input and event.properties.part.state.input.filePath
+                                    event.properties and
+                                    event.properties.part and
+                                    event.properties.part.tool == "write" and
+                                    event.properties.part.state and
+                                    event.properties.part.state.status == "completed" then
+                                    local filePath = event.properties.part.state.input and
+                                    event.properties.part.state.input.filePath
                                     if filePath then
                                         vim.schedule(function()
                                             vim.cmd('silent! checktime')
@@ -298,13 +299,13 @@ local function setup_terminal_keymaps()
                 end, { buffer = args.buf, desc = "Exit insert mode with Esc" })
 
                 -- Navigation keymaps
-                vim.keymap.set("t", "<C-u>", function()
-                    require("opencode").command("session.half.page.up")
-                end,   { desc = "opencode half page up" })
-                vim.keymap.set("t", "<C-d>", function()
-                    require("opencode").command("session.half.page.down")
-                end, { desc = "opencode half page down" })
-                        end
+                -- vim.keymap.set("t", "<C-u>", function()
+                --     require("opencode").command("session.half.page.up")
+                -- end, { desc = "opencode half page up" })
+                -- vim.keymap.set("t", "<C-d>", function()
+                --     require("opencode").command("session.half.page.down")
+                -- end, { desc = "opencode half page down" })
+            end
         end,
     })
 end

@@ -23,7 +23,8 @@ return {
             local luasnip = require('luasnip')
 
             -- Global toggle for R package prefixing
-            vim.g.blink_cmp_r_prefix_enabled = vim.g.blink_cmp_r_prefix_enabled ~= nil and vim.g.blink_cmp_r_prefix_enabled or true
+            vim.g.blink_cmp_r_prefix_enabled = vim.g.blink_cmp_r_prefix_enabled ~= nil and
+                vim.g.blink_cmp_r_prefix_enabled or true
 
             blink.setup({
                 sources = {
@@ -52,6 +53,7 @@ return {
                                     return items
                                 end
 
+                                for _, item in ipairs(items) do
                                     -- Only apply to function types (kind = 3)
                                     if item.kind == 3 then
                                         -- r_ls puts the environment/package name here
@@ -62,7 +64,11 @@ return {
                                             local pkg = env:gsub("^package:", ""):gsub("^namespace:", "")
 
                                             -- Don't prefix globals, already-namespaced things, or R default packages
-                                            local default_packages = { "base", "stats", "utils", "datasets", "graphics", "grDevices", "methods" }
+                                            local default_packages = {
+                                                "base", "stats", "utils",
+                                                "datasets", "graphics",
+                                                "grDevices", "methods"
+                                            }
                                             local is_default = false
                                             for _, default_pkg in ipairs(default_packages) do
                                                 if pkg == default_pkg then

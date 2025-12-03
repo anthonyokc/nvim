@@ -147,6 +147,15 @@ return {
                     }
                 }
             })
+            vim.lsp.config("r_language_server", {
+                settings = {
+                    r = {
+                        lsp = {
+                            diagnostics = false, -- Disable R LSP diagnostics to avoid conflicts with other linters
+                        },
+                    },
+                },
+            })
             vim.lsp.config("harper_ls", {
                 settings = {
                     ["harper-ls"] = {
@@ -159,8 +168,6 @@ return {
                     },
                 },
             })
-
-
             -- Configure diagnostics
             vim.diagnostic.config({
                 -- Displays lines pointing to the part of the code with the diagnostic

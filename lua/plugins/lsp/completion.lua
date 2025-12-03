@@ -1,19 +1,4 @@
 return {
-    -- Specialized completions
-    {
-        "R-nvim/cmp-r",
-        event = { "BufRead", "BufNewFile" },
-        config = function()
-            require('cmp_r').setup({
-                filetypes = { 'r', 'rmd', 'qmd', 'rnoweb', 'rhelp' },             -- default: {"r", "rmd", "qmd", "rnoweb", "rhelp"}
-                doc_width = 58,                                                   -- max. width of documentation window, default: 58
-                trigger_characters = { " ", ":", "(", ",", ", ", '"', "@", "$" }, -- list of characters that trigger completion, default: {" ", ":", "(", '"', "@", "$"}
-                fun_data_1 = { 'select', 'rename', 'mutate', 'filter' },          -- list of functions where data.frame columns are use to autocomplete, default: {'select', 'rename', 'mutate', 'filter'}
-                fun_data_2 = { ggplot = { 'aes' }, with = { '*' } }               -- Dictionary with parent function as keys and list of nested functions as values, default: {ggplot = {'aes'}, with = {'*'}}
-                -- quarto_intel = "PATH" -- Path to yaml-intelligence-resources.json which is part of quarto application and has all necessary information for completion of valid YAML options in an Quarto document. Default: nil (cmp-r will try to find the file).
-            })
-        end,
-    },
     {
         'saghen/blink.cmp',
         version = '1.*',
@@ -29,7 +14,6 @@ return {
                 version = '2.*',
                 opt = {}
             },
-            'R-nvim/cmp-r',           -- R completions
             'jmbuhr/otter.nvim',      -- specialized completion for Quarto and RMarkdown documents
             "moyiz/blink-emoji.nvim", -- emoji completion
         },
@@ -49,18 +33,6 @@ return {
                         psql = { 'lsp', 'snippets', 'dadbod', 'buffer',},
                     },
                     providers = {
-                        cmp_r = {
-                            name = 'cmp_r',
-                            module = 'blink.compat.source',
-                            -- Boost cmp-r items; cmp-r already sets sortText for args
-                            score_offset = 20,
-                            -- Nudge cmp-r "function argument" items (sort_text == '0')
-                            -- to display with a distinct kind and bias UI sorting
-                            transform_items = function(_, items)
-                                for _, item in ipairs(items) do
-                                    if item.sort_text == '0' then
-                                        -- Reclassify as TypeParameter to differentiate from variables
-                                        item.kind = 'TypeParameter'
                                     end
                                 end
                                 return items

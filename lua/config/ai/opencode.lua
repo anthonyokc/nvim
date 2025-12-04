@@ -6,11 +6,85 @@ local sse_connected = false
 
 local CODE_WINDOW_TARGET_WIDTH = 120
 local TERMINAL_MIN_WIDTH = 1
+local ASK_WINDOW_WIDTH = 100
+local ASK_WINDOW_MAX_HEIGHT_RATIO = 0.5
 
 local window_layout_state = {
     code = nil,
     terminals = {},
 }
+
+local function compute_wrapped_line_count(text)
+    if not text or text == "" then
+        return 1
+    end
+
+    local total = 0
+    for _, line in ipairs(vim.split(text, "\n", { plain = true, trimempty = false })) do
+        local display_width = vim.fn.strdisplaywidth(line)
+        local segments = math.max(1, math.ceil(math.max(display_width, 1) / ASK_WINDOW_WIDTH))
+        total = total + segments
+    end
+
+    return math.max(total, 1)
+end
+
+local function insert_soft_break(win)
+    if not (win and win.win and win.buf and vim.api.nvim_buf_is_valid(win.buf)) then
+        return
+    end
+
+    local cursor = vim.api.nvim_win_get_cursor(win.win)
+    local row = cursor[1] - 1
+    local col = cursor[2]
+    local current_line = vim.api.nvim_buf_get_lines(win.buf, row, row + 1, false)[1] or ""
+
+    local before = col == 0 and "" or string.sub(current_line, 1, col)
+    local after = string.sub(current_line, col + 1)
+
+    vim.api.nvim_buf_set_lines(win.buf, row, row + 1, false, { before, after })
+    vim.api.nvim_win_set_cursor(win.win, { row + 2, 0 })
+    vim.bo[win.buf].modified = false
+    win:update()
+end
+
+local function configure_ask_window_runtime()
+    local ok, config = pcall(require, "opencode.config")
+    if not ok then
+        return
+    end
+
+    config.opts.ask = config.opts.ask or {}
+    config.opts.ask.snacks = config.opts.ask.snacks or {}
+    config.opts.ask.snacks.win = config.opts.ask.snacks.win or {}
+
+    local win_opts = config.opts.ask.snacks.win
+    win_opts.width = ASK_WINDOW_WIDTH
+    win_opts.min_width = ASK_WINDOW_WIDTH
+    win_opts.max_width = ASK_WINDOW_WIDTH
+    win_opts.min_height = 1
+    win_opts.max_height = math.max(3, math.floor(vim.o.lines * ASK_WINDOW_MAX_HEIGHT_RATIO))
+    win_opts.height = function(win)
+        local desired = compute_wrapped_line_count(win and win:text() or "")
+        local max_height = math.max(3, math.floor(vim.o.lines * ASK_WINDOW_MAX_HEIGHT_RATIO))
+        return math.max(1, math.min(desired, max_height))
+    end
+
+    win_opts.wo = vim.tbl_deep_extend("force", win_opts.wo or {}, {
+        wrap = true,
+        linebreak = true,
+    })
+
+    win_opts.actions = vim.tbl_deep_extend("force", win_opts.actions or {}, {
+        insert_soft_break = insert_soft_break,
+    })
+
+    win_opts.keys = vim.tbl_deep_extend("force", win_opts.keys or {}, {
+        soft_break_ctrl_enter = { "<C-CR>", "insert_soft_break", mode = { "i", "n" }, desc = "Insert newline" },
+        soft_break_alt_enter = { "<M-CR>", "insert_soft_break", mode = { "i", "n" }, desc = "Insert newline" },
+        soft_break_ctrl_j = { "<C-j>", "insert_soft_break", mode = { "i", "n" }, desc = "Insert newline" },
+    })
+end
 
 local function safe_set_width(win, width)
     if not (win and vim.api.nvim_win_is_valid(win) and width) then
@@ -95,6 +169,19 @@ local function configure_globals()
         provider = {
             enabled = "snacks",
             snacks = {
+            },
+        },
+        ask = {
+            snacks = {
+                win = {
+                    width = ASK_WINDOW_WIDTH,
+                    min_width = ASK_WINDOW_WIDTH,
+                    max_width = ASK_WINDOW_WIDTH,
+                    wo = {
+                        wrap = true,
+                        linebreak = true,
+                    },
+                },
             },
         },
     }
@@ -320,6 +407,29 @@ local function setup_user_keymaps()
         end
     end
 
+    local function ensure_opencode_open(trigger_win, opts)
+        opts = opts or {}
+        if opencode_terminal_is_open() then
+            return true
+        end
+
+        require('opencode').toggle()
+
+        vim.defer_fn(function()
+            if not opencode_terminal_is_open() then
+                return
+            end
+
+            apply_window_compaction(trigger_win)
+
+            if opts.restore_focus and trigger_win and vim.api.nvim_win_is_valid(trigger_win) then
+                vim.api.nvim_set_current_win(trigger_win)
+            end
+        end, 40)
+
+        return false
+    end
+
     -- Toggle opencode interface
     vim.keymap.set({ 'n' }, '<leader>ot', function()
         local trigger_win = vim.api.nvim_get_current_win()
@@ -350,9 +460,13 @@ local function setup_user_keymaps()
 
     -- Ask opencode questions
     vim.keymap.set('n', '<leader>oA', function()
+        local trigger_win = vim.api.nvim_get_current_win()
+        ensure_opencode_open(trigger_win, { restore_focus = true })
         require('opencode').ask()
     end, { desc = 'Ask opencode' })
     vim.keymap.set({ 'n', 'v' }, '<leader>oa', function()
+        local trigger_win = vim.api.nvim_get_current_win()
+        ensure_opencode_open(trigger_win, { restore_focus = true })
         require('opencode').ask('@this: ', { submit = true })
     end, { desc = 'Ask opencode about this' })
 
@@ -383,6 +497,7 @@ end
 -- Main setup function
 function M.setup()
     configure_globals()
+    configure_ask_window_runtime()
     setup_auto_reload()
     setup_terminal_keymaps()
     setup_user_keymaps()

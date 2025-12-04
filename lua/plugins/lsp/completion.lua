@@ -225,12 +225,6 @@ return {
             luasnip.filetype_extend('quarto', { 'markdown' })
             luasnip.filetype_extend('rmarkdown', { 'markdown' })
 
-            -- Toggle R package prefixing
-            vim.keymap.set('n', '<leader>rc', function()
-                vim.g.blink_cmp_r_prefix_enabled = not vim.g.blink_cmp_r_prefix_enabled
-                local status = vim.g.blink_cmp_r_prefix_enabled and 'enabled' or 'disabled'
-                vim.notify('R package prefixing ' .. status, vim.log.levels.INFO)
-            end, { desc = 'Toggle R package prefixing' })
         end,
     }
 }

@@ -259,7 +259,9 @@ M.assign_defaults_current_function = function()
         return
     end
 
-    local command = string.format([=[(function(expr){f<-tryCatch(eval(parse(text=expr),envir=.GlobalEnv),error=function(e)NULL);if(is.null(f))f<-tryCatch(eval(parse(text=expr),envir=parent.frame()),error=function(e)NULL);if(is.null(f)){message("Function not found: ",expr);return(invisible(FALSE))};if(!is.function(f)){message("Object is not a function: ",expr);return(invisible(FALSE))};d<-formals(f);if(length(d)==0){message("No defaults for: ",expr);return(invisible(TRUE))};e<-environment(f);if(is.null(e))e<-.GlobalEnv;a<-character(0);for(n in names(d)){v<-d[[n]];if(!(is.symbol(v)&&as.character(v)=="")){val<-tryCatch(eval(v,envir=e),error=function(err)structure(list(error=err),class="try-error"));if(!inherits(val,"try-error")){assign(n,val,envir=.GlobalEnv);a<-c(a,n)}}};if(length(a)==0)message("No defaults assigned for: ",expr)else message("Defaults assigned for ",expr,": ",paste(a,collapse=", "));invisible(TRUE)})(%q)]=], expr)
+    local command = string.format(
+        [=[(function(expr){f<-tryCatch(eval(parse(text=expr),envir=.GlobalEnv),error=function(e)NULL);if(is.null(f))f<-tryCatch(eval(parse(text=expr),envir=parent.frame()),error=function(e)NULL);if(is.null(f)){message("Function not found: ",expr);return(invisible(FALSE))};if(!is.function(f)){message("Object is not a function: ",expr);return(invisible(FALSE))};d<-formals(f);if(length(d)==0){message("No defaults for: ",expr);return(invisible(TRUE))};e<-environment(f);if(is.null(e))e<-.GlobalEnv;a<-character(0);for(n in names(d)){v<-d[[n]];if(!(is.symbol(v)&&as.character(v)=="")){val<-tryCatch(eval(v,envir=e),error=function(err)structure(list(error=err),class="try-error"));if(!inherits(val,"try-error")){assign(n,val,envir=.GlobalEnv);a<-c(a,n)}}};if(length(a)==0)message("No defaults assigned for: ",expr)else message("Defaults assigned for ",expr,": ",paste(a,collapse=", "));invisible(TRUE)})(%q)]=],
+        expr)
 
     local ok, result = pcall(send_mod.cmd, command)
     if not ok then
@@ -291,6 +293,12 @@ M.setup = function()
             vim.api.nvim_buf_set_keymap(0, 'n', '<leader>rp',
                 ':lua require("config.languages.r").toggle_trailing_pipe_current_line()<CR>',
                 { noremap = true, silent = true, desc = "Toggle trailing pipe" })
+            -- Toggle R package prefixing
+            vim.keymap.set('n', '<leader>rc', function()
+                vim.g.blink_cmp_r_prefix_enabled = not vim.g.blink_cmp_r_prefix_enabled
+                local status = vim.g.blink_cmp_r_prefix_enabled and 'enabled' or 'disabled'
+                vim.notify('R package prefixing ' .. status, vim.log.levels.INFO)
+            end, { desc = 'Toggle R package prefixing' })
         end
     })
 end

@@ -5,12 +5,6 @@ return {
         dependencies = {
             { "nvim-lua/plenary.nvim" },
             { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
-            {
-                "nvim-telescope/telescope-live-grep-args.nvim",
-                -- This will not install any breaking changes.
-                -- For major updates, this must be adjusted manually.
-                version = "^1.0.0",
-            },
             { "aaronhallaert/advanced-git-search.nvim" },
         },
         cmd = Telescope,
@@ -35,6 +29,27 @@ return {
 
             require('telescope').setup({
                 defaults = {
+                    layout_strategy = 'horizontal',
+                    layout_config = {
+                        horizontal = {
+                            preview_width = 0.55,
+                            width = 0.9,
+                        }
+                    },
+                    defaults = {
+                        -- Important for performance with large repositories
+                        sorting_strategy = "descending",
+                        layout_strategy = "horizontal",
+                        dynamic_preview_title = true,
+                    },
+                    extensions = {
+                        fzf = {
+                            fuzzy = true,                    -- false will only do exact matching
+                            override_generic_sorter = true,  -- override the generic sorter
+                            override_file_sorter = true,     -- override the file sorter
+                            case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
+                        },
+                    },
                     mappings = {
                         i = {
                             ["<C-j>"] = actions.move_selection_next,
@@ -47,13 +62,6 @@ return {
                         },
                         n = { ["<C-t>"] = open_with_trouble },
                     },
-                    layout_strategy = 'horizontal',
-                    layout_config = {
-                        horizontal = {
-                            preview_width = 0.55,
-                            width = 0.9,
-                        }
-                    }
                 },
                 pickers = {
                     find_files = {
@@ -67,7 +75,6 @@ return {
             require('telescope').load_extension('noice')
             require('telescope').load_extension('fzf')
             require('telescope').load_extension('git_worktree')
-            require('telescope').load_extension("live_grep_args")
             require('telescope').load_extension("advanced_git_search")
 
             -- File and buffer operations
@@ -76,8 +83,19 @@ return {
             vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Find Buffers" })
 
             -- Search operations
-            vim.keymap.set("n", "<leader>fg", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>",
-                { desc = "Find with Live Grep" })
+            vim.keymap.set("n", "<leader>fg", function()
+                builtin.live_grep {
+                    additional_args = function()
+                        return {
+                            "--hidden",
+                            "--glob=!.git/*",
+                            "--glob=!node_modules/*",
+                            "--glob=!dist/*",
+                        }
+                    end,
+                }
+            end, { desc = "Find with Live Grep (rg)" })
+
             vim.keymap.set('n', '<leader>fG', function()
                 builtin.grep_string({ search = vim.fn.input("Grep > ") })
             end, { desc = "Find with Grep String" })
@@ -122,7 +140,8 @@ return {
                 if notify_ok and notify.history then
                     local notify_history = notify.history() or {}
                     for _, n in ipairs(notify_history) do
-                        local message = type(n.message) == "table" and vim.inspect(n.message) or tostring(n.message or "unknown")
+                        local message = type(n.message) == "table" and vim.inspect(n.message) or
+                            tostring(n.message or "unknown")
                         table.insert(entries, "[notify] " .. message)
                     end
                 end
@@ -132,7 +151,8 @@ return {
                 if noice_ok and noice.api and noice.api.history and noice.api.history.list then
                     local noice_history = noice.api.history.list() or {}
                     for _, n in ipairs(noice_history) do
-                        local message = type(n.message) == "table" and vim.inspect(n.message) or tostring(n.message or n.event or "unknown")
+                        local message = type(n.message) == "table" and vim.inspect(n.message) or
+                            tostring(n.message or n.event or "unknown")
                         table.insert(entries, "[noice] " .. message)
                     end
                 end
@@ -165,13 +185,20 @@ return {
         -- or if you are using nixos
         -- build = "nix run .#release",
         opts = {
+            prompt = "🤠 ",
+            title = "fff.nvim",
+            lazy_sync = false,
+            max_results = 50,
+            max_threads = 99, -- FULL THROTTLE
             layout = {
                 width = 0.9,
                 height = 0.9,
             },
-            prompt = "🤠 ",
-            max_results = 70,
-
+            preview = {
+                max_size = 5 * 1024 * 1024, -- Do not try to read files larger than 5MB
+                chunk_size = 2048,          -- half the default, ~8kb for 50-100 lines
+                line_numbers = true,
+            },
             keymaps = {
                 close = { '<Esc>', '<C-c>' },
                 move_up = { '<Up>', '<C-k>', '<C-p>' },

@@ -74,9 +74,6 @@ return {
                 "jq",             -- JQ for JSON processing
                 -- "tex-fmt", -- Tex FMT for LaTeX formatting
                 "usort",          -- Usort for Python sorting imports
-
-                -- Other tools
-                "harper_ls", -- Harper Language Server; grammar and style checker
             },
         }
     },
@@ -152,18 +149,6 @@ return {
                     r = {
                         lsp = {
                             diagnostics = false, -- Disable R LSP diagnostics to avoid conflicts with other linters
-                        },
-                    },
-                },
-            })
-            vim.lsp.config("harper_ls", {
-                settings = {
-                    ["harper-ls"] = {
-                        linters = {
-                            SentenceCapitalization = false,
-                            SpellCheck             = false,
-                            LongSentences          = false,
-                            Dashes                 = false,
                         },
                     },
                 },

@@ -86,11 +86,18 @@ return {
             vim.keymap.set("n", "<leader>fg", function()
                 builtin.live_grep {
                     additional_args = function()
+                        -- TODO: Maybe have R only settings, or a toggle?
                         return {
                             "--hidden",
                             "--glob=!.git/*",
                             "--glob=!node_modules/*",
                             "--glob=!dist/*",
+                            "--glob=!*.html",
+                            "--glob=!*.css",
+                            "--glob=!*.scss",
+                            "--glob=!*.js",
+                            "--glob=!*.json",
+                            "--glob=!*.csv"
                         }
                     end,
                 }

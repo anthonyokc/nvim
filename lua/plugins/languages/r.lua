@@ -38,7 +38,6 @@ return {
                         { "v", "<LocalLeader>f",   "<Plug>RFormat",                    "Format selection",                      { remap = true } },
                         { "n", "<leader>V",        "<Plug>RViewDF",                    "View object",                           { remap = true } },
                         { "v", "<leader>V",        "<Plug>RViewDF",                    "View object",                           { remap = true } },
-                        { "n", "<leader>rv",       "<Plug>RViewDF",                    "View object under cursor",              { remap = true } },
                         { "v", "<leader>rv",       "<Plug>RViewDF",                    "View object under cursor",              { remap = true } },
                         { "n", "<leader>r<Enter>", "<Plug>RSendChain",                 "Send piped chain up to current cursor", { remap = true } },
 

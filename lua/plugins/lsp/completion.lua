@@ -30,9 +30,6 @@ return {
                 sources = {
                     default = { 'lazydev', 'lsp', 'path', 'snippets', 'buffer', 'omni', 'emoji' },
                     per_filetype = {
-                        r    = { 'lsp', 'path', 'snippets', 'buffer' },
-                        rmd  = { 'lsp', 'path', 'snippets', 'buffer' },
-                        qmd  = { 'lsp', 'path', 'snippets', 'buffer' },
                         sql  = { 'lsp', 'snippets', 'dadbod', 'buffer', },
                         psql = { 'lsp', 'snippets', 'dadbod', 'buffer', },
                     },

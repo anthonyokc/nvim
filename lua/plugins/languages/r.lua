@@ -68,8 +68,10 @@ return {
                         ), "renv install package" },
 
                         -- targets commands and actions
-                        { "n", "<leader>tm",  helpers.r_action("targets::tar_make"),                "targets::tar_make(data)" },
+                        { "n", "<leader>tm",  helpers.r_action("targets::tar_make"),                  "targets::tar_make(data)" },
                         { "n", "<leader>tM",  helpers.r_cmd("targets::tar_make()"),                   "targets::tar_make()" },
+                        { "n", "<leader>tf",  helpers.r_action("tmf"),                                "tmf(data)" },
+                        { "n", "<leader>tF",  helpers.r_cmd("tmf"),                                   "tmf()" },
                         { "n", "<leader>tl",  helpers.r_action("targets::tar_load"),                  "tar_load(data)" },
                         { "n", "<leader>tL",  helpers.r_cmd("targets::tar_load_everything()"),        "tar_load_everything()" },
                         { "n", "<leader>tr",  helpers.r_cmd("targets::tar_read()"),                   "targets::tar_read()" },

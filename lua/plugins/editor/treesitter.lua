@@ -23,7 +23,6 @@ return {
                 'query',
                 'vim',
                 'vimdoc',
-                'latex', -- requires tree-sitter-cli (installed automatically via Mason)
                 'html',
                 'css',
                 'dot',

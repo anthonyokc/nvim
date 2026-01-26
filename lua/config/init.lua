@@ -11,6 +11,8 @@ require("config.file_types")
 local in_wsl = os.getenv('WSL_DISTRO_NAME') ~= nil
 if in_wsl then
     require("config.system.wsl").setup()
+else
+    vim.g.clipboard = 'osc52'
 end
 
 -- Load git configurations

@@ -31,8 +31,8 @@ return {
                     },
                     sh = {
                         command = { "bash", "--norc" },
-                        format = common.bracketed_paste(),
-                    }
+                        format = common.bracketed_paste,
+                    },
                 },
                 repl_open_cmd = view.split.vertical.botright(),
             },

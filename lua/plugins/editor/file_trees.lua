@@ -16,9 +16,8 @@ return {
                 },
             },
             filters = {
-                dotfiles = false,   -- Don't filter dotfiles by default
-                git_ignored = false -- Don't filter git-ignored files by default
-            }
+                enable = false, -- Start with filters disabled, toggle with keybinding
+            },
         })
 
         local api = require "nvim-tree.api"

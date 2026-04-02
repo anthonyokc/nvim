@@ -45,7 +45,10 @@ return {
         priority = 1000, -- make sure to load this before all the other start plugins
         config = function()
             require("catppuccin").setup({
-                flavour = "mocha"
+                flavour = "mocha",
+                integrations = {
+                    render_markdown = true,
+                },
             })
 
             vim.cmd("colorscheme catppuccin")

@@ -78,6 +78,7 @@ return {
             { "<leader>ff",  desc = "Find Files" },
             { "<leader>fF",  desc = "Find Git Files" },
             { "<leader>fb",  desc = "Find Buffers" },
+            { "<leader>fm",  desc = "Find Markdown Headings" },
             -- Search operations
             { "<leader>fg",  desc = "Find with Live Grep" },
             { "<leader>fG",  desc = "Find with Grep String" },
@@ -100,7 +101,7 @@ return {
             { "<leader>fN",  desc = "Find Noice Messages" },
             { "<leader>fy",  desc = "Find Clipboard History" },
             -- Harpoon
-            { "<leader>fm",  desc = "Find Harpoon Marks" },
+            { "<leader>fp",  desc = "Find Harpoon Marks" },
             { "<leader>ft",  desc = "Find TODOs" },
 
             -- Other groups

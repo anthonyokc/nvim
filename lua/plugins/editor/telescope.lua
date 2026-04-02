@@ -182,7 +182,7 @@ return {
             vim.keymap.set('n', '<leader>fy', "<cmd>Telescope neoclip<CR>", { desc = "Find Clipboard History" })
 
             -- Harpoon
-            vim.keymap.set('n', '<leader>fm', "<cmd>Telescope harpoon marks<cr>", { desc = "Find Harpoon Marks" })
+            vim.keymap.set('n', '<leader>fp', "<cmd>Telescope harpoon marks<cr>", { desc = "Find Harpoon Marks" })
         end
     },
     {

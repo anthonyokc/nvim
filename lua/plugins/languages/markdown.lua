@@ -10,16 +10,124 @@ return {
         opts = {
             code = {
                 language_border = ' ',
-                language_left = '',
-                language_right = '',
+                language_left = '',
+                language_right = '',
+                style = 'full',
+                border = 'thick',
+                above = '▄',
+                below = '▀',
             },
             heading = {
                 width = 'block',
                 min_width = 30,
-                sign = false
-            }
+                sign = false,
+                icons = { '󰎤 ', '󰎧 ', '󰎪 ', '󰎭 ', '󰎱 ', '󰎳 ' },
+                backgrounds = {
+                    'RenderMarkdownH1Bg',
+                    'RenderMarkdownH2Bg',
+                    'RenderMarkdownH3Bg',
+                    'RenderMarkdownH4Bg',
+                    'RenderMarkdownH5Bg',
+                    'RenderMarkdownH6Bg',
+                },
+                foregrounds = {
+                    'RenderMarkdownH1',
+                    'RenderMarkdownH2',
+                    'RenderMarkdownH3',
+                    'RenderMarkdownH4',
+                    'RenderMarkdownH5',
+                    'RenderMarkdownH6',
+                },
+            },
+            bullet = {
+                icons = { '●', '○', '◆', '◇' },
+            },
+            checkbox = {
+                unchecked = { icon = '󰄱 ' },
+                checked   = { icon = '󰄲 ' },
+                custom    = { todo = { raw = '[-]', rendered = '󰥔 ', highlight = 'RenderMarkdownWarn' } },
+            },
+            pipe_table = {
+                style = 'full',
+                border = { '┌', '┬', '┐', '├', '┼', '┤', '└', '┴', '┘', '│', '─' },
+            },
+            dash = {
+                icon = '─',
+            },
+            quote = {
+                icon = '▎',
+            },
         },
         config = function(_, opts)
+            -- Catppuccin Mocha palette
+            local mocha = {
+                rosewater = '#f5e0dc',
+                flamingo  = '#f2cdcd',
+                pink      = '#f5c2e7',
+                mauve     = '#cba6f7',
+                red       = '#f38ba8',
+                maroon    = '#eba0ac',
+                peach     = '#fab387',
+                yellow    = '#f9e2af',
+                green     = '#a6e3a1',
+                teal      = '#94e2d5',
+                sky       = '#89dceb',
+                sapphire  = '#74c7ec',
+                blue      = '#89b4fa',
+                lavender  = '#b4befe',
+                text      = '#cdd6f4',
+                base      = '#1e1e2e',
+                mantle    = '#181825',
+                crust     = '#11111b',
+                surface0  = '#313244',
+                surface1  = '#45475a',
+            }
+
+            --- Darken a hex color toward base by a factor (0..1)
+            local function darken(hex, amount)
+                local r = tonumber(hex:sub(2, 3), 16)
+                local g = tonumber(hex:sub(4, 5), 16)
+                local b = tonumber(hex:sub(6, 7), 16)
+                local br = tonumber(mocha.base:sub(2, 3), 16)
+                local bg = tonumber(mocha.base:sub(4, 5), 16)
+                local bb = tonumber(mocha.base:sub(6, 7), 16)
+                r = math.floor(r + (br - r) * (1 - amount))
+                g = math.floor(g + (bg - g) * (1 - amount))
+                b = math.floor(b + (bb - b) * (1 - amount))
+                return string.format('#%02x%02x%02x', r, g, b)
+            end
+
+            -- Heading colors: catppuccin rainbow progression
+            local h_fg = { mocha.red, mocha.peach, mocha.yellow, mocha.green, mocha.sapphire, mocha.mauve }
+            local bg_amount = 0.28 -- matches catppuccin's transparent-mode darkening
+
+            for i = 1, 6 do
+                vim.api.nvim_set_hl(0, 'RenderMarkdownH' .. i, { fg = h_fg[i], bold = true })
+                vim.api.nvim_set_hl(0, 'RenderMarkdownH' .. i .. 'Bg', { bg = darken(h_fg[i], bg_amount) })
+            end
+
+            -- Code blocks & inline code
+            vim.api.nvim_set_hl(0, 'RenderMarkdownCode', { bg = mocha.mantle })
+            vim.api.nvim_set_hl(0, 'RenderMarkdownCodeInline', { bg = mocha.surface0 })
+
+            -- Bullets, tables, quotes, dashes
+            vim.api.nvim_set_hl(0, 'RenderMarkdownBullet', { fg = mocha.sky })
+            vim.api.nvim_set_hl(0, 'RenderMarkdownTableHead', { fg = mocha.blue, bold = true })
+            vim.api.nvim_set_hl(0, 'RenderMarkdownTableRow', { fg = mocha.lavender })
+            vim.api.nvim_set_hl(0, 'RenderMarkdownQuote', { fg = mocha.surface1, italic = true })
+            vim.api.nvim_set_hl(0, 'RenderMarkdownDash', { fg = mocha.surface1 })
+
+            -- Callouts / alerts
+            vim.api.nvim_set_hl(0, 'RenderMarkdownSuccess', { fg = mocha.green })
+            vim.api.nvim_set_hl(0, 'RenderMarkdownInfo', { fg = mocha.sky })
+            vim.api.nvim_set_hl(0, 'RenderMarkdownHint', { fg = mocha.teal })
+            vim.api.nvim_set_hl(0, 'RenderMarkdownWarn', { fg = mocha.yellow })
+            vim.api.nvim_set_hl(0, 'RenderMarkdownError', { fg = mocha.red })
+
+            -- Checkboxes
+            vim.api.nvim_set_hl(0, 'RenderMarkdownUnchecked', { fg = mocha.surface1 })
+            vim.api.nvim_set_hl(0, 'RenderMarkdownChecked', { fg = mocha.green })
+
             local ok, rm = pcall(require, 'render-markdown')
             if ok then rm.setup(opts) end
 
@@ -41,6 +149,145 @@ return {
                 end
             end
 
+            local ns_previewer = vim.api.nvim_create_namespace("telescope.previewers")
+
+            local function ensure_telescope_loaded()
+                local telescope_ok = pcall(require, "telescope")
+                if not telescope_ok then
+                    local lazy_ok, lazy = pcall(require, "lazy")
+                    if lazy_ok then lazy.load({ plugins = { "telescope.nvim" } }) end
+                    telescope_ok = pcall(require, "telescope")
+                end
+                if not telescope_ok then
+                    vim.notify("telescope.nvim is required to find markdown headings.", vim.log.levels.ERROR)
+                    return false
+                end
+                return true
+            end
+
+            local function find_markdown_headings(bufnr)
+                if not ensure_telescope_loaded() then return end
+                local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+                local results = {}
+                local counters = { 0, 0, 0, 0, 0, 0 }
+                for lnum, line in ipairs(lines) do
+                    local hashes, title = line:match("^(#+)%s+(.*)$")
+                    if hashes then
+                        local level = #hashes
+                        if level <= 6 then
+                            title = vim.trim(title)
+                            if title == "" then title = "(empty heading)" end
+                            counters[level] = counters[level] + 1
+                            for i = level + 1, 6 do
+                                counters[i] = 0
+                            end
+                            local parts = {}
+                            for i = 1, level do
+                                table.insert(parts, tostring(counters[i]))
+                            end
+                            local outline = table.concat(parts, ".")
+                            table.insert(results, {
+                                lnum = lnum,
+                                outline = outline,
+                                title = title,
+                                ordinal = outline .. " " .. title .. " Line Number: " .. lnum,
+                            })
+                        end
+                    end
+                end
+                if #results == 0 then
+                    vim.notify("No markdown headings in this buffer.", vim.log.levels.INFO)
+                    return
+                end
+
+                local pickers = require("telescope.pickers")
+                local finders = require("telescope.finders")
+                local conf = require("telescope.config").values
+                local actions = require("telescope.actions")
+                local action_state = require("telescope.actions.state")
+                local previewers = require("telescope.previewers")
+
+                pickers.new({ initial_mode = "insert" }, {
+                    prompt_title = "Markdown headings",
+                    finder = finders.new_table({
+                        results = results,
+                        entry_maker = function(entry)
+                            return {
+                                value = entry.lnum,
+                                display = string.format(
+                                    "%-14s  %s  Line Number: %d",
+                                    entry.outline,
+                                    entry.title,
+                                    entry.lnum
+                                ),
+                                ordinal = entry.ordinal,
+                            }
+                        end,
+                    }),
+                    previewer = previewers.new_buffer_previewer({
+                        title = "Heading preview",
+                        dyn_title = function(_, entry)
+                            return string.format("Line %s", tostring(entry.value))
+                        end,
+                        get_buffer_by_name = function()
+                            return "md_headings_" .. tostring(bufnr)
+                        end,
+                        teardown = function(self)
+                            if self.state and self.state.bufnr and vim.api.nvim_buf_is_valid(self.state.bufnr) then
+                                pcall(vim.api.nvim_buf_clear_namespace, self.state.bufnr, ns_previewer, 0, -1)
+                            end
+                        end,
+                        define_preview = function(self, entry, status)
+                            if not vim.api.nvim_buf_is_valid(bufnr) then return end
+                            local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+                            vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+                            local ft = vim.api.nvim_buf_get_option(bufnr, "filetype")
+                            pcall(vim.api.nvim_buf_set_option, self.state.bufnr, "filetype", ft)
+                            local lnum = entry.value
+                            vim.defer_fn(function()
+                                if not self.state or not vim.api.nvim_buf_is_valid(self.state.bufnr) then return end
+                                pcall(vim.api.nvim_buf_clear_namespace, self.state.bufnr, ns_previewer, 0, -1)
+                                if lnum and lnum > 0 then
+                                    pcall(
+                                        vim.api.nvim_buf_add_highlight,
+                                        self.state.bufnr,
+                                        ns_previewer,
+                                        "TelescopePreviewLine",
+                                        lnum - 1,
+                                        0,
+                                        -1
+                                    )
+                                end
+                                local win = self.state.winid or status.preview_win
+                                if win and vim.api.nvim_win_is_valid(win) then
+                                    pcall(vim.api.nvim_win_set_cursor, win, { lnum, 0 })
+                                    pcall(vim.api.nvim_buf_call, self.state.bufnr, function()
+                                        vim.cmd("norm! zz")
+                                    end)
+                                end
+                            end, 50)
+                        end,
+                    }),
+                    sorter = conf.generic_sorter({}),
+                    attach_mappings = function(prompt_bufnr, _)
+                        actions.select_default:replace(function()
+                            local selection = action_state.get_selected_entry()
+                            actions.close(prompt_bufnr)
+                            if not selection or not selection.value then return end
+                            local win = vim.fn.bufwinid(bufnr)
+                            if win == -1 then
+                                vim.api.nvim_set_current_buf(bufnr)
+                                win = 0
+                            else
+                                vim.api.nvim_set_current_win(win)
+                            end
+                            vim.api.nvim_win_set_cursor(win, { selection.value, 0 })
+                            vim.cmd("normal! zz")
+                        end)
+                        return true
+                    end,
+                }):find()
+            end
 
             -- Checks each line to see if it matches a markdown heading (#, ##, etc.):
             -- It’s called implicitly by Neovim’s folding engine by vim.opt_local.foldexpr
@@ -124,6 +371,17 @@ return {
                     end, "[P]Toggle fold")
                     km("zu", function() vim.cmd("normal! zR|zz") end, "[P]Unfold all")
                     km("zi", function() vim.cmd("normal gk|normal! za|zz") end, "[P]Fold heading above")
+                end,
+            })
+
+            vim.api.nvim_create_autocmd("FileType", {
+                pattern = { "markdown", "Avante", "quarto", "rmd", "r" },
+                callback = function(args)
+                    vim.keymap.set("n", "<leader>fm", function() find_markdown_headings(args.buf) end, {
+                        buffer = args.buf,
+                        desc = "[P]Find headings",
+                        silent = true,
+                    })
                 end,
             })
 

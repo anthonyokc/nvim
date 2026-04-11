@@ -47,7 +47,7 @@ return {
             require("catppuccin").setup({
                 flavour = "mocha",
                 integrations = {
-                    render_markdown = true,
+                    markview = true,
                 },
             })
 

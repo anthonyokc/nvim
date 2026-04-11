@@ -1,86 +1,121 @@
 return {
     {
-        'MeanderingProgrammer/render-markdown.nvim',
+        'OXY2DEV/markview.nvim',
         event = 'VeryLazy',
         dependencies = {
             'nvim-treesitter/nvim-treesitter',
-            'nvim-tree/nvim-web-devicons', -- if you prefer nvim-web-devicons
-            'folke/noice.nvim',            -- ensure noice loads first so we can override
+            'nvim-tree/nvim-web-devicons',
         },
-        opts = {
-            code = {
-                language_border = ' ',
-                language_left = '',
-                language_right = '',
-                style = 'full',
-                border = 'thick',
-                above = '▄',
-                below = '▀',
-            },
-            heading = {
-                width = 'block',
-                min_width = 30,
-                sign = false,
-                icons = { '󰎤 ', '󰎧 ', '󰎪 ', '󰎭 ', '󰎱 ', '󰎳 ' },
-                backgrounds = {
-                    'RenderMarkdownH1Bg',
-                    'RenderMarkdownH2Bg',
-                    'RenderMarkdownH3Bg',
-                    'RenderMarkdownH4Bg',
-                    'RenderMarkdownH5Bg',
-                    'RenderMarkdownH6Bg',
+        config = function()
+            local presets = require("markview.presets")
+
+            require("markview").setup({
+                preview = {
+                    filetypes = { "markdown", "Avante", "quarto", "rmd" },
+                    hybrid_modes = { "n" },
                 },
-                foregrounds = {
-                    'RenderMarkdownH1',
-                    'RenderMarkdownH2',
-                    'RenderMarkdownH3',
-                    'RenderMarkdownH4',
-                    'RenderMarkdownH5',
-                    'RenderMarkdownH6',
+                markdown = {
+                    headings = {
+                        shift_width = 1,
+
+                        heading_1 = {
+                            style = "icon",
+                            icon = "[%d] ",
+                            hl = "MarkviewHeading1",
+                        },
+                        heading_2 = {
+                            style = "icon",
+                            icon = "[%d.%d] ",
+                            hl = "MarkviewHeading2",
+                        },
+                        heading_3 = {
+                            style = "icon",
+                            icon = "[%d.%d.%d] ",
+                            hl = "MarkviewHeading3",
+                        },
+                        heading_4 = {
+                            style = "icon",
+                            icon = "[%d.%d.%d.%d] ",
+                            hl = "MarkviewHeading4",
+                        },
+                        heading_5 = {
+                            style = "icon",
+                            icon = "[%d.%d.%d.%d.%d] ",
+                            hl = "MarkviewHeading5",
+                        },
+                        heading_6 = {
+                            style = "icon",
+                            icon = "[%d.%d.%d.%d.%d.%d] ",
+                            hl = "MarkviewHeading6",
+                        },
+
+                        setext_1 = {
+                            style = "decorated",
+                            icon = "  ",
+                            hl = "MarkviewHeading1",
+                            border = "▂",
+                        },
+                        setext_2 = {
+                            style = "decorated",
+                            icon = "  ",
+                            hl = "MarkviewHeading2",
+                            border = "▁",
+                        },
+                    },
+                    code_blocks = {
+                        style = "block",
+                        min_width = 60,
+                        pad_amount = 2,
+                        pad_char = " ",
+                        label_direction = "right",
+                        sign = false,
+                    },
+                    tables = {
+                        enable = true,
+                        block_decorator = true,
+                        use_virt_lines = false,
+                    },
+                    list_items = {
+                        marker_minus = {
+                            add_padding = true,
+                            conceal_on_checkboxes = true,
+                            text = "●",
+                            hl = "MarkviewListItemMinus",
+                        },
+                        marker_plus = {
+                            add_padding = true,
+                            conceal_on_checkboxes = true,
+                            text = "○",
+                            hl = "MarkviewListItemPlus",
+                        },
+                        marker_star = {
+                            add_padding = true,
+                            conceal_on_checkboxes = true,
+                            text = "◆",
+                            hl = "MarkviewListItemStar",
+                        },
+                    },
+                    horizontal_rules = presets.horizontal_rules.thin,
                 },
-            },
-            bullet = {
-                icons = { '●', '○', '◆', '◇' },
-            },
-            checkbox = {
-                unchecked = { icon = '󰄱 ' },
-                checked   = { icon = '󰄲 ' },
-                custom    = { todo = { raw = '[-]', rendered = '󰥔 ', highlight = 'RenderMarkdownWarn' } },
-            },
-            pipe_table = {
-                style = 'full',
-                border = { '┌', '┬', '┐', '├', '┼', '┤', '└', '┴', '┘', '│', '─' },
-            },
-            dash = {
-                icon = '─',
-            },
-            quote = {
-                icon = '▎',
-            },
-        },
-        config = function(_, opts)
+            })
+
             -- Catppuccin Mocha palette
             local mocha = {
-                rosewater = '#f5e0dc',
-                flamingo  = '#f2cdcd',
-                pink      = '#f5c2e7',
-                mauve     = '#cba6f7',
                 red       = '#f38ba8',
-                maroon    = '#eba0ac',
                 peach     = '#fab387',
                 yellow    = '#f9e2af',
                 green     = '#a6e3a1',
-                teal      = '#94e2d5',
-                sky       = '#89dceb',
                 sapphire  = '#74c7ec',
+                mauve     = '#cba6f7',
                 blue      = '#89b4fa',
+                sky       = '#89dceb',
+                teal      = '#94e2d5',
                 lavender  = '#b4befe',
-                text      = '#cdd6f4',
+                pink      = '#f5c2e7',
+                overlay2  = '#9399b2',
                 base      = '#1e1e2e',
                 mantle    = '#181825',
-                crust     = '#11111b',
                 surface0  = '#313244',
-                surface1  = '#45475a',
             }
 
             --- Darken a hex color toward base by a factor (0..1)
@@ -97,47 +132,63 @@ return {
                 return string.format('#%02x%02x%02x', r, g, b)
             end
 
-            -- Heading colors: catppuccin rainbow progression
-            local h_fg = { mocha.red, mocha.peach, mocha.yellow, mocha.green, mocha.sapphire, mocha.mauve }
-            local bg_amount = 0.28 -- matches catppuccin's transparent-mode darkening
+            -- Palette colors: catppuccin rainbow used by markview's MarkviewPalette0-6
+            -- Palette mapping: 0=overlay2, 1=red, 2=peach, 3=yellow, 4=green, 5=sapphire, 6=mauve, 7=mauve
+            local palette = {
+                [0] = mocha.overlay2,
+                [1] = mocha.red,
+                [2] = mocha.peach,
+                [3] = mocha.yellow,
+                [4] = mocha.green,
+                [5] = mocha.sapphire,
+                [6] = mocha.mauve,
+                [7] = mocha.mauve,
+            }
+            local bg_amount = 0.28
 
-            for i = 1, 6 do
-                vim.api.nvim_set_hl(0, 'RenderMarkdownH' .. i, { fg = h_fg[i], bold = true })
-                vim.api.nvim_set_hl(0, 'RenderMarkdownH' .. i .. 'Bg', { bg = darken(h_fg[i], bg_amount) })
+            for i = 0, 7 do
+                local color = palette[i]
+                local bg_color = darken(color, bg_amount)
+                vim.api.nvim_set_hl(0, 'MarkviewPalette' .. i, { fg = color, bg = bg_color })
+                vim.api.nvim_set_hl(0, 'MarkviewPalette' .. i .. 'Fg', { fg = color })
+                vim.api.nvim_set_hl(0, 'MarkviewPalette' .. i .. 'Bg', { bg = bg_color })
+                vim.api.nvim_set_hl(0, 'MarkviewIcon' .. i, { fg = color, bg = mocha.mantle })
             end
 
-            -- Code blocks & inline code
-            vim.api.nvim_set_hl(0, 'RenderMarkdownCode', { bg = mocha.mantle })
-            vim.api.nvim_set_hl(0, 'RenderMarkdownCodeInline', { bg = mocha.surface0 })
+            -- Heading highlights (link to palette: H1=Palette1, H2=Palette2, etc.)
+            for i = 1, 6 do
+                local color = palette[i]
+                local bg_color = darken(color, bg_amount)
+                vim.api.nvim_set_hl(0, 'MarkviewHeading' .. i, { fg = color, bg = bg_color, bold = true })
+                vim.api.nvim_set_hl(0, 'MarkviewHeading' .. i .. 'Sign', { fg = color })
+            end
 
-            -- Bullets, tables, quotes, dashes
-            vim.api.nvim_set_hl(0, 'RenderMarkdownBullet', { fg = mocha.sky })
-            vim.api.nvim_set_hl(0, 'RenderMarkdownTableHead', { fg = mocha.blue, bold = true })
-            vim.api.nvim_set_hl(0, 'RenderMarkdownTableRow', { fg = mocha.lavender })
-            vim.api.nvim_set_hl(0, 'RenderMarkdownQuote', { fg = mocha.surface1, italic = true })
-            vim.api.nvim_set_hl(0, 'RenderMarkdownDash', { fg = mocha.surface1 })
+            -- Code blocks
+            vim.api.nvim_set_hl(0, 'MarkviewCode', { bg = mocha.mantle })
+            vim.api.nvim_set_hl(0, 'MarkviewCodeFg', { fg = mocha.mantle })
+            vim.api.nvim_set_hl(0, 'MarkviewCodeInfo', { fg = mocha.overlay2, bg = mocha.mantle })
+            vim.api.nvim_set_hl(0, 'MarkviewInlineCode', { bg = mocha.surface0 })
 
-            -- Callouts / alerts
-            vim.api.nvim_set_hl(0, 'RenderMarkdownSuccess', { fg = mocha.green })
-            vim.api.nvim_set_hl(0, 'RenderMarkdownInfo', { fg = mocha.sky })
-            vim.api.nvim_set_hl(0, 'RenderMarkdownHint', { fg = mocha.teal })
-            vim.api.nvim_set_hl(0, 'RenderMarkdownWarn', { fg = mocha.yellow })
-            vim.api.nvim_set_hl(0, 'RenderMarkdownError', { fg = mocha.red })
+            -- Block quotes
+            vim.api.nvim_set_hl(0, 'MarkviewBlockQuoteDefault', { fg = mocha.overlay2 })
+            vim.api.nvim_set_hl(0, 'MarkviewBlockQuoteError', { fg = mocha.red, bg = darken(mocha.red, bg_amount) })
+            vim.api.nvim_set_hl(0, 'MarkviewBlockQuoteNote', { fg = mocha.blue, bg = darken(mocha.blue, bg_amount) })
+            vim.api.nvim_set_hl(0, 'MarkviewBlockQuoteOk', { fg = mocha.green, bg = darken(mocha.green, bg_amount) })
+            vim.api.nvim_set_hl(0, 'MarkviewBlockQuoteSpecial', { fg = mocha.mauve, bg = darken(mocha.pink, bg_amount) })
+            vim.api.nvim_set_hl(0, 'MarkviewBlockQuoteWarn', { fg = mocha.yellow, bg = darken(mocha.yellow, bg_amount) })
 
-            -- Checkboxes
-            vim.api.nvim_set_hl(0, 'RenderMarkdownUnchecked', { fg = mocha.surface1 })
-            vim.api.nvim_set_hl(0, 'RenderMarkdownChecked', { fg = mocha.green })
+            -- Tables
+            vim.api.nvim_set_hl(0, 'MarkviewTableHeader', { fg = mocha.blue })
 
-            local ok, rm = pcall(require, 'render-markdown')
-            if ok then rm.setup(opts) end
-
+            -- Toggle keymap
             vim.api.nvim_create_autocmd("FileType", {
                 pattern = { "markdown", "Avante", "r" },
                 callback = function()
-                    vim.keymap.set("n", "<leader>mR", "<cmd>RenderMarkdown toggle<cr>",
-                        { desc = "Toggle Render Markdown", buffer = true })
+                    vim.keymap.set("n", "<leader>mR", "<cmd>Markview toggle<cr>",
+                        { desc = "Toggle Markview", buffer = true })
                 end,
             })
+
             ------------------------------------------------------------------------------
             --                           Folding section
             -------------------------------------------------------------------------------
@@ -205,7 +256,7 @@ return {
                 local conf = require("telescope.config").values
                 local actions = require("telescope.actions")
                 local action_state = require("telescope.actions.state")
-                local previewers = require("telescope.previewers")
+                local previewers_mod = require("telescope.previewers")
 
                 pickers.new({ initial_mode = "insert" }, {
                     prompt_title = "Markdown headings",
@@ -224,7 +275,7 @@ return {
                             }
                         end,
                     }),
-                    previewer = previewers.new_buffer_previewer({
+                    previewer = previewers_mod.new_buffer_previewer({
                         title = "Heading preview",
                         dyn_title = function(_, entry)
                             return string.format("Line %s", tostring(entry.value))
@@ -239,8 +290,8 @@ return {
                         end,
                         define_preview = function(self, entry, status)
                             if not vim.api.nvim_buf_is_valid(bufnr) then return end
-                            local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-                            vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+                            local preview_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+                            vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, preview_lines)
                             local ft = vim.api.nvim_buf_get_option(bufnr, "filetype")
                             pcall(vim.api.nvim_buf_set_option, self.state.bufnr, "filetype", ft)
                             local lnum = entry.value
@@ -290,7 +341,7 @@ return {
             end
 
             -- Checks each line to see if it matches a markdown heading (#, ##, etc.):
-            -- It’s called implicitly by Neovim’s folding engine by vim.opt_local.foldexpr
+            -- It's called implicitly by Neovim's folding engine by vim.opt_local.foldexpr
             -- buffer-local setup for markdown folding
             local function set_markdown_folding()
                 -- detect frontmatter end once
@@ -387,15 +438,12 @@ return {
 
             -- Hook LSP/cmp markdown floats and sanitize R HTML noise
             local util = vim.lsp.util
-            if ok and rm.stylize_markdown then
-                util.stylize_markdown = rm.stylize_markdown
-            end
             local sanitize = function(c)
                 local s = require('util.markdown').sanitize_html
                 return s and s(c) or c
             end
             local orig_open = util.open_floating_preview
-            util.open_floating_preview = function(contents, syntax, opts, ...)
+            util.open_floating_preview = function(contents, syntax, float_opts, ...)
                 if syntax == 'markdown' then
                     contents = sanitize(contents)
                     if type(contents) == 'string' then contents = { contents } end
@@ -405,7 +453,7 @@ return {
                         end
                     end
                 end
-                return orig_open(contents, syntax, opts, ...)
+                return orig_open(contents, syntax, float_opts, ...)
             end
         end,
 

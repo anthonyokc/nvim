@@ -44,10 +44,10 @@ return {
                     },
                     extensions = {
                         fzf = {
-                            fuzzy = true,                    -- false will only do exact matching
-                            override_generic_sorter = true,  -- override the generic sorter
-                            override_file_sorter = true,     -- override the file sorter
-                            case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
+                            fuzzy = true,                   -- false will only do exact matching
+                            override_generic_sorter = true, -- override the generic sorter
+                            override_file_sorter = true,    -- override the file sorter
+                            case_mode = "smart_case",       -- or "ignore_case" or "respect_case"
                         },
                     },
                     mappings = {
@@ -188,7 +188,11 @@ return {
     {
         -- A fast file finder and more written in Rust
         "dmtrKovalenko/fff.nvim",
-        build = "cargo build --release",
+        build = function()
+            -- this will download prebuild binary or try to use existing rustup toolchain to build from source
+            -- (if you are using lazy you can use gb for rebuilding a plugin if needed)
+            require("fff.download").download_or_build_binary()
+        end,
         -- or if you are using nixos
         -- build = "nix run .#release",
         opts = {

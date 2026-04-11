@@ -3,7 +3,7 @@ return {
     { -- requires plugins in lua/plugins/treesitter.lua and lua/plugins/lsp.lua
         -- for complete functionality (language features)
         'quarto-dev/quarto-nvim',
-        ft = { 'quarto' },
+        ft = { 'quarto', 'qmd' },
         dev = false,
         dependencies = {
             -- for language features in code cells
@@ -14,9 +14,68 @@ return {
         },
         config = function()
             local quarto = require('quarto')
+
             quarto.setup()
             vim.keymap.set('n', '<leader>qp', quarto.quartoPreview, { silent = true, noremap = true })
+            vim.api.nvim_create_autocmd('FileType', {
+                group = vim.api.nvim_create_augroup('QuartoRFormatting', { clear = true }),
+                pattern = { 'quarto', 'qmd' },
+                callback = function(args)
+                    vim.keymap.set('n', '<leader>F', function()
+                        require('conform').format({
+                            bufnr = args.buf,
+                            timeout_ms = 5000,
+                            lsp_format = 'fallback',
+                        })
+                    end, {
+                        buffer = args.buf,
+                        silent = true,
+                        desc = 'Format embedded code blocks',
+                    })
+                end,
+            })
         end
+    },
+
+    {
+        'stevearc/conform.nvim',
+        ft = { 'r', 'rmd', 'quarto', 'qmd' },
+        cmd = { 'ConformInfo' },
+        opts = {
+            formatters_by_ft = {
+                r = { 'styler_text' },
+                rmd = { 'injected_r' },
+                quarto = { 'injected_r' },
+                qmd = { 'injected_r' },
+            },
+            default_format_opts = {
+                lsp_format = 'fallback',
+            },
+            formatters = {
+                styler_text = {
+                    inherit = false,
+                    command = 'R',
+                    args = {
+                        '--no-init-file',
+                        '-s',
+                        '-e',
+                        'writeLines(styler::style_text(readLines(file("stdin"))))',
+                    },
+                    stdin = true,
+                },
+                injected_r = {
+                    inherit = 'injected',
+                    options = {
+                        lang_to_ext = {
+                            r = 'rconform',
+                        },
+                        lang_to_formatters = {
+                            r = { 'styler_text' },
+                        },
+                    },
+                },
+            },
+        },
     },
 
     { -- directly open ipynb files as quarto docuements

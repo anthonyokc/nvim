@@ -41,6 +41,81 @@ local function is_boundary_line(line)
   return not line or line:match("^%s*$") or line:match("^%s*#")
 end
 
+local function get_visual_selection_lines()
+  local start_pos = api.nvim_buf_get_mark(0, "<")
+  local end_pos = api.nvim_buf_get_mark(0, ">")
+  if not start_pos or not end_pos then
+    return nil, nil
+  end
+
+  local lines = api.nvim_buf_get_lines(0, start_pos[1] - 1, end_pos[1], true)
+  local vmode = vim.fn.visualmode()
+
+  if vmode == "\022" then
+    local start_col = start_pos[2] + 1
+    local end_col = end_pos[2] + 1
+    if start_col > end_col then
+      start_col, end_col = end_col, start_col
+    end
+    for idx, line in ipairs(lines) do
+      lines[idx] = string.sub(line, start_col, end_col)
+    end
+  elseif vmode == "v" then
+    if start_pos[1] == end_pos[1] then
+      lines[1] = string.sub(lines[1], start_pos[2] + 1, end_pos[2] + 1)
+    else
+      lines[1] = string.sub(lines[1], start_pos[2] + 1, -1)
+      lines[#lines] = string.sub(lines[#lines], 1, end_pos[2] + 1)
+    end
+  end
+
+  return lines, end_pos
+end
+
+local function get_quarto_r_expression()
+  local line_num = api.nvim_win_get_cursor(0)[1]
+  local line = vim.fn.getline(line_num)
+  if line:match("^%s*$") then
+    return nil
+  end
+
+  local chunk = require("r.quarto").get_current_code_chunk(0)
+  if vim.tbl_isempty(chunk) or chunk:get_chunk_section_at_cursor() ~= "chunk_body" then
+    return nil
+  end
+
+  local chunk_content = chunk:get_content()
+  local chunk_start = chunk:get_range()
+  local content_start = chunk_start + 1
+  local relative_row = line_num - content_start
+  local col = line:find("%S") or 1
+
+  local ok, parser = pcall(vim.treesitter.get_string_parser, chunk_content, "r")
+  if not ok or not parser then
+    return nil
+  end
+
+  local root = parser:parse()[1]:root()
+  local node = root:named_descendant_for_range(relative_row, col - 1, relative_row, col - 1)
+  while node do
+    local parent = node:parent()
+    if parent and (parent:type() == "program" or parent:type() == "braced_expression") then
+      break
+    end
+    node = parent
+  end
+
+  if not node then
+    return nil
+  end
+
+  local start_row, _, end_row, _ = node:range()
+  local abs_start = content_start + start_row
+  local abs_end = content_start + end_row
+  local lines = api.nvim_buf_get_lines(0, abs_start - 1, abs_end, false)
+  return lines, abs_end
+end
+
 -- Helper to set buffer-local keymaps with descriptions
 function M.bufmap(mode, lhs, rhs, desc, opts)
   opts = opts or {}
@@ -162,6 +237,62 @@ function M.send_paragraph_to_r()
 
     current_line = next_line
   end
+end
+
+function M.send_quarto_selection_to_r()
+  local lang = require("r.utils").get_lang()
+  local canonical = require("r.quarto").resolve_lang(lang)
+  if canonical ~= "r" then
+    require("r.send").selection(true)
+    return
+  end
+
+  local lines, end_pos = get_visual_selection_lines()
+  if not lines or #lines == 0 then
+    return
+  end
+
+  local esc = api.nvim_replace_termcodes("<Esc>", true, false, true)
+  api.nvim_feedkeys(esc, "x", false)
+
+  local config = require("r.config").get_config()
+  require("r.edit").add_for_deletion(config.source_file)
+  vim.fn.writefile(lines, config.source_file)
+
+  local send = require("r.send")
+  local source_args = send.get_source_args():gsub("^, ", "")
+  local cmd = source_args ~= "" and ("Rnvim.selection(" .. source_args .. ")") or "Rnvim.selection()"
+  local ok = send.cmd(cmd)
+  if not ok then
+    return
+  end
+
+  api.nvim_win_set_cursor(0, end_pos)
+  require("r.cursor").move_next_line()
+end
+
+function M.send_quarto_line_to_r()
+  local lang = require("r.utils").get_lang()
+  local canonical = require("r.quarto").resolve_lang(lang)
+  if canonical ~= "r" then
+    require("r.send").line("move")
+    return
+  end
+
+  local lines, end_line = get_quarto_r_expression()
+  if not lines or #lines == 0 then
+    require("r.send").line("move")
+    return
+  end
+
+  local ok = require("r.send").source_lines(lines, nil)
+  if not ok then
+    return
+  end
+
+  local last_line = api.nvim_buf_line_count(0)
+  api.nvim_win_set_cursor(0, { math.min(end_line, last_line), 0 })
+  require("r.cursor").move_next_line()
 end
 
 -- Send the current pipe chain and inspect the result with glimpse()

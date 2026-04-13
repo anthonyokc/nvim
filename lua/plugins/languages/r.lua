@@ -109,6 +109,15 @@ return {
                     for _, keymap in ipairs(keymaps) do
                         helpers.bufmap(keymap[1], keymap[2], keymap[3], keymap[4], keymap[5])
                     end
+
+                    if vim.tbl_contains({ 'quarto', 'qmd' }, vim.bo.filetype) then
+                        vim.schedule(function()
+                            if vim.api.nvim_buf_is_valid(0) then
+                                helpers.bufmap('n', '<Enter>', helpers.send_quarto_line_to_r, 'Send line to R')
+                                helpers.bufmap('v', '<Enter>', helpers.send_quarto_selection_to_r, 'Send selection to R')
+                            end
+                        end)
+                    end
                 end,
             },
 

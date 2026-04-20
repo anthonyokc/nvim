@@ -2,6 +2,18 @@ return {
     'nvimdev/dashboard-nvim',
     event = 'VimEnter',
     config = function()
+        vim.api.nvim_create_autocmd('FileType', {
+            pattern = 'dashboard',
+            callback = function(event)
+                vim.keymap.set('n', 'q', '<cmd>quit<cr>', {
+                    buffer = event.buf,
+                    silent = true,
+                    nowait = true,
+                    desc = 'Quit dashboard',
+                })
+            end,
+        })
+
         require('dashboard').setup {
             -- config
             shortcut_type = 'number',

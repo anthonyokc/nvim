@@ -189,6 +189,15 @@ return {
                 end,
             })
 
+            vim.api.nvim_create_autocmd("FileType", {
+                pattern = { "markdown", "Avante", "quarto", "rmd" },
+                callback = function()
+                    vim.opt_local.wrap = true
+                    vim.opt_local.linebreak = true
+                    vim.opt_local.breakindent = true
+                end,
+            })
+
             ------------------------------------------------------------------------------
             --                           Folding section
             -------------------------------------------------------------------------------
@@ -465,6 +474,14 @@ return {
         build = "cd app && yarn install",
         init = function()
             vim.g.mkdp_filetypes = { "markdown" }
+            if vim.fn.has("wsl") == 1 then
+                vim.cmd([[
+                function! OpenMarkdownPreviewWSL(url) abort
+                  call jobstart([expand('~/scripts/brave_wsl_open.sh'), a:url], {'detach': v:true})
+                endfunction
+                ]])
+                vim.g.mkdp_browserfunc = "OpenMarkdownPreviewWSL"
+            end
         end,
         ft = { "markdown" },
         keys = {

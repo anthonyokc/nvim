@@ -289,7 +289,7 @@ end
 M.setup = function()
     -- Set up R-specific keymaps
     vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "r", "rmd", "quarto" },
+        pattern = { "r", "rmd", "qmd", "quarto" },
         callback = function()
             vim.api.nvim_buf_set_keymap(0, 'n', '<leader>C',
                 ':lua require("config.lang.r").toggle_comment_current_line()<CR>',

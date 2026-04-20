@@ -42,14 +42,30 @@ local function is_boundary_line(line)
 end
 
 local function get_visual_selection_lines()
-  local start_pos = api.nvim_buf_get_mark(0, "<")
-  local end_pos = api.nvim_buf_get_mark(0, ">")
+  local mode = vim.fn.mode()
+  local start_pos
+  local end_pos
+
+  if mode == "v" or mode == "V" or mode == "\022" then
+    start_pos = vim.fn.getpos("v")
+    end_pos = vim.fn.getpos(".")
+    start_pos = { start_pos[2], start_pos[3] - 1 }
+    end_pos = { end_pos[2], end_pos[3] - 1 }
+  else
+    start_pos = api.nvim_buf_get_mark(0, "<")
+    end_pos = api.nvim_buf_get_mark(0, ">")
+  end
+
   if not start_pos or not end_pos then
     return nil, nil
   end
 
+  if start_pos[1] > end_pos[1] or (start_pos[1] == end_pos[1] and start_pos[2] > end_pos[2]) then
+    start_pos, end_pos = end_pos, start_pos
+  end
+
   local lines = api.nvim_buf_get_lines(0, start_pos[1] - 1, end_pos[1], true)
-  local vmode = vim.fn.visualmode()
+  local vmode = mode == "n" and vim.fn.visualmode() or mode
 
   if vmode == "\022" then
     local start_col = start_pos[2] + 1
@@ -253,7 +269,7 @@ function M.send_quarto_selection_to_r()
   end
 
   local esc = api.nvim_replace_termcodes("<Esc>", true, false, true)
-  api.nvim_feedkeys(esc, "x", false)
+  api.nvim_feedkeys(esc, "nx", false)
 
   local config = require("r.config").get_config()
   require("r.edit").add_for_deletion(config.source_file)

@@ -22,6 +22,56 @@ return {
             local blink = require('blink.cmp')
             local luasnip = require('luasnip')
 
+            local function get_project_root(bufnr)
+                local buf_dir = vim.fn.expand(('#%d:p:h'):format(bufnr))
+                local markers = {
+                    ".here",
+                    ".git",
+                    "_quarto.yml",
+                    "DESCRIPTION",
+                    "renv.lock",
+                    "package.json",
+                    "pyproject.toml",
+                    "Cargo.toml",
+                    "go.mod",
+                }
+                local start = buf_dir ~= "." and buf_dir or vim.uv.cwd()
+                local root_file = vim.fs.find(function(name)
+                    if vim.tbl_contains(markers, name) then
+                        return true
+                    end
+
+                    return name:match("%.Rproj$") ~= nil
+                end, { path = start, upward = true })[1]
+
+                if root_file then
+                    return vim.fs.dirname(root_file)
+                end
+
+                return vim.uv.cwd()
+            end
+
+            local function get_root_path_context(context)
+                local line = context.line:sub(1, context.cursor[2])
+                local patterns = {
+                    [[here::here%(%s*['"]([^'"]*)$]],
+                    [[here%(%s*['"]([^'"]*)$]],
+                    [[fs::path%(%s*['"]([^'"]*)$]],
+                    [[quarto::quarto_render%(%s*input%s*=%s*['"]([^'"]*)$]],
+                    [[quarto_render%(%s*input%s*=%s*['"]([^'"]*)$]],
+                }
+
+                for _, pattern in ipairs(patterns) do
+                    local partial = line:match(pattern)
+                    if partial ~= nil then
+                        return {
+                            partial = partial,
+                            root = get_project_root(context.bufnr),
+                        }
+                    end
+                end
+            end
+
             -- Global toggle for R package prefixing
             vim.g.blink_cmp_r_prefix_enabled = vim.g.blink_cmp_r_prefix_enabled ~= nil and
                 vim.g.blink_cmp_r_prefix_enabled or true
@@ -117,6 +167,82 @@ return {
                                 ---@type string|table|fun():table
                                 trigger = function()
                                     return { ":" }
+                                end,
+                            },
+                        },
+                        path = {
+                            opts = {
+                                get_cwd = function(context)
+                                    local buf_dir = vim.fn.expand(('#%d:p:h'):format(context.bufnr))
+                                    local root_path_context = get_root_path_context(context)
+
+                                    if root_path_context then
+                                        return root_path_context.root
+                                    end
+
+                                    return buf_dir
+                                end,
+                            },
+                            override = {
+                                get_completions = function(module, context, callback)
+                                    local root_path_context = get_root_path_context(context)
+                                    if not root_path_context then
+                                        return module:get_completions(context, callback)
+                                    end
+
+                                    local partial = root_path_context.partial
+                                    if partial:find("/") or partial:find("\\") or partial:match("^%.") or partial:match("^~") or partial:match("^%$") then
+                                        return module:get_completions(context, callback)
+                                    end
+
+                                    callback = vim.schedule_wrap(callback)
+
+                                    local include_hidden = module.opts.show_hidden_files_by_default or partial:sub(1, 1) == "."
+                                    local range = {
+                                        start = {
+                                            line = context.cursor[1] - 1,
+                                            character = context.cursor[2] - #partial,
+                                        },
+                                        ['end'] = {
+                                            line = context.cursor[1] - 1,
+                                            character = context.cursor[2],
+                                        },
+                                    }
+                                    local results = {}
+                                    local fs = require('blink.cmp.sources.path.fs')
+                                    local path_lib = require('blink.cmp.sources.path.lib')
+
+                                    fs.scan_dir_async(root_path_context.root, function(entries_chunk)
+                                        for _, entry in ipairs(entries_chunk) do
+                                            if (include_hidden or entry.name:sub(1, 1) ~= '.') and
+                                                (partial == '' or entry.name:lower():find(partial:lower(), 1, true) == 1) then
+                                                results[#results + 1] = path_lib.entry_to_completion_item(
+                                                    entry,
+                                                    root_path_context.root,
+                                                    range,
+                                                    module.opts
+                                                )
+
+                                                if #results >= module.opts.max_entries then
+                                                    break
+                                                end
+                                            end
+                                        end
+                                    end)
+                                        :map(function()
+                                            callback({
+                                                is_incomplete_forward = false,
+                                                is_incomplete_backward = false,
+                                                items = results,
+                                            })
+                                        end)
+                                        :catch(function()
+                                            callback({
+                                                is_incomplete_forward = false,
+                                                is_incomplete_backward = false,
+                                                items = {},
+                                            })
+                                        end)
                                 end,
                             },
                         },

@@ -50,6 +50,7 @@ return {
 
                         -- R actions and helpers
                         { "n", "<leader><CR>",     helpers.r_action(""),               "Run (context)" },
+                        { "v", "<leader><CR>",     "<Plug>RDSendSelection",            "Run selection",                        { remap = true } },
                         { "n", "<leader>fo",       object_picker.open_global_env,      "Find R object (.GlobalEnv)" },
                         { "n", "<leader>fl",       object_picker.open_library_objects, "Find R library object" },
                         { "n", "<leader>ra", function()
@@ -115,6 +116,7 @@ return {
                             if vim.api.nvim_buf_is_valid(0) then
                                 helpers.bufmap('n', '<Enter>', helpers.send_quarto_line_to_r, 'Send line to R')
                                 helpers.bufmap('v', '<Enter>', helpers.send_quarto_selection_to_r, 'Send selection to R')
+                                helpers.bufmap('v', '<leader><CR>', helpers.send_quarto_selection_to_r, 'Run selection')
                             end
                         end)
                     end

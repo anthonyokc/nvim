@@ -227,6 +227,7 @@ return {
 
             local function find_markdown_headings(bufnr)
                 if not ensure_telescope_loaded() then return end
+                bufnr = bufnr or vim.api.nvim_get_current_buf()
                 local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
                 local results = {}
                 local counters = { 0, 0, 0, 0, 0, 0 }
@@ -437,7 +438,7 @@ return {
             vim.api.nvim_create_autocmd("FileType", {
                 pattern = { "markdown", "Avante", "quarto", "rmd", "r" },
                 callback = function(args)
-                    vim.keymap.set("n", "<leader>fm", function() find_markdown_headings(args.buf) end, {
+                    vim.keymap.set("n", "<leader>fm", find_markdown_headings, {
                         buffer = args.buf,
                         desc = "[P]Find headings",
                         silent = true,

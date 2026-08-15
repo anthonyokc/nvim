@@ -19,12 +19,11 @@ nvim/
 │   │   ├── git-worktree-helpers.lua
 │   │   ├── lazy.lua         # lazy.nvim bootstrap
 │   │   ├── lazyvim/         # LazyVim-style defaults, icons, and options
-│   │   ├── ai/              # AI config (e.g., OpenCode prompts)
 │   │   ├── languages/       # Language-specific setup (R, etc.)
 │   │   └── system/          # OS-specific settings (WSL, Windows)
 │   ├── plugins/             # Plugin specs grouped by purpose
 │   │   ├── init.lua         # Imports each subdirectory
-│   │   ├── ai/              # Avante, Copilot, ChatGPT, OpenCode, MCP hub
+│   │   ├── ai/              # Avante, Copilot, ChatGPT, MCP hub
 │   │   ├── debugger/        # DAP and related helpers
 │   │   ├── editor/          # Treesitter, Telescope, Harpoon, snippets, etc.
 │   │   ├── git/             # Gitsigns, Diffview, Lazygit, worktree tooling
@@ -48,11 +47,11 @@ nvim/
 ## Feature Highlights
 
 - Fast startup with lazy-loaded plugins grouped by category (UI, LSP, git, editor tools, AI, debugger, language packs).
-- Utility commands: `:WA` saves all buffers while creating missing dirs; `<leader>j` toggles the current window to 50% width; `<leader>ot` triggers an Opencode prompt and resizes the REPL if there is one.
+- Utility commands: `:WA` saves all buffers while creating missing dirs; `<leader>j` toggles the current window to 50% width.
 - Git tooling: Gitsigns, Diffview, Lazygit, and worktree helpers for quick branch/worktree switches.
 - Navigation and editing: Telescope pickers, Treesitter, Harpoon, surround/undo/indent helpers, snippets, table of contents, and text wrapping tools.
 - UI polish: Colorscheme via lazy-loaded themes, statusline utilities, dashboard, tabs, notifications, and icon support.
-- AI helpers: OpenCode and Copilot primarily. Many custom OpenCode.nvim enhancements. Also includes Avante, ChatGPT, and MCP integrations with convenient keybindings.
+- AI helpers: Copilot, Avante, ChatGPT, and MCP integrations with convenient keybindings.
 
 ### R configuration
 

@@ -37,8 +37,6 @@
 - [ ] Configure MCPHub Avante integration using system_prompt and custom_tools
 - [ ] Consider adding blink.cmp fo
 - [ ] Explore use of [Avante.nvim](https://github.com/yetone/avante.nvim) new Claude Text Editor Tool Mode
-- [ ] Add diff preview for opencode.nvim file edits before saving (see lua/plugins/ai/opencode.lua)
-- [ ] Move opencode.nvim helper functions to lua/config/ directory
 
 ## Documentation
 

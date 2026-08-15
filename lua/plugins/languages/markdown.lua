@@ -72,6 +72,7 @@ return {
                     },
                     tables = {
                         enable = true,
+                        strict = false,
                         block_decorator = true,
                         use_virt_lines = false,
                     },

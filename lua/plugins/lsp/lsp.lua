@@ -35,7 +35,6 @@ return {
                 -- "ltex-ls", true                     -- LTeX for text, markdown, latex, restructuredtext
                 "nil",                             -- Nix Language Server
                 "postgrest-language-server",       -- Postgres Language Server
-                "r_language_server",               -- R Language Server
                 "rust-analyzer",                   -- Rust Analyzer for Rust
                 "terraform-ls",                    -- Terraform Language Server
                 "tofu-ls",                         -- OpenTofu Language Server
@@ -87,7 +86,7 @@ return {
         "mason-org/mason-lspconfig.nvim",
         event = "VeryLazy",
         dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
-        opts = { automatic_enable = true }, -- default, but kept explicit
+        opts = { automatic_enable = { exclude = { "r_language_server" } } },
     },
 
     -- 3. LSP Configurations: Provides sensible default configurations for LSP servers
@@ -143,15 +142,6 @@ return {
                         },
                     }
                 }
-            })
-            vim.lsp.config("r_language_server", {
-                settings = {
-                    r = {
-                        lsp = {
-                            diagnostics = false, -- Disable R LSP diagnostics to avoid conflicts with other linters
-                        },
-                    },
-                },
             })
             -- Configure diagnostics
             vim.diagnostic.config({

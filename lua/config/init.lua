@@ -25,7 +25,9 @@ vim.cmd [[
 
 -- Load utility functions and set up commands/keymaps
 local util = require("config.util")
+vim.api.nvim_create_user_command("WS", util.save_with_dirs, {})
 vim.api.nvim_create_user_command("WA", util.save_all_with_dirs, {})
+vim.keymap.set("n", "<leader>ws", util.save_with_dirs, { desc = "Save file + mkdir parents" })
 vim.keymap.set("n", "<leader>j", util.toggle_window_size,
     { noremap = true, silent = true, desc = "Toggle window size to 50%" })
 
@@ -45,4 +47,3 @@ function M.setup(opts)
 end
 
 return M
-

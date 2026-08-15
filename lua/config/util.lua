@@ -1,6 +1,21 @@
 -- util.lua: General utility functions used for Neovim configuration
 local M = {}
 
+-- Function to save the current buffer and create parent directories if needed
+M.save_with_dirs = function()
+    local buftype = vim.api.nvim_buf_get_option(0, "buftype")
+    local name = vim.api.nvim_buf_get_name(0)
+
+    if buftype ~= "" or name == "" then
+        vim.notify("Current buffer has no file to save", vim.log.levels.WARN)
+        return
+    end
+
+    local directory = vim.fn.fnamemodify(name, ":h")
+    vim.fn.mkdir(directory, "p")
+    vim.cmd("write")
+end
+
 -- Function to save all buffers and create directories if needed
 M.save_all_with_dirs = function()
     for _, buf in ipairs(vim.api.nvim_list_bufs()) do

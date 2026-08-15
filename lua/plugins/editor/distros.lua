@@ -42,7 +42,13 @@ return {
             },
             words = { enabled = true },
             gitbrowse = { enabled = true },
-            image = { enabled = true },
+            image = {
+                enabled = true,
+                doc = {
+                    enabled = true,
+                    inline = true,
+                },
+            },
             picker = {
                 enabled = true,
                 defaults = { hidden = true, ignored = true },
@@ -66,9 +72,9 @@ return {
         },
         keys = {
             ---@diagnostic disable: undefined-global
-            { "<leader>e",  function() Snacks.explorer() end,             desc = "File Explorer" },
-            { "<leader>gB", function() Snacks.gitbrowse() end,            desc = "Git Browse",          mode = { "n", "v" } },
-            { "<leader>gg", function() Snacks.lazygit() end,              desc = "Lazygit" },
+            { "<leader>e",  function() Snacks.explorer() end,  desc = "File Explorer" },
+            { "<leader>gB", function() Snacks.gitbrowse() end, desc = "Git Browse",   mode = { "n", "v" } },
+            { "<leader>gg", function() Snacks.lazygit() end,   desc = "Lazygit" },
         },
     }
 }

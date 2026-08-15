@@ -95,7 +95,7 @@ local function get_quarto_r_expression()
     return nil
   end
 
-  local chunk = require("r.quarto").get_current_code_chunk(0)
+  local chunk = require("r.chunk").get_current_code_chunk(0)
   if vim.tbl_isempty(chunk) or chunk:get_chunk_section_at_cursor() ~= "chunk_body" then
     return nil
   end
@@ -150,6 +150,48 @@ end
 function M.r_action(expr)
   return function()
     require("r.run").action(expr)
+  end
+end
+
+local function style_r_lines(lines)
+  local input = table.concat(lines, "\n")
+  if input == "" then
+    return nil
+  end
+
+  local cmd = {
+    "Rscript",
+    "--vanilla",
+    "-e",
+    "writeLines(styler::style_text(readLines('stdin', warn = FALSE)))",
+  }
+  local result = vim.system(cmd, { stdin = input, text = true }):wait()
+
+  if result.code ~= 0 then
+    vim.notify((result.stderr or "R formatting failed"):gsub("%s+$", ""), levels.ERROR)
+    return nil
+  end
+
+  return vim.split((result.stdout or ""):gsub("\n$", ""), "\n", { plain = true })
+end
+
+function M.format_buffer()
+  local lines = api.nvim_buf_get_lines(0, 0, -1, false)
+  local formatted = style_r_lines(lines)
+  if formatted then
+    api.nvim_buf_set_lines(0, 0, -1, false, formatted)
+    vim.notify("Formatted R buffer", levels.INFO)
+  end
+end
+
+function M.format_selection()
+  local start_line = vim.fn.getpos("'<")[2]
+  local end_line = vim.fn.getpos("'>")[2]
+  local lines = api.nvim_buf_get_lines(0, start_line - 1, end_line, false)
+  local formatted = style_r_lines(lines)
+  if formatted then
+    api.nvim_buf_set_lines(0, start_line - 1, end_line, false, formatted)
+    vim.notify("Formatted R selection", levels.INFO)
   end
 end
 
@@ -257,7 +299,7 @@ end
 
 function M.send_quarto_selection_to_r()
   local lang = require("r.utils").get_lang()
-  local canonical = require("r.quarto").resolve_lang(lang)
+  local canonical = require("r.chunk").resolve_lang(lang)
   if canonical ~= "r" then
     require("r.send").selection(true)
     return
@@ -289,7 +331,7 @@ end
 
 function M.send_quarto_line_to_r()
   local lang = require("r.utils").get_lang()
-  local canonical = require("r.quarto").resolve_lang(lang)
+  local canonical = require("r.chunk").resolve_lang(lang)
   if canonical ~= "r" then
     require("r.send").line("move")
     return
@@ -316,10 +358,27 @@ function M.send_chain_glimpse()
   local glimpse_fn = vim.g.r_chain_glimpse_fn or "dplyr::glimpse"
 
   local send = require("r.send")
-  local ok, err = pcall(send.chain)
-  if not ok then
-    vim.notify(string.format("Sending pipe chain failed: %s", err), vim.log.levels.WARN)
-    return
+  local has_chain = true
+  if type(send.get_pipe_chain) == "function" then
+    local ok, chain = pcall(send.get_pipe_chain, 0, false)
+    has_chain = not ok or chain ~= nil
+  end
+
+  if not has_chain then
+    local line_ok, line_result = pcall(send.line)
+    if not line_ok then
+      vim.notify(string.format("Sending statement failed: %s", line_result), vim.log.levels.WARN)
+      return
+    elseif line_result == false then
+      vim.notify("R is not ready", vim.log.levels.WARN)
+      return
+    end
+  else
+    local ok, err = pcall(send.chain)
+    if not ok then
+      vim.notify(string.format("Sending pipe chain failed: %s", err), vim.log.levels.WARN)
+      return
+    end
   end
 
   local cmd = string.format("%s(.Last.value)", glimpse_fn)

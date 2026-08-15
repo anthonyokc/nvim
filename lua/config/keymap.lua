@@ -5,7 +5,19 @@
 -- # Custom Keybindings of Native Vim Functions
 vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "Open file explorer" })
-vim.keymap.set("n", "<leader>w", "<C-w>w", { desc = "Switch to next window" })
+vim.keymap.set("n", "<leader>x", function()
+    local path = vim.fn.expand("%:p")
+    if path == "" then
+        vim.notify("No file path for current buffer", vim.log.levels.WARN)
+        return
+    end
+
+    vim.ui.open(path)
+end, { desc = "Open current file with default application" })
+vim.keymap.set("n", "<leader>ww", "<C-w>w", { desc = "Switch to next window" })
+vim.keymap.set("n", "<leader>wf", function()
+    vim.opt.wrap = not vim.opt.wrap:get()
+end, { desc = "Toggle line wrap" })
 
 vim.keymap.set("n", "T", "<cmd>retab<CR>")
 vim.keymap.set("v", "T", "<cmd>retab<CR>")

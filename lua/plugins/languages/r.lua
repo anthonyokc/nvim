@@ -134,6 +134,9 @@ return {
 
             -- Configuration options
             min_editor_width = 18, -- Minimum width for R console split
+            compl_data = {
+                max_time = 1000, -- ms
+            },
 
             -- R Console
             rconsole_width = 100,

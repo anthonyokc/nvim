@@ -137,7 +137,7 @@ return {
             -- R Console
             rconsole_width = 100,
             OutDec = ".",
-            R_app = "radian",
+            R_app = "radian-ctrlg",
             R_cmd = "R",
             hl_term = true,
             bracketed_paste = true,
@@ -182,6 +182,16 @@ return {
             -- Syntax Highlighting
             Rout_more_colors = true,
         }
+
+        vim.api.nvim_create_autocmd("TermOpen", {
+            pattern = "term://*radian-ctrlg*",
+            callback = function(args)
+                vim.keymap.set("t", "<C-c>", [[<C-\><C-n>]], { buffer = args.buf, desc = "Exit R terminal mode" })
+                vim.keymap.set("t", "<C-g>", function()
+                    vim.fn.chansend(vim.b[args.buf].terminal_job_id, "\007")
+                end, { buffer = args.buf, desc = "Interrupt R" })
+            end,
+        })
 
         -- Call the setup function with the options
         require("r").setup(setup_options)

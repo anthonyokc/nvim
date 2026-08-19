@@ -36,6 +36,71 @@ vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Copy to system clip
 vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "Copy line to system clipboard" })        -- copy whole line to system clipboard
 vim.keymap.set("n", "yay", "<cmd>%y+<CR>", { desc = "Copy whole file to system clipboard" }) -- copy whole line to system clipboard
 
+local function opencode_git_root(path)
+    local root = vim.fs.root(path, { ".git" })
+    return root or vim.fn.getcwd()
+end
+
+local function opencode_relpath(path)
+    local root = opencode_git_root(path)
+    return vim.fs.relpath(root, path) or path
+end
+
+local function opencode_visual_range()
+    local start_pos = vim.fn.getpos("v")
+    local end_pos = vim.fn.getpos(".")
+    local start_line = start_pos[2]
+    local end_line = end_pos[2]
+
+    if start_line > end_line then
+        start_line, end_line = end_line, start_line
+    end
+
+    return start_line, end_line
+end
+
+local function opencode_ref(opts)
+    opts = opts or {}
+
+    local path = vim.api.nvim_buf_get_name(0)
+    if path == "" then
+        vim.notify("No file path for current buffer", vim.log.levels.WARN)
+        return
+    end
+
+    local file = opencode_relpath(path)
+    local ref
+
+    if opts.range then
+        local start_line, end_line = opencode_visual_range()
+        if start_line == end_line then
+            ref = string.format("@%s#L%d", file, start_line)
+        else
+            ref = string.format("@%s#L%d-%d", file, start_line, end_line)
+        end
+    elseif opts.current_line then
+        ref = string.format("@%s#L%d", file, vim.fn.line("."))
+    else
+        ref = string.format("@%s", file)
+    end
+
+    vim.fn.setreg("+", ref)
+    vim.fn.setreg('"', ref)
+    vim.notify("Copied " .. ref)
+end
+
+vim.keymap.set("n", "<leader>of", function()
+    opencode_ref()
+end, { desc = "Copy OpenCode file ref" })
+
+vim.keymap.set("n", "<leader>ol", function()
+    opencode_ref({ current_line = true })
+end, { desc = "Copy OpenCode line ref" })
+
+vim.keymap.set("x", "<leader>ol", function()
+    opencode_ref({ range = true })
+end, { desc = "Copy OpenCode visual range ref" })
+
 vim.keymap.set({ "n", "v" }, "D", [["_d]])
 
 vim.keymap.set("i", "<C-c>", "<Esc>")

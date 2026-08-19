@@ -215,7 +215,76 @@ M.toggle_trailing_pipe_current_line = function()
     vim.api.nvim_win_set_cursor(0, { cursor_row, #updated })
 end
 
+local function function_context_from_node(node)
+    if node:type() ~= "binary_operator" then
+        return nil
+    end
+
+    local lhs = node:field("lhs")[1]
+    local rhs = node:field("rhs")[1]
+    if not lhs or not rhs or lhs:type() ~= "identifier" or rhs:type() ~= "function_definition" then
+        return nil
+    end
+
+    return {
+        name = vim.treesitter.get_node_text(lhs, 0),
+        body = rhs:field("body")[1],
+    }
+end
+
+local function node_contains_position(node, row, col)
+    local start_row, start_col, end_row, end_col = node:range()
+    local after_start = row > start_row or (row == start_row and col >= start_col)
+    local before_end = row < end_row or (row == end_row and col < end_col)
+    return after_start and before_end
+end
+
+local function get_current_function_context()
+    local ok, node = pcall(vim.treesitter.get_node, { bufnr = 0 })
+    if ok and node then
+        while node do
+            local context = function_context_from_node(node)
+            if context then
+                return context
+            end
+            node = node:parent()
+        end
+    end
+
+    local parser_ok, parser = pcall(vim.treesitter.get_parser, 0, "r")
+    if not parser_ok or not parser then
+        return nil
+    end
+
+    local tree_ok, trees = pcall(parser.parse, parser)
+    if not tree_ok or not trees[1] then
+        return nil
+    end
+
+    local cursor = vim.api.nvim_win_get_cursor(0)
+    local cursor_row, cursor_col = cursor[1] - 1, cursor[2]
+    local found
+    local function visit(current)
+        local context = function_context_from_node(current)
+        if context and context.body and node_contains_position(context.body, cursor_row, cursor_col) then
+            found = context
+        end
+        for child in current:iter_children() do
+            if child:named() and node_contains_position(child, cursor_row, cursor_col) then
+                visit(child)
+            end
+        end
+    end
+    visit(trees[1]:root())
+    return found
+end
+
 local function extract_current_function_expr()
+    local context = get_current_function_context()
+    if context then
+        return context.name
+    end
+
     local word = vim.fn.expand("<cword>")
     if type(word) == "string" then
         word = vim.trim(word)
@@ -255,8 +324,9 @@ local function extract_current_function_expr()
     return ""
 end
 
-M.assign_defaults_current_function = function()
-    local expr = extract_current_function_expr()
+M.assign_defaults_current_function = function(opts)
+    opts = opts or {}
+    local expr = opts.expr or extract_current_function_expr()
     if expr == "" then
         vim.notify("No function name under cursor.", levels.WARN, { title = "R defaults" })
         return
@@ -273,16 +343,146 @@ M.assign_defaults_current_function = function()
         return
     end
 
-    local command = string.format(
-        [=[(function(expr){f<-tryCatch(eval(parse(text=expr),envir=.GlobalEnv),error=function(e)NULL);if(is.null(f))f<-tryCatch(eval(parse(text=expr),envir=parent.frame()),error=function(e)NULL);if(is.null(f)){message("Function not found: ",expr);return(invisible(FALSE))};if(!is.function(f)){message("Object is not a function: ",expr);return(invisible(FALSE))};d<-formals(f);if(length(d)==0){message("No defaults for: ",expr);return(invisible(TRUE))};e<-environment(f);if(is.null(e))e<-.GlobalEnv;a<-character(0);for(n in names(d)){v<-d[[n]];if(!(is.symbol(v)&&as.character(v)=="")){val<-tryCatch(eval(v,envir=e),error=function(err)structure(list(error=err),class="try-error"));if(!inherits(val,"try-error")){assign(n,val,envir=.GlobalEnv);a<-c(a,n)}}};if(length(a)==0)message("No defaults assigned for: ",expr)else message("Defaults assigned for ",expr,": ",paste(a,collapse=", "));invisible(TRUE)})(%q)]=],
-        expr)
+    local command = string.format([=[
+(function(expr) {
+    f <- tryCatch(eval(parse(text = expr), envir = .GlobalEnv), error = function(e) NULL)
+    if (is.null(f)) {
+        message("Function not found after sourcing buffer: ", expr)
+        return(invisible(FALSE))
+    }
+    if (!is.function(f)) {
+        message("Object is not a function: ", expr)
+        return(invisible(FALSE))
+    }
 
-    local ok, result = pcall(send_mod.cmd, command)
+    defaults <- formals(f)
+    if (length(defaults) == 0) {
+        message("No defaults for: ", expr)
+        return(invisible(TRUE))
+    }
+
+    is_target_name <- vapply(
+        defaults,
+        function(value) is.symbol(value) && as.character(value) != "",
+        logical(1)
+    )
+    target_names <- unique(vapply(defaults[is_target_name], as.character, character(1)))
+
+    if (length(target_names) > 0) {
+        metadata <- tryCatch(
+            targets::tar_meta(
+                names = tidyselect::any_of(target_names),
+                fields = tidyselect::any_of("data"),
+                targets_only = TRUE
+            ),
+            error = function(e) {
+                message("Could not inspect target defaults: ", conditionMessage(e))
+                NULL
+            }
+        )
+
+        if (!is.null(metadata) && nrow(metadata) > 0) {
+            store <- normalizePath(targets::tar_config_get("store"), mustWork = FALSE)
+            cache_name <- ".nvim_targets_data_hashes"
+            if (!exists(cache_name, envir = .GlobalEnv, inherits = FALSE) ||
+                    !is.environment(get(cache_name, envir = .GlobalEnv))) {
+                assign(cache_name, new.env(parent = emptyenv()), envir = .GlobalEnv)
+            }
+            cache <- get(cache_name, envir = .GlobalEnv)
+            hashes <- stats::setNames(metadata$data, metadata$name)
+
+            unchanged <- vapply(names(hashes), function(name) {
+                key <- paste(store, name, sep = "::")
+                loaded <- exists(name, envir = .GlobalEnv, inherits = FALSE)
+                cached_hash <- cache[[key]]
+                loaded && (is.null(cached_hash) || identical(cached_hash, hashes[[name]]))
+            }, logical(1))
+            load_names <- names(hashes)[!unchanged]
+            loaded_ok <- TRUE
+
+            if (length(load_names) > 0) {
+                loaded_ok <- tryCatch({
+                    targets::tar_load_raw(
+                        load_names,
+                        strict = FALSE,
+                        silent = TRUE,
+                        envir = .GlobalEnv
+                    )
+                    TRUE
+                }, error = function(e) {
+                    message("Could not load target defaults: ", conditionMessage(e))
+                    FALSE
+                })
+            }
+
+            cache_names <- names(hashes)[unchanged | loaded_ok]
+            for (name in cache_names) {
+                if (exists(name, envir = .GlobalEnv, inherits = FALSE)) {
+                    cache[[paste(store, name, sep = "::")]] <- hashes[[name]]
+                }
+            }
+        }
+    }
+
+    function_env <- environment(f)
+    if (is.null(function_env)) function_env <- .GlobalEnv
+    assigned <- character(0)
+    for (name in names(defaults)) {
+        value_expr <- defaults[[name]]
+        if (!(is.symbol(value_expr) && as.character(value_expr) == "")) {
+            value <- tryCatch(
+                eval(value_expr, envir = function_env),
+                error = function(e) structure(list(error = e), class = "try-error")
+            )
+            if (!inherits(value, "try-error")) {
+                assign(name, value, envir = .GlobalEnv)
+                assigned <- c(assigned, name)
+            }
+        }
+    }
+
+    if (length(assigned) == 0) {
+        message("No defaults assigned for: ", expr)
+    } else {
+        message("Defaults assigned for ", expr, ": ", paste(assigned, collapse = ", "))
+    }
+    invisible(TRUE)
+})(%q)
+]=], expr)
+
+    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+    vim.list_extend(lines, vim.split(command, "\n", { plain = true, trimempty = true }))
+    if opts.body_lines then
+        vim.list_extend(lines, opts.body_lines)
+    end
+
+    local ok, result = pcall(send_mod.source_lines, lines, nil)
     if not ok then
-        vim.notify(string.format("Failed to assign defaults: %s", result), levels.ERROR, { title = "R defaults" })
+        vim.notify(string.format("Failed to source buffer and assign defaults: %s", result), levels.ERROR,
+            { title = "R defaults" })
     elseif result == false then
         vim.notify("R is not ready to receive commands.", levels.WARN, { title = "R defaults" })
     end
+end
+
+M.run_current_function_to_cursor = function()
+    local context = get_current_function_context()
+    if not context or not context.body then
+        vim.notify("Place the cursor inside an assigned function.", levels.WARN, { title = "R breakpoint" })
+        return
+    end
+
+    local cursor_row = vim.api.nvim_win_get_cursor(0)[1] - 1
+    local body_lines = {}
+    for _, node in ipairs(context.body:field("body")) do
+        local _, _, end_row = node:range()
+        if end_row <= cursor_row then
+            local text = vim.treesitter.get_node_text(node, 0)
+            vim.list_extend(body_lines, vim.split(text, "\n", { plain = true, trimempty = true }))
+        end
+    end
+
+    M.assign_defaults_current_function({ expr = context.name, body_lines = body_lines })
 end
 
 -- Setup function to be called from init.lua

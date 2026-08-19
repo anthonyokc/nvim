@@ -61,7 +61,10 @@ return {
                         end, "Toggle trailing pipe" },
                         { "n", "<leader>re", function()
                             require("config.languages.r").assign_defaults_current_function()
-                        end, "Assign function defaults to Global Environment" },
+                        end, "Source buffer and load defaults" },
+                        { "n", "<leader>rE", function()
+                            require("config.languages.r").run_current_function_to_cursor()
+                        end, "Run function to cursor" },
                         { "n", "<leader>rg", helpers.r_action("dplyr::glimpse"), "glimpse(data)" },
                         { "n", "<leader>rP", helpers.r_action("problems"),       "problems(data)" },
                         { "n", "<leader>ri", helpers.r_action(
@@ -135,7 +138,7 @@ return {
             -- Configuration options
             min_editor_width = 18, -- Minimum width for R console split
             compl_data = {
-                max_time = 1000, -- ms
+                max_time = 3000, -- ms
             },
 
             -- R Console

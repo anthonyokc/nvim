@@ -110,6 +110,45 @@ vim.keymap.set("n", "<C-i>", "<C-o>")
 vim.keymap.set("n", "Q", "<nop>")
 vim.keymap.set("n", "gf", function()
     local target = vim.fn.expand("<cfile>")
+    local current_line = vim.api.nvim_get_current_line()
+    local cursor_column = vim.api.nvim_win_get_cursor(0)[2] + 1
+    local search_from = 1
+
+    while true do
+        local link_start, link_end, link_target = current_line:find("%b[]%((#[^%)]+)%)", search_from)
+        if not link_start then break end
+        if cursor_column >= link_start and cursor_column <= link_end then
+            target = link_target
+            break
+        end
+        search_from = link_end + 1
+    end
+
+    local heading_anchor = target:match("^#(.+)$")
+    if heading_anchor then
+        local slug_counts = {}
+
+        for line_number, text in ipairs(vim.api.nvim_buf_get_lines(0, 0, -1, false)) do
+            local hashes, heading = text:match("^ ? ? ?(#+)%s+(.+)$")
+            if hashes and #hashes <= 6 then
+                heading = vim.trim(heading:gsub("%s+#+%s*$", ""))
+                local slug = heading:lower():gsub("[^%w%s_-]", ""):gsub("%s", "-")
+                local duplicate_number = slug_counts[slug] or 0
+                slug_counts[slug] = duplicate_number + 1
+                if duplicate_number > 0 then slug = slug .. "-" .. duplicate_number end
+
+                if slug == heading_anchor then
+                    vim.api.nvim_win_set_cursor(0, { line_number, 0 })
+                    vim.cmd("normal! zz")
+                    return
+                end
+            end
+        end
+
+        vim.notify("Heading #" .. heading_anchor .. " was not found", vim.log.levels.WARN)
+        return
+    end
+
     local line = target:match("#L(%d+)%-L%d+$") or target:match("#L(%d+)$")
     if not line then
         vim.cmd("normal! gf")
@@ -133,7 +172,7 @@ vim.keymap.set("n", "gf", function()
 
     vim.api.nvim_win_set_cursor(0, { line, 0 })
     vim.cmd("normal! zz")
-end, { desc = "Go to file and line" })
+end, { desc = "Go to file, line, or heading" })
 vim.keymap.set("n", "<leader>F", function()
     vim.lsp.buf.format({ timeout_ms = 5000 })
 end, { desc = "Format buffer" })

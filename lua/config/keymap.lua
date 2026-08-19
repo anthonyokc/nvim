@@ -108,6 +108,32 @@ vim.keymap.set("n", "<C-o>", "<C-i>")
 vim.keymap.set("n", "<C-i>", "<C-o>")
 
 vim.keymap.set("n", "Q", "<nop>")
+vim.keymap.set("n", "gf", function()
+    local target = vim.fn.expand("<cfile>")
+    local line = target:match("#L(%d+)%-L%d+$") or target:match("#L(%d+)$")
+    if not line then
+        vim.cmd("normal! gf")
+        return
+    end
+
+    local isfname = vim.o.isfname
+    vim.opt.isfname:remove("#")
+    local ok, err = pcall(vim.cmd, "normal! gf")
+    vim.o.isfname = isfname
+
+    if not ok then
+        error(err)
+    end
+
+    line = tonumber(line)
+    if line > vim.api.nvim_buf_line_count(0) then
+        vim.notify("Line " .. line .. " is outside the target file", vim.log.levels.WARN)
+        return
+    end
+
+    vim.api.nvim_win_set_cursor(0, { line, 0 })
+    vim.cmd("normal! zz")
+end, { desc = "Go to file and line" })
 vim.keymap.set("n", "<leader>F", function()
     vim.lsp.buf.format({ timeout_ms = 5000 })
 end, { desc = "Format buffer" })

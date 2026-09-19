@@ -102,6 +102,7 @@ return {
                 cond = function() return vim.tbl_contains({ "r", "rmd", "quarto" }, vim.bo.filetype) end,
                 { "<leader>r",   group = "R Commands" },
                 { "<leader>rf",  desc = "R Format Function" },
+                { "<leader>rF",  desc = "R anti-slop format and lint" },
                 { "<leader>rr",  desc = "R Unformat Function" },
                 { "<leader>rh",  desc = "Convert read.csv to read_csv and use here()" },
                 { "<leader>ri",  desc = "Install R package with renv" },

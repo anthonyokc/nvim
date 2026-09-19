@@ -485,36 +485,48 @@ M.run_current_function_to_cursor = function()
     M.assign_defaults_current_function({ expr = context.name, body_lines = body_lines })
 end
 
+local r_filetypes = { "r", "rmd", "qmd", "quarto" }
+
+local function set_r_keymaps(buf)
+    local opts = { buffer = buf, silent = true }
+    vim.keymap.set("n", "<leader>C", M.toggle_comment_current_line,
+        vim.tbl_extend("force", opts, { desc = "Toggle comment" }))
+    vim.keymap.set("v", "<leader>C", M.toggle_comment_selected_lines,
+        vim.tbl_extend("force", opts, { desc = "Toggle comment" }))
+    vim.keymap.set("n", "<leader>rf", M.format_r_function,
+        vim.tbl_extend("force", opts, { desc = "Format R function" }))
+    vim.keymap.set("n", "<leader>rF", function()
+        require("config.languages.r.helpers").format_and_lint_anti_slop()
+    end, vim.tbl_extend("force", opts, { desc = "r-anti-slop format and lint" }))
+    vim.keymap.set("n", "<leader>ru", M.unformat_r_function,
+        vim.tbl_extend("force", opts, { desc = "Unformat R function" }))
+    vim.keymap.set("n", "<leader>ra", M.toggle_assignment_current_object,
+        vim.tbl_extend("force", opts, { desc = "Toggle pipe assignment" }))
+    vim.keymap.set("n", "<leader>rp", M.toggle_trailing_pipe_current_line,
+        vim.tbl_extend("force", opts, { desc = "Toggle trailing pipe" }))
+    vim.keymap.set("n", "<leader>rc", function()
+        vim.g.blink_cmp_r_prefix_enabled = not vim.g.blink_cmp_r_prefix_enabled
+        local status = vim.g.blink_cmp_r_prefix_enabled and "enabled" or "disabled"
+        vim.notify("R package prefixing " .. status, vim.log.levels.INFO)
+    end, vim.tbl_extend("force", opts, { desc = "Toggle R package prefixing" }))
+end
+
 -- Setup function to be called from init.lua
 M.setup = function()
-    -- Set up R-specific keymaps
+    local grp = vim.api.nvim_create_augroup("RLanguageKeymaps", { clear = true })
     vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "r", "rmd", "qmd", "quarto" },
-        callback = function()
-            vim.api.nvim_buf_set_keymap(0, 'n', '<leader>C',
-                ':lua require("config.lang.r").toggle_comment_current_line()<CR>',
-                { noremap = true, silent = true, desc = "Toggle comment" })
-            vim.api.nvim_buf_set_keymap(0, 'v', '<leader>C',
-                ':lua require("config.lang.r").toggle_comment_selected_lines()<CR>',
-                { noremap = true, silent = true, desc = "Toggle comment" })
-            vim.api.nvim_buf_set_keymap(0, 'n', '<leader>rf', ':lua require("config.lang.r").format_r_function()<CR>',
-                { noremap = true, silent = true, desc = "Format R function" })
-            vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ru', ':lua require("config.lang.r").unformat_r_function()<CR>',
-                { noremap = true, silent = true, desc = "Unformat R function" })
-            vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ra',
-                ':lua require("config.languages.r").toggle_assignment_current_object()<CR>',
-                { noremap = true, silent = true, desc = "Toggle pipe assignment" })
-            vim.api.nvim_buf_set_keymap(0, 'n', '<leader>rp',
-                ':lua require("config.languages.r").toggle_trailing_pipe_current_line()<CR>',
-                { noremap = true, silent = true, desc = "Toggle trailing pipe" })
-            -- Toggle R package prefixing
-            vim.keymap.set('n', '<leader>rc', function()
-                vim.g.blink_cmp_r_prefix_enabled = not vim.g.blink_cmp_r_prefix_enabled
-                local status = vim.g.blink_cmp_r_prefix_enabled and 'enabled' or 'disabled'
-                vim.notify('R package prefixing ' .. status, vim.log.levels.INFO)
-            end, { desc = 'Toggle R package prefixing' })
-        end
+        group = grp,
+        pattern = r_filetypes,
+        callback = function(ev)
+            set_r_keymaps(ev.buf)
+        end,
     })
+
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_buf_is_loaded(buf) and vim.tbl_contains(r_filetypes, vim.bo[buf].filetype) then
+            set_r_keymaps(buf)
+        end
+    end
 end
 
 -- lua/my/folds_r.lua

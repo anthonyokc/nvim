@@ -195,6 +195,269 @@ function M.format_selection()
   end
 end
 
+local anti_slop_ns = api.nvim_create_namespace("r-anti-slop")
+local anti_slop_dir = vim.fn.expand("~/.agents/skills/r-anti-slop")
+local anti_slop_formatter = anti_slop_dir .. "/scripts/format_r_source.py"
+local anti_slop_audit = anti_slop_dir .. "/scripts/audit_r_project.R"
+local anti_slop_inflight = {}
+
+local anti_slop_severity = {
+  error = vim.diagnostic.severity.ERROR,
+  warning = vim.diagnostic.severity.WARN,
+  advisory = vim.diagnostic.severity.INFO,
+}
+
+local function anti_slop_notify(message, level)
+  vim.notify(message, level or levels.INFO, { title = "R anti-slop" })
+end
+
+local function anti_slop_executable(name)
+  return vim.fn.executable(name) == 1 and name or nil
+end
+
+local function anti_slop_python()
+  return anti_slop_executable("python3") or anti_slop_executable("python")
+end
+
+local function anti_slop_current_file()
+  local buf = api.nvim_get_current_buf()
+  local path = api.nvim_buf_get_name(buf)
+  if path == "" then
+    return nil, nil, "Save the buffer before running r-anti-slop."
+  end
+  if vim.fn.fnamemodify(path, ":e"):lower() ~= "r" then
+    return nil, nil, "r-anti-slop formats and lints .R files only."
+  end
+  return path, buf
+end
+
+local function anti_slop_write_buffer(buf)
+  if vim.bo[buf].buftype ~= "" then
+    return false, "Current buffer is not a file."
+  end
+  if vim.bo[buf].modified then
+    local ok, err = pcall(api.nvim_buf_call, buf, function()
+      vim.cmd("write")
+    end)
+    if not ok then
+      return false, err
+    end
+  end
+  return true
+end
+
+local function anti_slop_audit_root(path)
+  local start = vim.fs.dirname(path)
+  return vim.fs.root(start, { "DESCRIPTION", "_targets.R", "renv.lock", ".git" }) or start
+end
+
+local function anti_slop_apply_formatted_file(buf, path)
+  local lines = vim.fn.readfile(path)
+  local current = api.nvim_buf_get_lines(buf, 0, -1, false)
+  if vim.deep_equal(current, lines) then
+    return false
+  end
+  local view = vim.fn.winsaveview()
+  api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  vim.bo[buf].modified = false
+  vim.fn.winrestview(view)
+  return true
+end
+
+local function anti_slop_findings(report)
+  local findings = report and report.findings or {}
+  if type(findings) ~= "table" then
+    return {}
+  end
+  if findings.rule_id or findings.file_path then
+    return { findings }
+  end
+  return findings
+end
+
+local function anti_slop_publish_diagnostics(buf, path, report)
+  local diagnostics = {}
+  for _, finding in ipairs(anti_slop_findings(report)) do
+    local line = tonumber(finding.line_number) or 1
+    local col = tonumber(finding.column_number) or 1
+    local rule_id = finding.rule_id or "R-ANTI-SLOP"
+    local message = finding.message or "r-anti-slop finding"
+    table.insert(diagnostics, {
+      lnum = math.max(line - 1, 0),
+      col = math.max(col - 1, 0),
+      severity = anti_slop_severity[finding.severity] or vim.diagnostic.severity.WARN,
+      source = "r-anti-slop",
+      code = rule_id,
+      message = string.format("[%s] %s", rule_id, message),
+    })
+  end
+  vim.diagnostic.set(anti_slop_ns, buf, diagnostics, { filename = path })
+  return #diagnostics
+end
+
+local function anti_slop_audit_command(path, report_path, files_json)
+  local args = {
+    "--fail-on=none",
+    "--max-findings=0",
+    "--json=" .. report_path,
+  }
+  if files_json then
+    table.insert(args, "--files-json=" .. files_json)
+  end
+
+  if anti_slop_executable("uvr") then
+    local cmd = { "uvr", "run", anti_slop_audit, "--", path }
+    vim.list_extend(cmd, args)
+    return cmd
+  end
+
+  local cmd = { "Rscript", "--vanilla", anti_slop_audit, path }
+  vim.list_extend(cmd, args)
+  return cmd
+end
+
+local function anti_slop_run_audit(buf, path)
+  if vim.fn.filereadable(anti_slop_audit) ~= 1 then
+    anti_slop_notify("Missing audit script: " .. anti_slop_audit, levels.ERROR)
+    anti_slop_inflight[buf] = nil
+    return
+  end
+
+  local root = anti_slop_audit_root(path)
+  local rel = vim.fs.relpath(root, path)
+  local report_dir = vim.fn.tempname() .. "-r-anti-slop"
+  vim.fn.mkdir(report_dir, "p")
+  local report_path = report_dir .. "/audit.json"
+  local files_json
+  local audit_path = path
+
+  if rel and rel ~= "" and not rel:match("^%.%.") then
+    files_json = report_dir .. "/files.json"
+    vim.fn.writefile({ vim.json.encode({ rel }) }, files_json)
+    audit_path = root
+  end
+
+  anti_slop_notify("Auditing with r-anti-slop…")
+  vim.system(
+    anti_slop_audit_command(audit_path, report_path, files_json),
+    { text = true, timeout = 180000 },
+    function(result)
+      vim.schedule(function()
+        anti_slop_inflight[buf] = nil
+        if not api.nvim_buf_is_valid(buf) then
+          vim.fn.delete(report_dir, "rf")
+          return
+        end
+
+        if vim.fn.filereadable(report_path) ~= 1 then
+          local detail = vim.trim((result.stderr or "") .. "\n" .. (result.stdout or ""))
+          anti_slop_notify(
+            detail ~= "" and detail or "r-anti-slop audit failed without a report.",
+            levels.ERROR
+          )
+          vim.fn.delete(report_dir, "rf")
+          return
+        end
+
+        local ok, decoded = pcall(vim.json.decode, table.concat(vim.fn.readfile(report_path), "\n"))
+        vim.fn.delete(report_dir, "rf")
+        if not ok then
+          anti_slop_notify("Could not parse r-anti-slop report: " .. tostring(decoded), levels.ERROR)
+          return
+        end
+        local count = anti_slop_publish_diagnostics(buf, path, decoded)
+        if count == 0 then
+          anti_slop_notify("r-anti-slop: no findings")
+        else
+          anti_slop_notify(string.format("r-anti-slop: %d finding%s", count, count == 1 and "" or "s"))
+        end
+      end)
+    end
+  )
+end
+
+function M.lint_anti_slop()
+  local path, buf, err = anti_slop_current_file()
+  if not path then
+    anti_slop_notify(err, levels.WARN)
+    return
+  end
+  if anti_slop_inflight[buf] then
+    anti_slop_notify("r-anti-slop is already running for this buffer.", levels.WARN)
+    return
+  end
+
+  local written, write_err = anti_slop_write_buffer(buf)
+  if not written then
+    anti_slop_notify(write_err, levels.ERROR)
+    return
+  end
+
+  anti_slop_inflight[buf] = true
+  anti_slop_run_audit(buf, path)
+end
+
+function M.format_and_lint_anti_slop()
+  local path, buf, err = anti_slop_current_file()
+  if not path then
+    anti_slop_notify(err, levels.WARN)
+    return
+  end
+  if anti_slop_inflight[buf] then
+    anti_slop_notify("r-anti-slop is already running for this buffer.", levels.WARN)
+    return
+  end
+
+  local python = anti_slop_python()
+  if not python then
+    anti_slop_notify("python3 is required for the r-anti-slop formatter.", levels.ERROR)
+    return
+  end
+  if vim.fn.filereadable(anti_slop_formatter) ~= 1 then
+    anti_slop_notify("Missing formatter script: " .. anti_slop_formatter, levels.ERROR)
+    return
+  end
+
+  local written, write_err = anti_slop_write_buffer(buf)
+  if not written then
+    anti_slop_notify(write_err, levels.ERROR)
+    return
+  end
+
+  anti_slop_inflight[buf] = true
+  anti_slop_notify("Formatting with r-anti-slop…")
+  local width = tonumber(vim.bo[buf].textwidth)
+  if not width or width < 20 then
+    width = 80
+  end
+
+  vim.system(
+    { python, anti_slop_formatter, "--write", "--width", tostring(width), path },
+    { text = true, timeout = 120000 },
+    function(result)
+      vim.schedule(function()
+        if not api.nvim_buf_is_valid(buf) then
+          anti_slop_inflight[buf] = nil
+          return
+        end
+
+        if result.code == 0 then
+          local changed = anti_slop_apply_formatted_file(buf, path)
+          anti_slop_notify(changed and "Formatted with r-anti-slop" or "Already formatted by r-anti-slop")
+        else
+          local detail = vim.trim((result.stderr or "") .. "\n" .. (result.stdout or ""))
+          anti_slop_notify(
+            detail ~= "" and detail or "r-anti-slop formatter failed.",
+            levels.ERROR
+          )
+        end
+
+        anti_slop_run_audit(buf, path)
+      end)
+    end
+  )
+end
+
 -- Clear mappings that start with a prefix
 function M.clear_prefix_mappings(prefix, modes)
   modes = modes or { "n", "i", "v", "c" }

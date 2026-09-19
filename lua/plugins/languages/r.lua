@@ -25,6 +25,11 @@ return {
                         helpers.read_csv_to_object,
                         { desc = 'Replace write_csv(obj, here("path")) with read_csv(here("path"))' }
                     )
+                    vim.api.nvim_create_user_command(
+                        'RAntiSlop',
+                        helpers.format_and_lint_anti_slop,
+                        { desc = 'Format with r-anti-slop and publish lint findings' }
+                    )
 
                     -- Define all keymaps in a table for better organization
                     local keymaps = {
@@ -36,6 +41,9 @@ return {
                         { "v", "<Enter>",          "<Plug>RDSendSelection",            "Send selection to R",                   { remap = true } },
                         { "n", "<LocalLeader>f",   helpers.format_buffer,               "Format buffer" },
                         { "v", "<LocalLeader>f",   helpers.format_selection,            "Format selection" },
+                        { "n", "<LocalLeader>F",   helpers.format_and_lint_anti_slop,   "r-anti-slop format and lint" },
+                        { "v", "<LocalLeader>F",   helpers.format_and_lint_anti_slop,   "r-anti-slop format and lint" },
+                        { "n", "<leader>rF",       helpers.format_and_lint_anti_slop,   "r-anti-slop format and lint" },
                         { "n", "<leader>V",        "<Plug>RViewDF",                    "View object",                           { remap = true } },
                         { "v", "<leader>V",        "<Plug>RViewDF",                    "View object",                           { remap = true } },
                         { "v", "<leader>rv",       "<Plug>RViewDF",                    "View object under cursor",              { remap = true } },

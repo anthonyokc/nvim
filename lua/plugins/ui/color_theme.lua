@@ -51,9 +51,7 @@ return {
                 },
             })
 
-            vim.cmd("colorscheme catppuccin-nvim")
-
-            ColorMyPencils()
+            ColorMyPencils("catppuccin")
         end
     },
     {

@@ -156,12 +156,12 @@ return {
                 vim.api.nvim_set_hl(0, 'MarkviewIcon' .. i, { fg = color, bg = mocha.mantle })
             end
 
-            -- Heading highlights (link to palette: H1=Palette1, H2=Palette2, etc.)
+            -- Heading backgrounds follow the palette; white text maximizes contrast.
             for i = 1, 6 do
                 local color = palette[i]
                 local bg_color = darken(color, bg_amount)
-                vim.api.nvim_set_hl(0, 'MarkviewHeading' .. i, { fg = color, bg = bg_color, bold = true })
-                vim.api.nvim_set_hl(0, 'MarkviewHeading' .. i .. 'Sign', { fg = color })
+                vim.api.nvim_set_hl(0, 'MarkviewHeading' .. i, { fg = '#ffffff', bg = bg_color, bold = true })
+                vim.api.nvim_set_hl(0, 'MarkviewHeading' .. i .. 'Sign', { fg = '#ffffff' })
             end
 
             -- Code blocks

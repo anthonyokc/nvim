@@ -15,7 +15,12 @@ return {
         config = function()
             local quarto = require('quarto')
 
-            quarto.setup()
+            quarto.setup({
+                lspFeatures = {
+                    -- R.nvim provides completion without synchronizing Otter's embedded buffers on each keystroke.
+                    completion = { enabled = false },
+                },
+            })
             vim.keymap.set('n', '<leader>qp', quarto.quartoPreview, { silent = true, noremap = true })
             vim.api.nvim_create_autocmd('FileType', {
                 group = vim.api.nvim_create_augroup('QuartoRFormatting', { clear = true }),

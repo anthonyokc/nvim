@@ -14,6 +14,16 @@ local function compiler_default_components()
     }
 end
 
+local function open_overseer_results()
+    local previous_window = vim.api.nvim_get_current_win()
+    vim.cmd("OverseerOpen")
+    vim.schedule(function()
+        if vim.api.nvim_win_is_valid(previous_window) then
+            vim.api.nvim_set_current_win(previous_window)
+        end
+    end)
+end
+
 return {
     { -- The task runner we use
         "stevearc/overseer.nvim",
@@ -21,6 +31,15 @@ return {
         event = "VeryLazy",
         cmd = { "CompilerOpen", "CompilerToggleResults", "CompilerRedo", "CompilerStop" },
         opts = {
+            component_aliases = {
+                default = {
+                    { "display_duration", detail_level = 2 },
+                    { "on_output_summarize", max_lines = 50 },
+                    "on_exit_set_status",
+                    "on_complete_notify",
+                    { "on_complete_dispose", require_view = { "SUCCESS", "FAILURE" } },
+                },
+            },
             task_list = {
                 direction = "right",
                 max_width = { 100, 0.5 },
@@ -28,7 +47,7 @@ return {
                 min_width = { 30, 0.2 },
                 -- optionally define an integer/float for the exact width of the task list
                 --width = 0.5,
-                default_detail = 1
+                default_detail = 2
             },
         },
         config = function(_, opts)
@@ -69,11 +88,22 @@ return {
 
                     local node_cmd = ("node %q"):format(file)
                     local ts_cmd   = run_ts()
+                    local rust_cmd = ("rustc %q -o %q && %q"):format(file, out, out)
+
+                    if ft == "rust" then
+                        local manifest = vim.fs.find("Cargo.toml", {
+                            path = vim.fs.dirname(file),
+                            upward = true,
+                        })[1]
+                        if manifest then
+                            rust_cmd = ("cargo run --manifest-path %q"):format(manifest)
+                        end
+                    end
 
                     local cmd      = ({
                         c               = ("gcc %q -O2 -g -o %q && %q"):format(file, out, out),
                         cpp             = ("g++ %q -O2 -g -std=c++20 -o %q && %q"):format(file, out, out),
-                        rust            = ("rustc %q -o %q && %q"):format(file, out, out),
+                        rust            = rust_cmd,
                         go              = ("go run %q"):format(file),
                         python          = ("python3 %q"):format(file),
                         lua             = ("lua %q"):format(file),
@@ -165,13 +195,7 @@ return {
             vim.keymap.set("n", "<leader>bb", function()
                 local template = language_template_lookup[vim.bo.filetype] or "Build & run current file"
                 overseer.run_template({ name = template })
-                local previous_window = vim.api.nvim_get_current_win()
-                vim.cmd("OverseerOpen")
-                vim.schedule(function()
-                    if vim.api.nvim_win_is_valid(previous_window) then
-                        vim.api.nvim_set_current_win(previous_window)
-                    end
-                end)
+                open_overseer_results()
             end, { desc = "Run current file with Overseer" })
         end
     },
@@ -194,6 +218,28 @@ return {
 
                 local default_show = compiler_telescope.show
 
+                local function find_cargo_manifest(buffer)
+                    local buffer_path = vim.api.nvim_buf_get_name(buffer)
+                    local start_path = buffer_path ~= "" and vim.fs.dirname(buffer_path) or vim.fn.getcwd()
+                    return vim.fs.find("Cargo.toml", { path = start_path, upward = true })[1]
+                end
+
+                local function use_nearest_cargo_directory(selected_option, filetype, buffer)
+                    if filetype ~= "rust" or not selected_option:match("^option[5-9]$") then
+                        return true
+                    end
+
+                    local manifest = find_cargo_manifest(buffer)
+                    if not manifest then
+                        vim.notify("No Cargo.toml found above the current Rust file", vim.log.levels.ERROR,
+                            { title = "Compiler.nvim" })
+                        return false
+                    end
+
+                    vim.cmd.lcd(vim.fn.fnameescape(vim.fs.dirname(manifest)))
+                    return true
+                end
+
                 local function dropdown_show()
                     if vim.loop.os_homedir() == vim.loop.cwd() then
                         vim.notify("You must :cd your project dir first.\nHome is not allowed as working dir.",
@@ -214,6 +260,12 @@ return {
                     local filetype = vim.api.nvim_get_option_value("filetype", { buf = buffer })
                     local language = utils.require_language(filetype) or utils.require_language("make") or {}
                     local options = vim.deepcopy(language.options or {})
+
+                    if filetype == "rust" and find_cargo_manifest(buffer) then
+                        options = vim.tbl_filter(function(option)
+                            return option.value:match("^option[5-9]$") ~= nil
+                        end, options)
+                    end
 
                     local bau_opts = utils_bau.get_bau_opts()
                     local last_bau_value
@@ -259,6 +311,9 @@ return {
                             _G.compiler_redo_bau_selection = selection.value
                             _G.compiler_redo_bau = bau
                         else
+                            if not use_nearest_cargo_directory(selection.value, filetype, buffer) then
+                                return
+                            end
                             if language.action then
                                 language.action(selection.value)
                             end
@@ -267,6 +322,7 @@ return {
                             _G.compiler_redo_bau_selection = nil
                             _G.compiler_redo_bau = nil
                         end
+                        open_overseer_results()
                     end
 
                     local dropdown = themes.get_dropdown({
@@ -325,9 +381,11 @@ return {
                 { noremap = true, silent = true, desc = "Compiler: open UI" })
 
             -- Redo last selected option
-            vim.keymap.set("n", "<leader>br",
-                "<cmd>CompilerStop<cr>" -- (Optional, to dispose all tasks before redo)
-                .. "<cmd>CompilerRedo<cr>",
+            vim.keymap.set("n", "<leader>br", function()
+                vim.cmd("CompilerStop")
+                vim.cmd("CompilerRedo")
+                open_overseer_results()
+            end,
                 { noremap = true, silent = true, desc = "Compiler: redo last option" })
 
             -- Toggle compiler results

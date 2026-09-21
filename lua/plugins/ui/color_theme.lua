@@ -71,11 +71,22 @@ return {
     {
         "HiPhish/rainbow-delimiters.nvim",
         event = "BufReadPre",
+        main = "rainbow-delimiters.setup",
         opts = {
-            -- UI plugins such as nvim-notify use temporary buffers whose
-            -- filetype can change without an associated Tree-sitter parser.
+            -- UI plugins such as noice use temporary buffers whose filetype
+            -- can change without an associated Tree-sitter parser.
             condition = function(bufnr)
-                return vim.bo[bufnr].buftype == ""
+                if vim.bo[bufnr].buftype ~= "" then
+                    return false
+                end
+
+                local lang = vim.treesitter.language.get_lang(vim.bo[bufnr].filetype)
+                if not lang then
+                    return false
+                end
+
+                local ok, parser = pcall(vim.treesitter.get_parser, bufnr, lang, { error = false })
+                return ok and parser ~= nil
             end,
         },
     }
